@@ -117,7 +117,7 @@ def identificar_tipo_archivo(ruta_archivo):
 # Obtenemos la Fecha y hora par agregarlos al nombre del archivo a guardar
 def obtener_fecha_hora():
 
-    return datetime.now().strftime("%Y%m%d_%H%M%S")
+    return datetime.now().strftime("%d_%m_%Y_%H_%M_%S")
 
 
 # Solicitamos un ID del paciente para identificarlo
@@ -149,7 +149,7 @@ def guardar_archivo_original( ruta_archivo,id_paciente):
     extension = obtener_extension(ruta_archivo)
 
     # Creamos nombre nuevo de archivo para conservar el original
-    nombre_nuevo = (f"{fecha}_"f"paciente_{id_paciente}_"f"{nombre_original}")
+    nombre_nuevo = (f"{fecha}_"f"Paciente_{id_paciente}_"f"{nombre_original}")
 
     # Creamos la ruta de destino, caso Mantener Arhivo Nuevo:
     destino = os.path.join(Carpeta_Archivos_Originales,nombre_nuevo)
@@ -166,22 +166,18 @@ def mostrar_informacion_archivo(ruta_archivo,tipo_archivo,extension):
 ########################################################
     #Testeando información:
 
-    print("\nInformacion Dek Archivo Subido")
+    print("\nInformacion Del Archivo Subido")
 
     print("\nArchivo seleccionado:")
-
     print(os.path.basename(ruta_archivo))
 
     print("\nRuta original:")
-
     print(os.path.abspath(ruta_archivo))
 
     print("\nExtensión:")
-
     print(extension)
 
     print("\nTipo de archivo detectado:")
-
     print(tipo_archivo)
 #########################################################
 
