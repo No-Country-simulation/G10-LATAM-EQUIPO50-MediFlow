@@ -5,20 +5,25 @@ import os
 Carpeta_Base = os.path.dirname(os.path.abspath(__file__))
 
 #Procedemos a ponerle nombre a las carpetas que se crearan para identificar los archivos de forma ordenada
-#Carpeta donde se guardarán las demas carpetas para tener un orden
+#Carpeta Local donde se guardarán las demas carpetas creadas para tener un orden
 Carpeta_Almacenamiento = os.path.join(Carpeta_Base,"Almacen_Local")
 
 #Carpeta para guardar los archivos originales seleccionados
-Carpeta_Archivos_Originales = os.path.join(Carpeta_Base,"Archivos_Originales") 
+#Dentro de la carpeta Almacen_Local
+Carpeta_Archivos_Originales = os.path.join(Carpeta_Almacenamiento,"Archivos_Originales") 
 
-#Carpeta para guardar las imagenes procesadas en caso que el archivo seleccionado sea una imagen
-Carpeta_Imagenes_Procesadas = os.path.join(Carpeta_Base,"Imagenes_Procesadas")
+#Carpeta para guardar las imagenes procesadas 
+#en caso que el archivo seleccionado sea una imagen
+#Dentro de la carpeta local
+Carpeta_Imagenes_Procesadas = os.path.join(Carpeta_Almacenamiento,"Imagenes_Procesadas")
 
 #Carpeta para guardar el archivo json de los documentos subidos por el usuario
-Carpeta_Datos_Clinicos = os.path.join(Carpeta_Base,"Datos_Clinicos")
+#Dentro de la Carpeta Local
+Carpeta_Datos_Clinicos = os.path.join(Carpeta_Almacenamiento,"Datos_Clinicos")
 
 #Creacion de Carpetas:
 def crear_carpetas():
+
     os.makedirs(Carpeta_Almacenamiento,exist_ok = True)
 
     os.makedirs(Carpeta_Archivos_Originales, exist_ok = True)
