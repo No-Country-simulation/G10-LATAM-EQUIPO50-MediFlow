@@ -47,4 +47,29 @@ El desarrollo técnico y funcional de este sistema comprende las siguientes fase
 
   Proyecto desplegado en los servidores de oracle alwaysfree para demostración y uso del proyecto publicamente.
 
---
+# Configuración del Entorno de Desarrollo
+
+Este proyecto requiere un ambiente virtual aislado para gestionar sus dependencias de forma segura y evitar conflictos entre librerías. Se recomienda el uso de **Anaconda** (o **Miniconda**) para la administración del entorno.
+
+---
+
+## 📌 Requisitos Previos
+
+1. Tener **Git** instalado.
+2. Descargar e instalar **Anaconda Distribution** (o **Miniconda** si prefieres una versión más ligera):
+   - 📥 [Descargar Anaconda](https://www.anaconda.com/download)
+   - 📥 [Descargar Miniconda](https://docs.conda.io/en/latest/miniconda.html)
+
+---
+
+## 🚀 Pasos para Configurar el Ambiente Virtual
+
+Abre tu terminal (o **Anaconda Prompt** en Windows) y ejecuta los siguientes comandos:
+
+### 1. Crear el ambiente virtual
+Crea un ambiente de Conda especificando la versión de Python recomendada para este proyecto:
+
+```bash
+conda create --name mi_proyecto_env python=3.11.13 -y 
+
+Nota: Puedes cambiar mi_proyecto_env por el nombre que prefieras para tu entorno.
