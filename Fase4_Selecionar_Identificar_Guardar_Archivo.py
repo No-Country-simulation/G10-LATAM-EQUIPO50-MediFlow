@@ -117,7 +117,9 @@ def identificar_tipo_archivo(ruta_archivo):
 # Obtenemos la Fecha y hora par agregarlos al nombre del archivo a guardar
 def obtener_fecha_hora():
 
-    return datetime.now().strftime("%d_%m_%Y_%H_%M_%S")
+    return datetime.now().strftime("Fecha_Creación_Dia%d_Mes%m_Año%Y;Hora%H_Minutos%M_Segundos%S")
+    #Probando cual Fecha se ve mejor
+    #return datetime.now().strftime("Fecha_Creación:_Dia:%d_Mes:%m_Año:%Y_Horario:_Hora:%H_Minuto:%M_Segundo:%S")
 
 
 # Solicitamos un ID del paciente para identificarlo
