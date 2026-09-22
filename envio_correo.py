@@ -74,10 +74,15 @@ def enviar_alerta_correo(paciente_id,tipo_documento,nivel_urgencia,motivo):
 
 
     #Medico o responsable del area que recibira la alerta por correo
-    mensaje["To"] = EMAIL_DESTINO
+    # Convertir la cadena en una lista de correos
+    destinatarios = [correo.strip()for correo in EMAIL_DESTINO.split(",")]
+
+    # Agregar destinatarios
+    mensaje["To"] = destinatarios
+
+    #mensaje["To"] = EMAIL_DESTINO
 
     #Agregamos el mensaje del correo
-
     cuerpo = f"""ALERTA MEDIFLOW
 Se ha detectado un documento clinico que requiere
 atencion inmediata y prioritaria por el personal del area del hospital,
