@@ -1,0 +1,20 @@
+{
+  "sistema_origen": "HIS-SALUD",
+  "fecha_documento": "2026-09-08",
+  "paciente": {
+    "nombre_completo": "Miguel Ruiz Cabrera",
+    "identificacion": {
+      "tipo": "CC",
+      "numero": "271722646"
+    },
+    "fecha_nacimiento": "1973-05-07",
+    "sexo": "M",
+    "cobertura": "Particular"
+  },
+  "profesional": {
+    "nombre": "Dr. Jorge Torres Rodríguez",
+    "registro": "RM 47700-92",
+    "especialidad": "Bacteriología y Laboratorio Clínico"
+  },
+  "contenido_texto": "INFORME DE LABORATORIO CLÍNICO\nEstudio: Marcadores cardíacos\nDiagnóstico presuntivo: Angina inestable (I20.0)\nRESULTADOS\nTroponina I                            0.13 ng/mL      Ref: 0.0 - 0.04  * ALTO"
+}

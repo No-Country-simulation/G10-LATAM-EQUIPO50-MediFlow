@@ -1,0 +1,20 @@
+{
+  "sistema_origen": "HIS-LUCÍA",
+  "fecha_documento": "2026-09-11",
+  "paciente": {
+    "nombre_completo": "Gabriela Laura Álvarez Suárez",
+    "identificacion": {
+      "tipo": "CC",
+      "numero": "44831972"
+    },
+    "fecha_nacimiento": "1980-07-17",
+    "sexo": "F",
+    "cobertura": "Salud Integral EPS"
+  },
+  "profesional": {
+    "nombre": "Dr. Jorge Pérez Díaz",
+    "registro": "RM 40149-49",
+    "especialidad": "Endocrinología"
+  },
+  "contenido_texto": "ORDEN DE SERVICIOS\nDiagnóstico: Hipotiroidismo, no especificado   CIE-10: E03.9\nResumen clínico: Astenia, intolerancia al frío y aumento de peso. TSH previa elevada.\nSe solicita:\n- TSH  (Cant: 1)\n- T4 libre  (Cant: 1)\nPrioridad: Prioritaria"
+}

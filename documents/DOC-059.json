@@ -1,0 +1,20 @@
+{
+  "sistema_origen": "HIS-SALUD",
+  "fecha_documento": "2026-09-13",
+  "paciente": {
+    "nombre_completo": "Lucía Díaz Cabrera",
+    "identificacion": {
+      "tipo": "CC",
+      "numero": "741774475"
+    },
+    "fecha_nacimiento": "1983-07-25",
+    "sexo": "F",
+    "cobertura": "EPS Vida Plena"
+  },
+  "profesional": {
+    "nombre": "Dra. Valentina Suárez Jiménez",
+    "registro": "RM 57826-10",
+    "especialidad": "Bacteriología y Laboratorio Clínico"
+  },
+  "contenido_texto": "INFORME DE LABORATORIO CLÍNICO\nEstudio: Perfil lipídico\nDiagnóstico presuntivo: Hiperlipidemia no especificada (E78.5)\nRESULTADOS\nColesterol total                      261.9 mg/dL      Ref: 0 - 200  * ALTO\nColesterol LDL                        169.4 mg/dL      Ref: 0 - 130  * ALTO\nColesterol HDL                         52.1 mg/dL      Ref: 40 - 80  \nTriglicéridos                          59.3 mg/dL      Ref: 0 - 150  "
+}

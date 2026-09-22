@@ -1,0 +1,20 @@
+{
+  "sistema_origen": "HIS-LUCÍA",
+  "fecha_documento": "2026-09-11",
+  "paciente": {
+    "nombre_completo": "María Paula Silva Cárdenas",
+    "identificacion": {
+      "tipo": "CC",
+      "numero": "781990313"
+    },
+    "fecha_nacimiento": "1953-05-18",
+    "sexo": "F",
+    "cobertura": "EPS Vida Plena"
+  },
+  "profesional": {
+    "nombre": "Dr. Tomás Moreno Moreno",
+    "registro": "RM 57020-40",
+    "especialidad": "Urología"
+  },
+  "contenido_texto": "EPICRISIS\nFecha de ingreso: 08/09/2026\nFecha de egreso: 11/09/2026\nServicio: Cirugía general\nMOTIVO DE INGRESO\nDolor lumbar tipo cólico irradiado a ingle, hematuria microscópica.\nEVOLUCIÓN\nPaciente con evolución clínica favorable, afebril, tolerando vía oral, sin signos de respuesta inflamatoria sistémica al egreso.\nPROCEDIMIENTOS REALIZADOS\nLitotricia extracorpórea el 09/09/2026, sin complicaciones.\nDIAGNÓSTICO DE EGRESO\nCálculo del riñón - CIE-10: N20.0\nTRATAMIENTO AL EGRESO\n- Diclofenaco 50 mg: Tomar 1 tableta cada 8 horas por 5 días\n- Acetaminofén 500 mg: Tomar 1 tableta cada 8 horas por 5 días\nRECOMENDACIONES\nControl por consulta externa de Urología en 7 días. Consultar por urgencias ante fiebre, dolor intenso o sangrado."
+}

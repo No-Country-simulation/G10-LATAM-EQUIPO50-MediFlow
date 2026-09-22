@@ -1,0 +1,20 @@
+{
+  "sistema_origen": "HIS-LUCÍA",
+  "fecha_documento": "2026-09-03",
+  "paciente": {
+    "nombre_completo": "Paula Paula Medina Romero",
+    "identificacion": {
+      "tipo": "CC",
+      "numero": "239113519"
+    },
+    "fecha_nacimiento": "1963-07-17",
+    "sexo": "F",
+    "cobertura": "Nueva Salud EPS"
+  },
+  "profesional": {
+    "nombre": "Dr. Eduardo García Fernández",
+    "registro": "RM 80972-06",
+    "especialidad": "Medicina General"
+  },
+  "contenido_texto": "PRESCRIPCIÓN MÉDICA\nDiagnóstico: Infección de vías urinarias, sitio no especificado   CIE-10: N39.0\n1. Acetaminofén 500 mg - tableta\n    Tomar 1 tableta cada 8 horas por 5 días.   Cantidad total: 15\n2. Nitrofurantoína 100 mg - cápsula\n    Tomar 1 cápsula cada 12 horas por 5 días.   Cantidad total: 10\nIndicaciones: Control en 15 días."
+}

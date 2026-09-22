@@ -1,0 +1,20 @@
+{
+  "sistema_origen": "HIS-SALUD",
+  "fecha_documento": "2026-09-18",
+  "paciente": {
+    "nombre_completo": "Eduardo Mendoza Jiménez",
+    "identificacion": {
+      "tipo": "CC",
+      "numero": "635501830"
+    },
+    "fecha_nacimiento": "1978-07-19",
+    "sexo": "M",
+    "cobertura": "EPS Bienestar Andino"
+  },
+  "profesional": {
+    "nombre": "Dr. Santiago Ortiz Ortiz",
+    "registro": "RM 21221-68",
+    "especialidad": "Radiología e Imágenes Diagnósticas"
+  },
+  "contenido_texto": "INFORME DE IMAGENOLOGÍA\nEstudio: Ecografía de abdomen superior\nIndicación clínica: Cólicos biliares recurrentes posprandiales. Ecografía previa con colelitiasis.\nHALLAZGOS\nVesícula biliar de paredes delgadas con múltiples imágenes ecogénicas con sombra acústica posterior, la mayor de 14 mm. Vía biliar no dilatada.\nCONCLUSIÓN\nColelitiasis múltiple sin signos de colecistitis."
+}

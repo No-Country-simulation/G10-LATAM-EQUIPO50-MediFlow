@@ -1,0 +1,20 @@
+{
+  "sistema_origen": "HIS-VITALIA",
+  "fecha_documento": "2026-09-15",
+  "paciente": {
+    "nombre_completo": "Carlos Pablo Romero Gómez",
+    "identificacion": {
+      "tipo": "CC",
+      "numero": "985707203"
+    },
+    "fecha_nacimiento": "1966-05-11",
+    "sexo": "M",
+    "cobertura": "Particular"
+  },
+  "profesional": {
+    "nombre": "Dr. Jorge Suárez Jiménez",
+    "registro": "RM 71344-35",
+    "especialidad": "Cirugía General"
+  },
+  "contenido_texto": "INFORME DE ALTA\nFecha de ingreso: 12/09/2026\nFecha de egreso: 15/09/2026\nServicio: Unidad de cuidados intermedios\nMOTIVO DE INGRESO\nDolor en fosa ilíaca derecha, fiebre y leucocitosis. Signo de Blumberg positivo.\nEVOLUCIÓN\nPaciente con evolución clínica favorable, afebril, tolerando vía oral, sin signos de respuesta inflamatoria sistémica al egreso.\nPROCEDIMIENTOS REALIZADOS\nApendicectomía laparoscópica el 13/09/2026, sin complicaciones.\nDIAGNÓSTICO DE EGRESO\nApendicitis aguda, otra y la no especificada - CIE-10: K35.8\nTRATAMIENTO AL EGRESO\n- Acetaminofén 500 mg: Tomar 1 tableta cada 8 horas por 5 días\nRECOMENDACIONES\nControl por consulta externa de Cirugía General en 7 días. Consultar por urgencias ante fiebre, dolor intenso o sangrado."
+}

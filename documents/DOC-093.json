@@ -1,0 +1,19 @@
+{
+  "sistema_origen": "HIS-VITALIA",
+  "fecha_documento": "2026-08-29",
+  "paciente": {
+    "nombre_completo": "Ricardo Álvarez Ramírez",
+    "identificacion": {
+      "tipo": "CC",
+      "numero": "483998574"
+    },
+    "fecha_nacimiento": "2002-03-21",
+    "sexo": "M",
+    "cobertura": "Particular"
+  },
+  "profesional": {
+    "nombre": "Dra. Daniela Mendoza Herrera",
+    "registro": "RM 20480-60",
+    "especialidad": "Medicina General"
+  },
+  "contenido_texto": "PRESCRIPCIÓN MÉDICA\nDiagnóstico: Infecci,
