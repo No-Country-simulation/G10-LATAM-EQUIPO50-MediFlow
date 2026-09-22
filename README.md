@@ -43,7 +43,7 @@ El desarrollo técnico y funcional de este sistema comprende las siguientes fase
   El agente validará la información y redirigirá de forma automatizada los documentos y sus metadatos hacia el sistema de destino correspondiente,
   
   
-- Desplegar en OCCI:
+- Desplegar en OCI:
 
   Proyecto desplegado en los servidores de oracle alwaysfree para demostración y uso del proyecto publicamente.
 
