@@ -17,9 +17,9 @@ from email.message import EmailMessage
 load_dotenv()
 
 #Obtencion de las Crendenciales:
-Email_Usuario = os.getenv("Email_Usuario")
-Email_Password = os.getenv("Email_Password")
-Email_Destino = os.getenv("Email_Destino")
+EMAIL_USUARIO  = os.getenv("EMAIL_USUARIO")
+EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
+EMAIL_DESTINO  = os.getenv("EMAIL_DESTINO")
 
 #Funcion para asegurarse qu elas credenciales existen:
 def validar_configuracion_correo():
@@ -28,13 +28,13 @@ def validar_configuracion_correo():
     estén definidas en el archivo .env.
     """
 
-    if not Email_Usuario:
+    if not EMAIL_USUARIO:
         raise ValueError("No se encontro Email_Usuario en el archivo .env")
 
-    if not Email_Password:
+    if not EMAIL_PASSWORD:
         raise ValueError("No se encontró Email_Password en el archivo .env")
 
-    if not Email_Destino:
+    if not EMAIL_DESTINO:
         raise ValueError("No se encontró Email_Destino en el archivo .env")
 
 
@@ -70,11 +70,11 @@ def enviar_alerta_correo(paciente_id,tipo_documento,nivel_urgencia,motivo):
     mensaje["Subject"] = ("ALERTA MEDIFLOW - Documento urgente!!!")
 
     #Cuenta de correo desde la cual se enviara:
-    mensaje["From"] = Email_Usuario
+    mensaje["From"] = EMAIL_USUARIO
 
 
     #Medico o responsable del area que recibira la alerta por correo
-    mensaje["To"] = Email_Destino
+    mensaje["To"] = EMAIL_DESTINO
 
     #Agregamos el mensaje del correo
 
@@ -117,7 +117,7 @@ por el sistema Inteligente de MediFlow.
 
         with smtplib.SMTP_SSL("smtp.gmail.com",465) as servidor:
             #Iniciamos Sesion
-            servidor.login(Email_Usuario,Email_Password)
+            servidor.login(EMAIL_USUARIO,EMAIL_PASSWORD)
 
             #Enviamos el mensaje creado
             servidor.send_message(mensaje)
@@ -125,8 +125,7 @@ por el sistema Inteligente de MediFlow.
         #Verificamos que se haya enviado el correo:
         print("\nAlerta por correo enviada Exitosamente!!!")
         #Vemos a quien le mandamos el correo:
-        print(f"Destinatario: {Email_Destino}")
-
+        print(f"Destinatario: {EMAIL_DESTINO}")
 
         return True
 
