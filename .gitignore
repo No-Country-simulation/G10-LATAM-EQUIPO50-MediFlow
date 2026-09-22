@@ -1,13 +1,6 @@
 #Carpeta de trabajo:
 Archivos_que_no_deben_subirse
 
-#Carpeta de Archivos Mediflow:
-Almacen_Local
-Carpeta_Almacenamiento
-Archivos_Originales
-Imagenes_Procesadas
-Datos_Clinicos
-
 # Ignorar las credenciales api_keys:
 .env
 
