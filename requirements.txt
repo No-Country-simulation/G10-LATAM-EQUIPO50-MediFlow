@@ -8,3 +8,5 @@ langgraph
 # === Validación de datos ===
 pydantic>=2 
 
+# === Backend / interfaz ===
+python-dotenv
