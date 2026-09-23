@@ -119,7 +119,7 @@ G10-LATAM-EQUIPO50-MediFlow/
 ├── .env
 ├── app.py                    # interfaz (Streamlit/FastAPI)
 ├── agent/
-│   ├── ingesta.py
+│   ├── ingesta_archivos.py
 │   ├── extraccion.py          # llamada a Gemini
 │   └── grafo_decision.py      # LangGraph — Tipo de Documento / Situación
 ├── cloud/
