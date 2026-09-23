@@ -22,13 +22,13 @@ El desarrollo técnico y funcional de este sistema comprende las siguientes fase
 
 - **Módulo de Recepción y Procesamiento MultiFormato:** el sistema procesa archivos PDF, imágenes (recetas manuscritas, órdenes de laboratorio, estudios diagnósticos) y documentos JSON ya estructurados — ver [formatos de entrada aceptados](docs/contrato-datos.md#formatos-de-entrada-aceptados).
 
-- **Motor de Clasificación Automatizada de Documentos:** el sistema clasifica cada documento en dos dimensiones — **Tipo de Documento** (Clínico / Receta / Otro) y **Situación** (Normal / Urgente / Ambiguo) — y asigna el destino correspondiente. Ver [`docs/contrato-datos.md`](docs/contrato-datos.md).
+- **Motor de Clasificación Automatizada de Documentos:** el sistema clasifica cada documento en dos dimensiones — **Tipo de Documento** (Clínico / Receta / Otro) y **Situación** (Normal / Urgente / Ambiguo) — y asigna el destino correspondiente. Ver [`docs/contrato_datos.md`](docs/contrato_datos.md).
 
 - **Componente de Extracción de Entidades y Datos Clínicos:** Gemini lee el documento directamente (PDF, imagen o JSON) y extrae los datos del paciente (nombre, diagnósticos, medicamentos, dosis, fechas) y del médico (nombre, matrícula, especialidad).
 
 - **Flujo de Enrutamiento Inteligente:** LangGraph orquesta la clasificación y decide el enrutamiento; los casos Urgente o Ambiguo disparan una alerta por correo (`envio_correo.py`) y quedan marcados para revisión humana.
 
-- **Despliegue en OCI:** proyecto desplegado en una instancia OCI Compute (Ampere A1, Always Free), para demostración y uso público. Detalle en [`docs/infraestructura-cloud.md`](docs/infraestructura-cloud.md).
+- **Despliegue en OCI:** proyecto desplegado en una instancia OCI Compute (Ampere A1, Always Free), para demostración y uso público. Detalle en [`docs/infraestructura_cloud.md`](docs/infraestructura_cloud.md).
 
 ## Estado actual del proyecto
  
