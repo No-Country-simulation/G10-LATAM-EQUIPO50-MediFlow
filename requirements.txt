@@ -1,0 +1,10 @@
+# === Cloud (OCI) ===
+oci
+
+# === LLM y orquestación ===
+google-genai
+langgraph
+
+# === Validación de datos ===
+pydantic>=2 
+
