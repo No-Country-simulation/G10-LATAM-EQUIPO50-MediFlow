@@ -108,7 +108,7 @@ Ya no hace falta instalar Tesseract ni Poppler en el servidor — Gemini lee PDF
  
 ## Casos de prueba
  
-**100 documentos de prueba ya están en `documents/`** (65 PDF, 25 imagen, 10 JSON) — nombrados `DOC-001` a `DOC-100`. Es la base de pruebas real del equipo; los 5 casos sintéticos originales (rutina/urgencia/ambigüedad) siguen sirviendo como referencia rápida en `tests/casos/`.
+**100 documentos de prueba ya están en `casos/`** (65 PDF, 25 imagen, 10 JSON) — nombrados `DOC-001` a `DOC-100`. Es la base de pruebas real del equipo; los 5 casos sintéticos originales (rutina/urgencia/ambigüedad) siguen sirviendo como referencia rápida en `tests/casos/`.
  
 ## Estructura del repositorio
  
