@@ -1,4 +1,4 @@
-#Realizando prueba con Gemini.
+#Gemini y generacion de Archivo JSON
 
 #Libreriras usadas:
 #Permite trabajar con rutas, archivos y carpetas.
@@ -14,10 +14,8 @@ from datetime import datetime
 from pathlib import Path
 
 #Parte Nueva:
-#JSON: #
+#JSON: 
 #Nos permitira comprobar posteriormente si Gemini,devuelve JSON valido 
-#En esta fase todavia no es nuestro objetivo principal,
-#pero lo dejamos preparado 
 import json
 
 #SDK oficial de Gemini 
@@ -121,8 +119,10 @@ Extensiones_JSON = {".json"}
 
 #Todas las extensiones permitidas juntas
 Extensiones_Permitidas = (
-    Extensiones_Imagen,
-    Extensiones_PDF,
+    Extensiones_Imagen
+    |
+    Extensiones_PDF
+    |
     Extensiones_JSON
 )
 
@@ -227,7 +227,7 @@ def validar_extension(ruta_archivo):
             "HEIC y HEIF no están permitidos."
         )
 
-    # Identificar imágenes.
+    #Identificando tipo de Archivos:
 
     if extension in Extensiones_Imagen:
         tipo_archivo = "imagen"
@@ -410,75 +410,475 @@ def subir_archivo_a_gemini(ruta_archivo):
     return archivo_gemini
 
 #Funcion de Prompt:
-
 #Creando Prompt de prueba
 #Creando Prompt Clinico
-def crear_prompt_prueba(tipo_archivo):
+def crear_prompt_prueba(tipo_archivo,nombre_archivo):
     """
-    Creamos un prompt sencillo para comprobar
-    que Gemini realmente puede interpretar
-    nuestro archivo subido,
-
-    TODAVIA NO estamos pidiendo la estructura clinica
-    definitiva,
-
-    Estamos comprobando que Gemini puede
-    leer y comprender el archivo subido por el usuario
+    Pidiendo Estructura clinica Gemini
     """
 
     prompt = f"""
 
-Eres el sistema de análisis documental de MediFlow, eres critico, experto en area medica, empatico y
+
+Eres el sistema de análisis documental Medico de MediFlow, eres critico, experto en area medica, empatico y
+y tú función es analizar cuidadosamente el archivo proporcionado y extraer información clínica estructurada,
 Has recibido un archivo de tipo:
 
 {tipo_archivo}
 
-Analiza el archivo cuidadosamente y meticulosamente ese archivo subido y
-Necesito que me indiques:
+Aplicando regla fundamental para la generacion del nombre de archivo:
+Debes copiar EXACTAMENTE este nombre en:
 
-1. Qué tipo de documento parece ser.
-2. Qué información principal contiene.
-3. Si parece tratarse de un documento médico.
-4. Que datos importantes puedes identificar.
-5. Si existen datos que no sean legibles o que sean ambiguos.
+"nombre_archivo"
 
-Otras consideraciones a tomar:
+NO debes modificarlo.
 
-Por ningun motivo inventes información alguna, esta estrictamente prohibido.
+NO debes traducirlo.
 
-Si un dato no aparece, indícalo.
+NO debes resumirlo.
 
-Por ahora NO necesitas realizar un diagnóstico médico pero si que
-Devuelvas una explicación clara y concisa del archivo subido.
+NO debes cambiar fechas.
+
+NO debes cambiar números.
+
+NO debes cambiar mayúsculas o minúsculas.
+
+El valor debe ser exactamente:
+
+{nombre_archivo}
+
+Aplicando Reglas de Extracción del archivo:
+
+Analiza TODO el contenido de manera meticulosamente que este disponible del archivo,
+Puede tratarse de:
+- Imagen médica
+- PDF médifo
+- Archivo JSON con información médica
+
+Pero Extrae únicamente información que aparezca
+explícitamente en el documento,
+ESTÁ ESTRICTAMENTE PROHIBIDO INVENTAR INFORMACIÓN.
+
+Si un dato individual NO aparece,
+utiliza:
+null
+
+Si una lista no contiene información,
+utiliza:
+[]
+
+Si una sección no tiene información,
+utiliza:
+null
+
+Si existe información pero no puede leerse con
+seguridad, NO intentes adivinarla ni inventes nada,
+Agrégala a:
+"datos_no_legibles_o_ambiguos"
+
+Aplicando Reglas sobre información a extraer del PACIENTE,
+Del archivo subido y sin inventar nada, Extrae esta información cuando esté disponible:
+
+- ID del paciente
+- Nombre completo
+- Fecha de nacimiento
+- Edad
+- Sexo
+- CURP
+- Teléfono
+- Correo
+- Dirección
+- Peso
+- Altura
+- Alergias
+- Antecedentes médicos
+- Antecedentes quirúrgicos
+- Antecedentes familiares
+
+Aplicando Reglas sobre información a extraer del MEDICO,
+Del archivo subido y sin inventar nada, Extrae esta información cuando esté disponible:
+
+- Nombre completo
+- Especialidad
+- Cédula profesional
+- Institución
+- Teléfono
+- Correo
+
+Aplicando Reglas sobre información a extraer de la INFORMACION DE LA CONSULTA MEDICA,
+Del archivo subido y sin inventar nada, Extrae esta información cuando esté disponible:
+
+- Fecha
+- Hora
+- Motivo de consulta
+- Síntomas
+- Signos
+- Observaciones
+
+Aplicando Reglas sobre información a extraer de los DIAGNÓSTICOS,
+Del archivo subido y sin inventar nada, Extrae esta información cuando esté disponible,
+Para cada diagnóstico intenta obtener:
+
+- Nombre
+- Descripción
+- Código
+- Tipo
+
+Extrae los diagnósticos explícitamente presentes.
+NO generes diagnósticos propios.
+
+
+Aplicando Reglas sobre información a extraer de los SIGNOS VITALES,
+Del archivo subido y sin inventar nada, Extrae esta información cuando esté disponible:
+
+- Presión arterial
+- Frecuencia cardiaca
+- Frecuencia respiratoria
+- Temperatura
+- Saturación de oxígeno
+- Glucosa
+
+Aplicando Reglas sobre información a extraer de los MEDICAMENTOS,
+Del archivo subido y sin inventar nada, Extrae esta información cuando esté disponible:
+
+Extrae TODOS los medicamentos encontrados.
+
+Para cada medicamento intenta identificar:
+
+- Nombre
+- Principio activo
+- Presentación
+- Concentración
+- Dosis
+- Unidad de dosis
+- Vía de administración
+- Frecuencia
+- Duración
+- Cantidad
+- Indicaciones
+
+Aplicando Reglas sobre información a extraer del TRATAMIENTO,
+Del archivo subido y sin inventar nada, Extrae esta información cuando esté disponible:
+
+- Descripción
+- Medicamentos
+- Procedimientos
+- Terapias
+- Recomendaciones
+- Cuidados
+- Restricciones
+- Dieta
+- Actividad física
+
+Aplicando Reglas sobre información a extraer de los ESTUDIOS MEDICOS,
+Del archivo subido y sin inventar nada, Extrae esta información cuando esté disponible:
+
+- Tipo
+- Nombre
+- Fecha
+- Resultado
+- Unidades
+- Rango de referencia
+- Interpretación
+
+Aplicando Reglas sobre información a extraer de los PROCEDIMIENTOS,
+Del archivo subido y sin inventar nada, Extrae esta información cuando esté disponible:
+
+- Nombre
+- Fecha
+- Descripción
+- Resultado
+
+Aplicando Reglas sobre información a extraer del SEGUIMIENTO,
+Del archivo subido y sin inventar nada, Extrae esta información cuando esté disponible:
+
+- Próxima cita
+- Indicaciones de seguimiento
+- Signos de alarma
+- Observaciones
+
+Aplicando Reglas sobre el FORMATO DE RESPUESTA:
+Devuelve ÚNICAMENTE JSON válido.
+
+NO utilices Markdown.
+
+NO escribas:
+
+```json
+
+NO agregues explicaciones antes o después
+del JSON.
+
+
+La estructura debe ser EXACTAMENTE:
+
+{{
+    "nombre_archivo": "{nombre_archivo}",
+
+    "tipo_archivo": "{tipo_archivo}",
+
+    "documento": {{
+        "es_documento_medico": null,
+        "tipo_documento": null,
+        "fecha_documento": null,
+        "numero_documento": null,
+        "institucion_medica": null
+    }},
+
+    "paciente": {{
+        "id_paciente": null,
+        "nombre_completo": null,
+        "fecha_nacimiento": null,
+        "edad": null,
+        "sexo": null,
+        "curp": null,
+        "telefono": null,
+        "correo": null,
+        "direccion": null,
+        "peso_kg": null,
+        "altura_cm": null,
+        "alergias": [],
+        "antecedentes_medicos": [],
+        "antecedentes_quirurgicos": [],
+        "antecedentes_familiares": []
+    }},
+
+    "medico": {{
+        "nombre_completo": null,
+        "especialidad": null,
+        "cedula_profesional": null,
+        "institucion": null,
+        "telefono": null,
+        "correo": null
+    }},
+
+    "consulta": {{
+        "fecha": null,
+        "hora": null,
+        "motivo_consulta": null,
+        "sintomas": [],
+        "signos": [],
+        "observaciones": null
+    }},
+
+    "diagnosticos": [],
+
+    "signos_vitales": {{
+        "presion_arterial": null,
+        "frecuencia_cardiaca_lpm": null,
+        "frecuencia_respiratoria_rpm": null,
+        "temperatura_c": null,
+        "saturacion_oxigeno_porcentaje": null,
+        "glucosa_mg_dl": null
+    }},
+
+    "medicamentos": [],
+
+    "tratamiento": {{
+        "descripcion": null,
+        "medicamentos": [],
+        "procedimientos": [],
+        "terapias": [],
+        "recomendaciones": [],
+        "cuidados": [],
+        "restricciones": [],
+        "dieta": null,
+        "actividad_fisica": null
+    }},
+
+    "estudios": [],
+
+    "procedimientos": [],
+
+    "seguimiento": {{
+        "proxima_cita": null,
+        "indicaciones_seguimiento": [],
+        "signos_alarma": [],
+        "observaciones": null
+    }},
+
+    "datos_no_legibles_o_ambiguos": [],
+
+    "observaciones": null
+}}
+
+
+RECUERDA:
+
+1. NO INVENTAR INFORMACIÓN.
+2. USAR null SI EL DATO NO EXISTE.
+3. USAR [] SI NO EXISTEN ELEMENTOS.
+4. INFORMAR DATOS ILEGIBLES EN
+   "datos_no_legibles_o_ambiguos".
+5. CONSERVAR EXACTAMENTE EL NOMBRE DE ARCHIVO.
+6. DEVOLVER ÚNICAMENTE JSON VÁLIDO.
+
 """
 
     return prompt
 
+#Por si Gemini devuelve un json sucio,
+#Funcion para limpiar JSON:
+def limpiar_respuesta_json(texto_respuesta):
+    """
+    Limpia posibles bloques Markdown
+    alrededor del JSON.
+    """
+    texto = texto_respuesta.strip()
+
+    # Si Gemini devuelve ```json
+    if texto.startswith( "```json"):
+
+        texto = texto[len("```json"):]
+
+    # Si devuelve solamente ```
+    elif texto.startswith("```"):
+        texto = texto[len("```"):]
+
+    # Eliminar cierre Markdown.
+    if texto.endswith("```"):
+        texto = texto[:-len("```")]
+
+    return texto.strip()
+
+#Funcion para validar el JSON clinico:
+def validar_json_clinico(texto_respuesta,nombre_archivo):
+    """
+    Convierte la respuesta de Gemini
+    en un diccionario y valida
+    los datos básicos que pedimos se generaran
+    """
+
+    if not texto_respuesta:
+
+        raise ValueError("Gemini no devolvió ninguna respuesta")
+
+    #Aplicando Limpiar Markdown.
+    texto_limpio = limpiar_respuesta_json(texto_respuesta)
+
+    #Intentar convertir texto a JSON del texto limpiado:
+    try:
+
+        datos_clinicos = json.loads(texto_limpio)
+
+    except json.JSONDecodeError as error:
+
+        print("\nRespuesta recibida de Gemini:")
+        print(texto_respuesta)
+
+        raise ValueError("\nGemini no devolvió JSON válido.\n" f"Error: {error}")
+
+    #Comprobando que el JSON sea un objeto.
+    if not isinstance(datos_clinicos,dict):
+
+        raise ValueError("\nLa respuesta de Gemini no es un objeto JSON")
+
+    #Comprobando el nombre del JSON:
+    nombre_respuesta = (datos_clinicos.get("nombre_archivo"))
+
+    if nombre_respuesta != nombre_archivo:
+
+        raise ValueError(
+
+            "\nEl nombre del archivo "
+            "devuelto por Gemini "
+            "no coincide con el generado "
+            "por MediFlow.\n\n"
+
+            f"Nombre esperado:\n"
+            f"{nombre_archivo}\n\n"
+
+            f"Nombre recibido:\n"
+            f"{nombre_respuesta}"
+
+        )
+
+
+    print("\nJSON clínico validado correctamente")
+
+    return datos_clinicos
+
+#Funcion para generar el nombre del JSON clinico:
+def generar_nombre_json_clinico(nombre_archivo):
+    """
+    Genera el nombre del JSON clinico
+    utilizando el nombre generado del archivo original, que es el que guardamos
+    """
+    nombre_sin_extension = Path(nombre_archivo).stem
+
+    nombre_json = (f"{nombre_sin_extension}" f"_Datos_Clinicos.json")
+
+    return nombre_json
+
+#Funcion para guardar el JSON generado por Gemini:
+def guardar_json_clinico(datos_clinicos,nombre_archivo):
+    """
+    Guarda el JSON clínico generado por Gemini,
+    en la carpeta: 
+        archivo_datos_clinicos.json
+    """
+
+    #Generando nombre:
+    nombre_json = (generar_nombre_json_clinico(nombre_archivo))
+
+    #Construyendo ruta de guardado:
+    ruta_json = os.path.join(Carpeta_Datos_Clinicos,nombre_json)
+
+    #Guardando JSON:
+    with open(ruta_json,"w",encoding="utf-8") as archivo_json:
+
+        json.dump(
+            datos_clinicos,
+            archivo_json,
+            ensure_ascii=False,
+            indent=4
+        )
+
+    # Comprobar que exista.
+    if not os.path.isfile(ruta_json):
+
+        raise IOError("El JSON clínico no se pudo guardar correctamente.")
+
+    #Si si se guardo bien:
+    print("\nJSON gurdado exitosamente")
+
+    #TEsteando Datos:
+    print(f"\nNombre:\n" f"{nombre_json}")
+    print(f"\nUbicación:\n" f"{ruta_json}")
+
+
+    return ruta_json
+
 #Funcion para Procesar el Archivo con Gemini:
-def procesar_con_gemini(ruta_archivo,tipo_archivo):
-    
+def procesar_con_gemini(ruta_archivo,tipo_archivo,nombre_archivo):
+    """
+    Realizando estos procesos con Gemini:
+        1. Sube archivo.
+        2. Crea prompt.
+        3. Envía archivo + instrucciones.
+        4. Recibe respuesta.
+        5. Valida JSON.
+        6. Devuelve JSON clínico.
+    """
     #Realiza el análisis completo con Gemini.
 
     #Paso1 Subir archivo:
     archivo_gemini = subir_archivo_a_gemini(ruta_archivo)
 
     #Paso2 Creamos las instrucciones a realiar para analizar el archivo subido:
-    prompt = crear_prompt_prueba(tipo_archivo)
+    prompt = crear_prompt_prueba(tipo_archivo,nombre_archivo)
 
     #Testeamos:
-    print("\nEspere El Agente MediFlow con Gemini integrado:")
+    print("\nEspere El Agente Inteligente MediFlow con Gemini integrado:")
     print("Por el Equipo50_LATAM_G10, esta analizando el archivo subido\n")
 
-    #Enviamos el prompt + archivo subido a Gemini
+    #Paso3 Enviamos el prompt + archivo subido a Gemini
     respuesta = cliente_gemini.models.generate_content(
-        model=MODELO_GEMINI,
-        contents=[
-            prompt,
-            archivo_gemini
-        ]
+        model = MODELO_GEMINI,
+        contents = [prompt,archivo_gemini]
     )
 
-    #Obtenemos el texto de respuesta que genero Gemini:
+    #Paso 4 Obtenemos el texto de respuesta que genero Gemini:
     texto_respuesta = respuesta.text
 
     #Comprobamos que Gemini haya respondido
@@ -486,13 +886,23 @@ def procesar_con_gemini(ruta_archivo,tipo_archivo):
 
         raise ValueError("Gemini no devolvió ninguna respuesta.")
 
-    return texto_respuesta
+
+    #Paso 5 Validamos la respueta(JSON):
+    datos_clinicos = (
+            validar_json_clinico(
+                texto_respuesta,
+                nombre_archivo
+            )
+        )
+    #Paso6 Devolvemos el diccionario JSON
+    return datos_clinicos
+
+
 
 #Funcion para mostrar la respuesta que dio GEmini:
 def mostrar_respuesta(respuesta):
     """
     En esta Fase Mostramos en la Terminal lo que Gemini respondio acerca del archivo subido,
-
     En esta fase NO guardamos todavia el resultado,
 
     Primero queremos verificar visualmente
@@ -500,8 +910,10 @@ def mostrar_respuesta(respuesta):
     el documento subido por el usuario
     """
 
-    print("\nRespuesta de Gemini:\n")
-    print(respuesta)
+    print("\nRespuesta Clinica de Gemini:\n")
+    #print(respuesta)
+    print(json.dumps(respuesta,indent=4,ensure_ascii=False))
+    
 
 # Funcion Principal de trabajo
 def main():
@@ -516,10 +928,11 @@ def main():
         Paso6 Testeamos Resultados Obtenidos
         PAso7 Integracion de Gemini
         Paso8 Envio de Archivo y Respuesta de interpretacion con GEmini
+        Paso9 Gemini(Extraccion de texto para devolver JSON del archivo subido, 
         
-        PAsos Futuros: 
-        Gemini(Extraccion de texto para devolver JSON del archivo subido, 
-        LandGraph(CLasificacion), Creacion y Guardado de archivo JSON
+        Pasos Futuros:
+        LandGraph(CLasificacion)
+        Enviar correo si requiere revision Humana
         Frontend
         OCI
     """
@@ -538,23 +951,30 @@ def main():
         tipo_archivo = validar_extension(ruta_archivo)
 
         #PASO 4
-        ruta_guardada = guardar_archivo_original(ruta_archivo)
+        ruta_guardada,nombre_generado = guardar_archivo_original(ruta_archivo)
 
         #PASO 5 Testeando
         mostrar_informacion(ruta_archivo,tipo_archivo,ruta_guardada)
 
         #Parte nueva:
-        #obteniendo MIne type archivo para gemini:
+        #Paso 6 obteniendo MIne type archivo para gemini:
         obtener_mime_type(ruta_archivo)
 
-        #Obtencion de Respusta con Gemini:
-        respuesta = procesar_con_gemini(ruta_archivo,tipo_archivo)
+        #Paso7 Obtencion de Respusta con Gemini:
+        respuesta = procesar_con_gemini(ruta_archivo,tipo_archivo,nombre_generado)
 
-        #Mostramos la REspuesta de Gemini:
+        #Paso8 Mostramos la REspuesta de Gemini(JSON):
         mostrar_respuesta(respuesta)
 
+        #Paso9 Guardamos el archivo JSON:
+        ruta_json = guardar_json_clinico(respuesta,nombre_generado)
+
+        #paso10 Resumen Final:
+        print(f"\nArchivo original:" f"\n{ruta_guardada}")
+        print(f"\nJSON clínico:" f"\n{ruta_json}")
+
         #Fase de subir un archivo con Gemini y mande un respuesta terminado
-        print("\nPrimera parte de Gemini: Subir Archivo e interpetarlo Terminado")
+        print("\nIntegracion de Gemini y generacion de JSON: Guardado correctamente!")
         
         
 

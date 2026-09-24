@@ -1,0 +1,85 @@
+{
+    "nombre_archivo": "Fecha_Creacion_Dia23_Mes09_Año2026;Horario_Hora23_Minutos27_Segundos16_b.png",
+    "tipo_archivo": "imagen",
+    "documento": {
+        "es_documento_medico": true,
+        "tipo_documento": "Receta médica",
+        "fecha_documento": "Todos los días",
+        "numero_documento": "14042",
+        "institucion_medica": "PANAMA CANCER CLINIC - Centro Multidisciplinario de Cáncer"
+    },
+    "paciente": {
+        "id_paciente": null,
+        "nombre_completo": "Para tí",
+        "fecha_nacimiento": null,
+        "edad": null,
+        "sexo": null,
+        "curp": null,
+        "telefono": null,
+        "correo": null,
+        "direccion": null,
+        "peso_kg": null,
+        "altura_cm": null,
+        "alergias": [],
+        "antecedentes_medicos": [],
+        "antecedentes_quirurgicos": [],
+        "antecedentes_familiares": []
+    },
+    "medico": {
+        "nombre_completo": "tu Doc Anticáncer",
+        "especialidad": null,
+        "cedula_profesional": null,
+        "institucion": "PANAMA CANCER CLINIC - Centro Multidisciplinario de Cáncer",
+        "telefono": "(507) 310-2869 / (507) 6382-2265",
+        "correo": "citas@panamacancerclinic.com"
+    },
+    "consulta": {
+        "fecha": "Todos los días",
+        "hora": null,
+        "motivo_consulta": null,
+        "sintomas": [],
+        "signos": [],
+        "observaciones": null
+    },
+    "diagnosticos": [],
+    "signos_vitales": {
+        "presion_arterial": null,
+        "frecuencia_cardiaca_lpm": null,
+        "frecuencia_respiratoria_rpm": null,
+        "temperatura_c": null,
+        "saturacion_oxigeno_porcentaje": null,
+        "glucosa_mg_dl": null
+    },
+    "medicamentos": [],
+    "tratamiento": {
+        "descripcion": null,
+        "medicamentos": [],
+        "procedimientos": [],
+        "terapias": [],
+        "recomendaciones": [
+            "1- Recuerda darle gracias a Dios todos los días.",
+            "2- Come sano",
+            "3- Haz ejercicio (15-20 min/día)",
+            "4- Comparte con amigos y familia",
+            "5- Evita los excesos (todo en moderación)",
+            "6- No disruptores (sin toxinas)"
+        ],
+        "cuidados": [],
+        "restricciones": [
+            "Evita los excesos",
+            "No disruptores"
+        ],
+        "dieta": "Come sano",
+        "actividad_fisica": "Haz ejercicio (15-20 min/día)"
+    },
+    "estudios": [],
+    "procedimientos": [],
+    "seguimiento": {
+        "proxima_cita": null,
+        "indicaciones_seguimiento": [],
+        "signos_alarma": [],
+        "observaciones": null
+    },
+    "datos_no_legibles_o_ambiguos": [],
+    "observaciones": null
+}

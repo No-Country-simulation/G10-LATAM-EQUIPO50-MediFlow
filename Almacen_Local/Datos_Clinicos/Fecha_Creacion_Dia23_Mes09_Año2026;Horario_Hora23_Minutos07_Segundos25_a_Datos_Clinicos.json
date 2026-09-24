@@ -1,0 +1,105 @@
+{
+    "nombre_archivo": "Fecha_Creacion_Dia23_Mes09_Año2026;Horario_Hora23_Minutos07_Segundos25_a.png",
+    "tipo_archivo": "imagen",
+    "documento": {
+        "es_documento_medico": true,
+        "tipo_documento": "Receta médica",
+        "fecha_documento": "2023-02-23",
+        "numero_documento": "37",
+        "institucion_medica": "Clínica Mexico Terán Ote."
+    },
+    "paciente": {
+        "id_paciente": "206360989",
+        "nombre_completo": "Noelia de los Angeles Vargas Solano",
+        "fecha_nacimiento": null,
+        "edad": "35 años, 5 meses, 23 días",
+        "sexo": null,
+        "curp": null,
+        "telefono": null,
+        "correo": null,
+        "direccion": null,
+        "peso_kg": 60,
+        "altura_cm": 1.65,
+        "alergias": [
+            "Ácaros",
+            "Otros agentes antibióticos"
+        ],
+        "antecedentes_medicos": [
+            "Historia personal de alergia a otros agentes antibióticos"
+        ],
+        "antecedentes_quirurgicos": [],
+        "antecedentes_familiares": []
+    },
+    "medico": {
+        "nombre_completo": "Fernanda Vargas",
+        "especialidad": "Medicina General",
+        "cedula_profesional": "MED19187",
+        "institucion": "Colegio de Médicos y Cirujanos / Universidad de las Ciencias Médicas. UCR",
+        "telefono": "+52 1111111 ext 12",
+        "correo": "clinmex@hulipractice.com"
+    },
+    "consulta": {
+        "fecha": "23 feb, 2023",
+        "hora": "12:58:15 pm",
+        "motivo_consulta": null,
+        "sintomas": [],
+        "signos": [],
+        "observaciones": null
+    },
+    "diagnosticos": [
+        {
+            "nombre": "Historia personal de alergia a otros agentes antibióticos",
+            "descripcion": null,
+            "codigo": "Z88.1",
+            "tipo": null
+        }
+    ],
+    "signos_vitales": {
+        "presion_arterial": "120/80 mmHg",
+        "frecuencia_cardiaca_lpm": null,
+        "frecuencia_respiratoria_rpm": null,
+        "temperatura_c": 37.0,
+        "saturacion_oxigeno_porcentaje": null,
+        "glucosa_mg_dl": null
+    },
+    "medicamentos": [
+        {
+            "nombre": "Amoxicilina acido clavulanico",
+            "principio_activo": "Amoxicilina / Ácido clavulánico",
+            "presentacion": "Tabletas",
+            "concentracion": "875mg/125mg",
+            "dosis": "1",
+            "unidad_dosis": "tableta",
+            "via_administracion": "Vía oral",
+            "frecuencia": "Cada 8 días",
+            "duracion": null,
+            "cantidad": "Caja con 12 presentaciones",
+            "indicaciones": "Tomar 1 vez cada 8 días."
+        }
+    ],
+    "tratamiento": {
+        "descripcion": "Amoxicilina acido clavulanico 875mg/125mg tabletas vía oral. Caja con 12 presentaciones. Tomar 1 vez cada 8 días.",
+        "medicamentos": [
+            "Amoxicilina acido clavulanico 875mg/125mg"
+        ],
+        "procedimientos": [],
+        "terapias": [],
+        "recomendaciones": [],
+        "cuidados": [],
+        "restricciones": [],
+        "dieta": null,
+        "actividad_fisica": null
+    },
+    "estudios": [],
+    "procedimientos": [],
+    "seguimiento": {
+        "proxima_cita": null,
+        "indicaciones_seguimiento": [],
+        "signos_alarma": [],
+        "observaciones": null
+    },
+    "datos_no_legibles_o_ambiguos": [
+        "Texto difuso de fondo/plantilla parcialmente visible detrás del contenido principal"
+    ],
+    "observaciones": null
+}
