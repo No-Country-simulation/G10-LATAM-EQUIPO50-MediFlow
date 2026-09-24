@@ -976,7 +976,7 @@ def main():
         #Fase de subir un archivo con Gemini y mande un respuesta terminado
         print("\nIntegracion de Gemini y generacion de JSON: Guardado correctamente!")
         
-        
+
 
     except Exception as error:
 
