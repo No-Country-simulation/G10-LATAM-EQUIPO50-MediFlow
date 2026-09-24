@@ -121,9 +121,9 @@ Extensiones_JSON = {".json"}
 
 #Todas las extensiones permitidas juntas
 Extensiones_Permitidas = (
-    Extensiones_Imagen
-    | Extensiones_PDF
-    | Extensiones_JSON
+    Extensiones_Imagen,
+    Extensiones_PDF,
+    Extensiones_JSON
 )
 
 # Solicitar Ruta de Archivo:
@@ -410,10 +410,7 @@ def subir_archivo_a_gemini(ruta_archivo):
     return archivo_gemini
 
 #Funcion de Prompt:
-# ============================================================
-# CREAR PROMPT DE PRUEBA
-# ============================================================
-
+#Creando Prompt
 def crear_prompt_prueba(tipo_archivo):
     """
     Creamos un prompt sencillo para comprobar
@@ -490,10 +487,6 @@ def procesar_con_gemini(ruta_archivo,tipo_archivo):
     return texto_respuesta
 
 #Funcion para mostrar la respuesta que dio GEmini:
-# ============================================================
-# MOSTRAR RESPUESTA DE GEMINI
-# ============================================================
-
 def mostrar_respuesta(respuesta):
     """
     En esta Fase Mostramos en la Terminal lo que Gemini respondio acerca del archivo subido,
