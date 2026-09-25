@@ -60,7 +60,7 @@ Gemini lee el documento (PDF/imagen/JSON) y extrae la información; LangGraph cl
  
 ## Cloud & Infraestructura (OCI)
  
-Cuenta Always Free existente, compartment dedicado, 3 buckets segregados por estado, acceso del equipo vía IAM, y despliegue en Compute con VCN mínima. Detalle completo, en [`docs/infraestructura-cloud.md`](docs/infraestructura-cloud.md).
+Cuenta Always Free existente, compartment dedicado, 3 buckets segregados por estado, acceso del equipo vía IAM, y despliegue en Compute con VCN mínima. Detalle completo, en [`docs/infraestructura_cloud.md`](docs/infraestructura_cloud.md).
  
 ## Contrato de datos
  
@@ -70,8 +70,14 @@ Formatos de entrada aceptados (PDF / Imagen / JSON, con ejemplo real) y el JSON 
  
 - **Reunión obligatoria:** lunes y jueves
 - **Reunión diaria (daily):** martes, miércoles y viernes
-- **Gestión de tareas:** Trello
+- **Gestión de tareas:** Trello https://trello.com/invite/b/6aacb00e8ac49dd1ff659f13/ATTI57ded9186f44107980c9f4c455e4bef3E2FDC5AF/g10-latam-equipo50-mediflow
 - **Commits:** prefijo por tipo — `feat:`, `fix:`, `docs:`, `test:`
+
+### Estructura del tablero de Trello
+ 
+- **Listas:** `Listos para iniciar` → `En desarrollo` → `Pausado` → `Concluido`
+- **Etiquetas por área:** `Cloud`, `Arquitectura/Agente`, `Backend`, `Interfaz`, `Docs`. 
+- **Convención de tarjetas:** una tarjeta por tarea concreta, no por persona ni por día — así se puede ver de un vistazo qué está bloqueado y por qué.
 
 ## Instrucciones de ejecución
  
@@ -108,7 +114,7 @@ Ya no hace falta instalar Tesseract ni Poppler en el servidor — Gemini lee PDF
  
 ## Casos de prueba
  
-**100 documentos de prueba ya están en `casos/`** (65 PDF, 25 imagen, 10 JSON) — nombrados `DOC-001` a `DOC-100`. Es la base de pruebas real del equipo; los 5 casos sintéticos originales (rutina/urgencia/ambigüedad) siguen sirviendo como referencia rápida en `tests/casos/`.
+**100 documentos de prueba ya están en `casos/`** (65 PDF, 25 imagen, 10 JSON) — nombrados `DOC-001` a `DOC-100`.
  
 ## Estructura del repositorio
  
@@ -131,11 +137,6 @@ G10-LATAM-EQUIPO50-MediFlow/
     ├── contrato-datos.md
     └── infraestructura-cloud.md
 ```
- 
-## Licencia
- 
-Proyecto académico — Hackathon ONE G10, Oracle Next Education & Alura.
-# Configuración del Entorno de Desarrollo
 
 Este proyecto requiere un ambiente virtual aislado para gestionar sus dependencias de forma segura y evitar conflictos entre librerías. Se recomienda el uso de **Anaconda** (o **Miniconda**) para la administración del entorno.
 
@@ -161,3 +162,8 @@ Crea un ambiente de Conda especificando la versión de Python recomendada para e
 conda create --name mi_proyecto_env python=3.11.13 -y 
 
 Nota: Puedes cambiar mi_proyecto_env por el nombre que prefieras para tu entorno.
+
+## Licencia
+ 
+Proyecto académico — Hackathon ONE G10, Oracle Next Education & Alura.
+# Configuración del Entorno de Desarrollo

@@ -12,8 +12,9 @@ flowchart TD
     E --> E1["Receta"]
     E --> E2["OrdenProcedimiento"]
     E --> E3["InformeEstudio"]
-    E --> E4["Incapacidad"]
-    E --> E5["Otro"]
+    E --> E4["EpicrisisAlta"]
+    E --> E5["Certificado"]
+    E --> E6["Otro"]
     F --> F1["Normal"]
     F --> F2["Urgente"]
     F --> F3["Ambiguo"]
@@ -22,6 +23,7 @@ flowchart TD
     E3 --> G
     E4 --> G
     E5 --> G
+    E6 --> G
     F1 --> G
     F2 --> G
     F3 --> G

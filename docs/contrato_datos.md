@@ -32,17 +32,18 @@ Tomado de `casos/` (carpeta con 100 casos de prueba ya en el repo — PDF, image
 }
 ```
 
-## 5 tipos de documento reales identificados (base para la taxonomía)
+## 6 tipos de documento reales identificados (base para la taxonomía)
  
 El equipo aportó ejemplos reales (fotografiados) de 5 documentos que emite el sistema de salud colombiano. Cada uno tiene una estructura de campos consistente y reconocible:
  
-| Tipo real | Campos característicos |
-|---|---|
-| **Incapacidad** | Días de incapacidad, fecha inicial/final, diagnóstico principal y relacionado (CIE-10), tipo de incapacidad, prórroga, retroactiva |
-| **Orden de Procedimientos** | Tabla de ítems: código, descripción, cantidad, bilateral, código SISPRO |
-| **Fórmula / Receta** | Diagnóstico(s) CIE-10, tabla de medicamentos: prescripción, cantidad total, código MIPRES, entregas |
-| **Informe de Estudio (Imágenes)** | Nombre del estudio, datos clínicos, técnica, reporte (hallazgos), opinión |
-| **Resultado de Laboratorio** | Exámenes por categoría (química, hematología...), resultado, unidad, valor de referencia, método, fecha de validación |
+| Tipo real | Aparece como (encabezados reales en `casos/`) | Campos característicos |
+|---|---|---|
+| **Receta** | Fórmula Médica, Receta Médica | Diagnóstico(s) CIE-10, tabla de medicamentos: prescripción, cantidad total, código MIPRES, entregas |
+| **OrdenProcedimiento** | Solicitud de Procedimientos, Orden Médica, Orden de Servicios | Tabla de ítems: código, descripción, cantidad, bilateral, código SISPRO |
+| **InformeEstudio** | Informe de Laboratorio Clínico, Informe de Imagenología, Informe de Estudio Radiológico | Nombre del estudio, datos clínicos, técnica, reporte (hallazgos), opinión; o resultados por categoría (química, hematología...) |
+| **EpicrisisAlta** | Epicrisis, Informe de Alta | Resumen de la atención, diagnóstico de egreso, evolución, indicaciones al alta |
+| **Certificado** | Certificado Médico, Certificado de Incapacidad | Días de incapacidad (si aplica), fecha inicial/final, diagnóstico principal y relacionado (CIE-10), tipo, prórroga, retroactiva |
+| **Otro** | — | Catch-all para lo que no encaje en ninguna de las anteriores |
  
 ## Salida — JSON estructurado
  
@@ -116,9 +117,14 @@ El contenido de `detalle` cambia según el tipo — cada uno modela lo que ese d
 }
 ```
  
-**Incapacidad:**
+**EpicrisisAlta:**
 ```json
-{ "dias_incapacidad": 2, "fecha_inicial": "2026-04-23", "fecha_final": "2026-04-24", "diagnostico_principal": "I20.9", "diagnostico_relacionado": "R07.4", "prorroga": false }
+{ "diagnostico_egreso": "string", "resumen_evolucion": "string", "indicaciones_alta": "string" }
+```
+ 
+**Certificado** (incluye certificados de incapacidad como subtipo):
+```json
+{ "tipo_certificado": "Incapacidad | Asistencia | Otro", "dias_incapacidad": 2, "fecha_inicial": "2026-04-23", "fecha_final": "2026-04-24", "diagnostico_principal": "I20.9", "diagnostico_relacionado": "R07.4", "prorroga": false }
 ```
  
 ## Reglas de enrutamiento
@@ -130,11 +136,12 @@ El contenido de `detalle` cambia según el tipo — cada uno modela lo que ese d
 | Receta | Farmacia Hospitalaria |
 | OrdenProcedimiento | Auditoría de Autorizaciones |
 | InformeEstudio | Historia Clínica Electrónica |
-| Incapacidad | Administrativo / RRHH |
+| EpicrisisAlta | Historia Clínica Electrónica |
+| Certificado | Administrativo / RRHH |
 | Otro | Revisión humana |
  
 > **`puntaje_confianza` sigue pendiente** — el cálculo y el umbral quedan a cargo de Anahí (grafo de decisión + orquestación).
  
 ## Almacenamiento
  
-Los archivos de entrada y el JSON de salida se suben a OCI Object Storage, en el bucket correspondiente al estado (`recibidos` / `procesados` / `auditoria_humana` — ver [`infraestructura-cloud.md`](infraestructura-cloud.md)).
+El JSON de salida se sube a OCI Object Storage, en el bucket correspondiente al estado (`recibidos` / `procesados` / `auditoria_humana` — ver [`infraestructura_cloud.md`](infraestructura_cloud.md)).
