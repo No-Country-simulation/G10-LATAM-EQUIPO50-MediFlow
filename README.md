@@ -165,5 +165,71 @@ Nota: Puedes cambiar mi_proyecto_env por el nombre que prefieras para tu entorno
 
 ## Licencia
  
-Proyecto académico — Hackathon ONE G10, Oracle Next Education & Alura.
+Proyecto académico — Hackathon ONE G10 Equipo50, Oracle Next Education & Alura.
 # Configuración del Entorno de Desarrollo
+
+
+### 2. Preparación de Entorno:
+
+Antes de comenzar el procesamiento, el programa prepara las carpetas y configuraciones necesarias.
+
+La estructura utilizada por MediFlow permite separar:
+
+1. Los documentos originales.
+2. Los datos clínicos generados.
+3. Los documentos normales.
+4. os documentos que requieren revisión o atención.
+
+La estructura general puede quedar de esta manera:
+
+Almacen_Local:
+    1. Carpeta Archivos_Originales: Aquí se guardan los archivos originales subidos por el usuario.
+    2. Carpeta Datos_Clínicos: Aquí se guardan los JSON clínicos generados
+
+Esto permite que los resultados queden organizados automáticamente dependiendo de la clasificación obtenida.
+
+### 3. Selección de Archivo:
+
+El usuario selecciona desde la terminal el documento que desea procesar,
+El programa permite trabajar con diferentes tipos de archivos, entre ellos:
+
+```
+* .jpg
+* .png
+* .jpeg
+* .bmp
+* .webb
+* .pdf
+* .json
+´´´
+
+El usuario puede introducir la ruta manualmente o utilizar una ruta obtenida mediante arrastrar y soltar el archivo sobre la terminal;
+Después el programa limpia la ruta recibida y valida que el archivo exista.
+
+### 4. Validación de Archivo:
+
+Antes de comenzar el procesamiento, MediFlow comprueba que el archivo tenga una extensión permitida,
+Esto evita intentar procesar formatos que el sistema no contempla;
+Si el archivo no tiene una extensión válida, el programa detiene el procesamiento y solicita un archivo compatible.
+
+### 5. Conservación del Documento Original:
+
+Una de las características importantes del flujo es que el archivo original se conserva sin modificarse;
+Antes de comenzar el análisis, MediFlow realiza una copia del documento dentro de:
+
+
+Almacen_Local/Archivos_Originales/
+
+Además, el sistema genera un nombre controlado para evitar problemas con archivos que tengan el mismo nombre;
+
+El nombre se incorpora con la información siguiente:
+
+* Fecha
+* Hora
+* Nombre original
+
+La finalidad es mantener una referencia del documento original utilizado para generar la información clínica.
+
+### Identificación de Tipo de Archivo:
+
+
