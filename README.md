@@ -159,6 +159,8 @@ Abre tu terminal (o **Anaconda Prompt** en Windows) y ejecuta los siguientes com
 Crea un ambiente de Conda especificando la versión de Python recomendada para este proyecto:
 
 ```bash
+
+```
 conda create --name mi_proyecto_env python=3.11.13 -y 
 
 Nota: Puedes cambiar mi_proyecto_env por el nombre que prefieras para tu entorno.
@@ -193,7 +195,6 @@ Esto permite que los resultados queden organizados automáticamente dependiendo 
 El usuario selecciona desde la terminal el documento que desea procesar,
 El programa permite trabajar con diferentes tipos de archivos, entre ellos:
 
-```
 * .jpg
 * .png
 * .jpeg
@@ -201,14 +202,13 @@ El programa permite trabajar con diferentes tipos de archivos, entre ellos:
 * .webb
 * .pdf
 * .json
-´´´
 
 El usuario puede introducir la ruta manualmente o utilizar una ruta obtenida mediante arrastrar y soltar el archivo sobre la terminal;
 Después el programa limpia la ruta recibida y valida que el archivo exista.
 
 ### 4. Validación de Archivo:
 
-Antes de comenzar el procesamiento, MediFlow comprueba que el archivo tenga una extensión permitida,
+Antes de comenzar el procesamiento, MediFlow comprueba que el archivo tenga una extensión permitida;
 Esto evita intentar procesar formatos que el sistema no contempla;
 Si el archivo no tiene una extensión válida, el programa detiene el procesamiento y solicita un archivo compatible.
 
@@ -216,7 +216,6 @@ Si el archivo no tiene una extensión válida, el programa detiene el procesamie
 
 Una de las características importantes del flujo es que el archivo original se conserva sin modificarse;
 Antes de comenzar el análisis, MediFlow realiza una copia del documento dentro de:
-
 
 Almacen_Local/Archivos_Originales/
 
@@ -232,4 +231,118 @@ La finalidad es mantener una referencia del documento original utilizado para ge
 
 ### Identificación de Tipo de Archivo:
 
+MediFlow identifica el tipo de documento para determinar cómo debe ser enviado a Gemini,
+Por ejemplo:
 
+* PDF application/pdf
+* PNG  -> image/png
+* JPEG -> image/jpeg
+* JSON -> application/json
+
+Esta información permite que Gemini reciba correctamente el archivo.
+
+---
+### 6. Envio del Documento a Gemini:
+
+Una vez validado el archivo, MediFlow utiliza Gemini como modelo multimodal para analizar el documento;
+Gemini recibe el archivo directamente y analiza su contenido;
+Esto permite trabajar con documentos que pueden contener información clínica en diferentes formatos, como:
+
+* Texto.
+* Imágenes.
+* PDFs.
+* Información estructurada.
+
+El objetivo de esta etapa no es realizar un diagnóstico médico;
+Su función es extraer y estructurar la información que aparece en el documento subido por el usuario.
+
+---
+### 7. Extracción de información Clínica:
+
+Gemini transforma la información encontrada en el documento en un objeto estructurado;
+Por ejemplo, puede identificar información relacionada con:
+
+* Paciente
+* Médico
+* Institución
+* Fecha
+* Tipo de documento
+* Medicamentos
+* Tratamientos
+* Indicaciones
+* Estudios
+* Procedimientos
+
+La información se organiza en formato JSON para que posteriormente pueda ser procesada automáticamente por LangGraph.
+---
+### 8. Regla IMPORTANTE: No inventar Información
+
+El sistema está diseñado para que Gemini no complete información que no aparezca en el documento.
+Cuando un dato no está disponible, debe mantenerse como:
+
+* Null
+
+o cuando se trata de una lista:
+
+* []
+
+Esto es importante porque el sistema trabaja con información clínica y debe distinguir entre: Dato encontrado y Dato NO disponible;
+De esta manera, un dato faltante puede ser identificado posteriormente por LangGraph.
+
+---
+### 9. Guardado de Archivo JSON:
+
+Una vez Gemini extrae toda la información dada en el documento subido, este guarda esa información de forma estructurada generando el primer archivo JSON clínico, 
+el cual es guardado en la carpeta de Datos_Clínicos (ESTO SE TIENE RESUELTO YA).
+
+---
+### 10. LangGraph
+
+---
+### 11. 
+
+
+----
+### 12. Tecnologias Usadas:
+
+1. El prototipo utiliza principalmente:
+
+* Python
+
+2. Se utiliza como lenguaje principal para controlar todo el flujo de procesamiento:
+
+* Gemini
+
+3. Se utiliza para el análisis multimodal del documento y la extracción de información clínica estructurada:
+
+* LangGraph
+
+4. Se utiliza para organizar el flujo de evaluación y clasificación mediante diferentes etapas o nodos:
+
+* JSON
+
+5. Se utiliza como formato estructurado para almacenar los datos clínicos obtenidos:
+
+* python-dotenv
+
+Permite cargar de manera segura variables de configuración desde el archivo: .env
+Por ejemplo, la clave utilizada para acceder a Gemini.
+
+7. Se utliza para Sistema de archivos de Python:
+
+las Bibliotecas como:
+
+* os
+* shutil
+* pathlib
+* datetime
+* json
+
+Permiten administrar:
+
+1. Archivos.
+2. Carpetas.
+3. Rutas.
+4. Fechas.
+5. Copias.
+6. JSON.
