@@ -94,8 +94,12 @@ MODELO_GEMINI = "gemini-3.6-flash"
 #desde la que ejecutemos el comando.
 Carpeta_Base = os.path.dirname(os.path.abspath(__file__))
 
+#Obtenemos la carpeta que contiene al backend
+Carpeta_Proyecto = os.path.dirname(Carpeta_Base)
+
 # Carpeta principal de almacenamiento
-Carpeta_Almacen = os.path.join(Carpeta_Base,"Almacen_Local")
+#Almacen_Local se guardara fuera de la carpeta backend
+Carpeta_Almacen = os.path.join(Carpeta_Proyecto,"Almacen_Local")
 
 # Carpeta donde guardaremos los originales
 Carpeta_Originales = os.path.join(Carpeta_Almacen,"Archivos_Originales")
@@ -2224,7 +2228,7 @@ def gestionar_json_final(ruta_json):
 #Aqui va la parte del envio de correo:
 
 #Funcion Para Enviar el Correo
-def enviar_alerta_correo(nombre_paciente,nombre_medico,tipo_documento,clasificacion_final,motivo):
+def enviar_alerta_correo(nombre_paciente,nombre_medico,tipo_documento,clasificacion_final,motivo,ruta_json):
     """
     Envía un correo de alerta cuando MediFlow determina
     que el documento requiere revision humana.
@@ -2291,6 +2295,9 @@ Clasificacion Final:
 
 Motivos de Revision:
 {motivo}
+
+Ruta donde se guardo el JSON Final:
+{ruta_json}
 
 Por favor, revise el documento en el sistema MediFlow.
 
@@ -2367,9 +2374,9 @@ def main():
         Paso9 Gemini(Extraccion de texto para devolver JSON del archivo subido, 
         paso10 LandGraph CLasificacion y Genración de JSON Final
         Paso11 Umbrales, Reglas y Ennrutamiento de manera Modificables Realizado
-        
+        Paso12 Enviar Alertas por correo cuando sea distinto de Normal el documento
+
         Pasos Futuros:
-        Enviar Alertas por correo cuando sea distinto de Normal el documento
         Frontend
         OCI
     """
@@ -2438,6 +2445,10 @@ def main():
 
         #Obtencion de categoria:
         categoria = (datos_clinicos_finales["clasificacion_documento"]["categoria"])
+
+        #Paso13 Guardamos el archivo JSON FINAL:
+        ruta_json = guardar_json_clasificado(datos_clinicos_finales,nombre_generado,clasificacion_final,categoria)
+                
 
         #Envio de correo:
         #Cambio Nuevo: Revision Humana Y Envio De Alerta Por Correo
@@ -2508,7 +2519,8 @@ def main():
             nombre_medico = nombre_medico,
             tipo_documento = tipo_documento,
             clasificacion_final = clasificacion_final,
-            motivo = motivo_correo
+            motivo = motivo_correo,
+            ruta_json = ruta_json
             )
         else:
             #Si el documento es NORMAL,
@@ -2516,9 +2528,6 @@ def main():
             print("\nEl documento NO requiere revision humana.")
             print("No se enviara alerta por correo.")
         #
-        
-        #Paso13 Guardamos el archivo JSON FINAL:
-        ruta_json = guardar_json_clasificado(datos_clinicos_finales,nombre_generado,clasificacion_final,categoria)
         
         #paso14 Resumen Final:
         #mostrar_resultado_final(resultado_langgraph, ruta_json)
