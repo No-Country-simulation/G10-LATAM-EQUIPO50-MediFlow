@@ -170,7 +170,7 @@ Nota: Puedes cambiar mi_proyecto_env por el nombre que prefieras para tu entorno
 Proyecto académico — Hackathon ONE G10 Equipo50, Oracle Next Education & Alura.
 # Configuración del Entorno de Desarrollo
 
-
+------
 ### 2. Preparación de Entorno:
 
 Antes de comenzar el procesamiento, el programa prepara las carpetas y configuraciones necesarias.
@@ -180,17 +180,57 @@ La estructura utilizada por MediFlow permite separar:
 1. Los documentos originales.
 2. Los datos clínicos generados.
 3. Los documentos normales.
-4. os documentos que requieren revisión o atención.
+4. Los documentos que requieren revisión o atención.
 
 La estructura general puede quedar de esta manera:
 
 Almacen_Local:
-    1. Carpeta Archivos_Originales: Aquí se guardan los archivos originales subidos por el usuario.
-    2. Carpeta Datos_Clínicos: Aquí se guardan los JSON clínicos generados
+* Carpeta Archivos_Originales: Aquí se guardan los archivos originales subidos por el usuario.
+* Carpeta Datos_Clínicos: Aquí se guardan los JSON clínicos generados.
 
 Esto permite que los resultados queden organizados automáticamente dependiendo de la clasificación obtenida.
+---
+### 3. Configuración de los Niveles de Evaluación:
 
-### 3. Selección de Archivo:
+El sistema permite configurar los valores de los umbrales utilizados por LangGraph,
+Los valores representan un puntaje de incoherencia, es decir,
+qué tantas inconsistencias o problemas detectados existen en la información del documento.
+
+Por defecto, el sistema puede trabajar con los siguientes rangos:
+
+*  0 a 19     Normal.
+* 20 a 39     Revisión.
+* 40 a 59     Revisión prioritaria.
+* 50 a 100    Alerta.
+
+*Nota: Es importante saber que este puntaje no representa la gravedad médica del paciente, no es un diagnóstico y tampoco representa una probabilidad de enfermedad.*
+
+El usuario puede modificar estos valores al iniciar el programa;
+Esto permite adaptar el comportamiento del sistema dependiendo de las necesidades del proyecto.
+
+----
+
+---
+### 4. Configuración de Reglas:
+
+Además de los umbrales, MediFlow permite configurar las reglas utilizadas durante la evaluación.
+
+Estas reglas ayudan a determinar si existe una posible inconsistencia entre:
+
+* La categoría identificada.
+* La información contenida en el documento.
+* Los datos clínicos extraídos.
+* Los datos faltantes.
+* Los datos ambiguos.
+* Las características esperadas para cada tipo de documento.
+
+Por ejemplo, una Receta Médica debería contener determinada información propia de una receta;
+Si el contenido extraído no coincide con lo esperado para esa categoría, el sistema puede aumentar el puntaje de incoherencia.
+
+---
+
+---
+### 5. Selección de Archivo:
 
 El usuario selecciona desde la terminal el documento que desea procesar,
 El programa permite trabajar con diferentes tipos de archivos, entre ellos:
@@ -205,19 +245,24 @@ El programa permite trabajar con diferentes tipos de archivos, entre ellos:
 
 El usuario puede introducir la ruta manualmente o utilizar una ruta obtenida mediante arrastrar y soltar el archivo sobre la terminal;
 Después el programa limpia la ruta recibida y valida que el archivo exista.
+---
 
-### 4. Validación de Archivo:
+---
+### 6. Validación de Archivo:
 
 Antes de comenzar el procesamiento, MediFlow comprueba que el archivo tenga una extensión permitida;
 Esto evita intentar procesar formatos que el sistema no contempla;
 Si el archivo no tiene una extensión válida, el programa detiene el procesamiento y solicita un archivo compatible.
 
-### 5. Conservación del Documento Original:
+---
+
+---
+### 7. Conservación del Documento Original:
 
 Una de las características importantes del flujo es que el archivo original se conserva sin modificarse;
 Antes de comenzar el análisis, MediFlow realiza una copia del documento dentro de:
 
-Almacen_Local/Archivos_Originales/
+*Almacen_Local/Archivos_Originales/*
 
 Además, el sistema genera un nombre controlado para evitar problemas con archivos que tengan el mismo nombre;
 
@@ -228,8 +273,10 @@ El nombre se incorpora con la información siguiente:
 * Nombre original
 
 La finalidad es mantener una referencia del documento original utilizado para generar la información clínica.
+---
 
-### Identificación de Tipo de Archivo:
+---
+### 8. Identificación de Tipo de Archivo:
 
 MediFlow identifica el tipo de documento para determinar cómo debe ser enviado a Gemini,
 Por ejemplo:
@@ -240,9 +287,10 @@ Por ejemplo:
 * JSON -> application/json
 
 Esta información permite que Gemini reciba correctamente el archivo.
+---
 
 ---
-### 6. Envio del Documento a Gemini:
+### 9. Envio del Documento a Gemini:
 
 Una vez validado el archivo, MediFlow utiliza Gemini como modelo multimodal para analizar el documento;
 Gemini recibe el archivo directamente y analiza su contenido;
@@ -255,9 +303,10 @@ Esto permite trabajar con documentos que pueden contener información clínica e
 
 El objetivo de esta etapa no es realizar un diagnóstico médico;
 Su función es extraer y estructurar la información que aparece en el documento subido por el usuario.
+---
 
 ---
-### 7. Extracción de información Clínica:
+### 10. Extracción de información Clínica:
 
 Gemini transforma la información encontrada en el documento en un objeto estructurado;
 Por ejemplo, puede identificar información relacionada con:
@@ -273,9 +322,11 @@ Por ejemplo, puede identificar información relacionada con:
 * Estudios
 * Procedimientos
 
-La información se organiza en formato JSON para que posteriormente pueda ser procesada automáticamente por LangGraph.
+La información se organiza en formato JSON estructurado para que posteriormente pueda ser procesada automáticamente por LangGraph.
 ---
-### 8. Regla IMPORTANTE: No inventar Información
+
+---
+### 11. Regla IMPORTANTE: No inventar Información
 
 El sistema está diseñado para que Gemini no complete información que no aparezca en el documento.
 Cuando un dato no está disponible, debe mantenerse como:
@@ -288,57 +339,202 @@ o cuando se trata de una lista:
 
 Esto es importante porque el sistema trabaja con información clínica y debe distinguir entre: Dato encontrado y Dato NO disponible;
 De esta manera, un dato faltante puede ser identificado posteriormente por LangGraph.
+---
 
 ---
-### 9. Guardado de Archivo JSON:
+### 12. Clasificación del Documento:
 
-Una vez Gemini extrae toda la información dada en el documento subido, este guarda esa información de forma estructurada generando el primer archivo JSON clínico, 
-el cual es guardado en la carpeta de Datos_Clínicos (ESTO SE TIENE RESUELTO YA).
+Después de obtener el JSON generado por Gemini, el flujo pasa a LangGraph;
+Una de sus responsabilidades es identificar la categoría que se encuentra en el documento.
+Las categorías utilizadas por el sistema son:
+
+* Receta Médica
+* Informe de Estudio de Diagnóstico por Imágenes/Laboratorio
+* Orden de Solicitud de Procedimiento
+* Epicrisis / Informe de Alta
+* Certificado Médico
+* Otro
+
+Esta clasificación permite organizar automáticamente los documentos.
+---
 
 ---
-### 10. LangGraph
+### 13. Evaluación del Documento:
+
+LangGraph también participa en la evaluación del documento;
+El sistema analiza diferentes señales que pueden indicar que el documento necesita revisión;
+Entre ellas pueden encontrarse:
+
+* Información urgente
+* Información ambigua
+* Datos faltantes
+* Información que no coincide
+* Problemas de coherencia del documento
+
+*Nota: Estas señales no representan un diagnóstico médico; Su función es identificar documentos que pueden requerir una revisión adicional.*
+---
 
 ---
-### 11. 
+### 14. Validación de Coherencia:
 
+Una de las partes importantes del flujo es la validación de coherencia entre el documento y su categoría;
+El sistema utiliza las reglas configuradas para comprobar si la información encontrada tiene sentido con respecto al tipo de documento identificado.
+Por ejemplo:
+
+* Documento identificado:
+  Receta Médica
+
+* Información encontrada:
+  Datos que no corresponden
+  claramente a una receta
+
+* Resultado:
+  Posible inconsistencia
+
+Esto evita depender únicamente de la clasificación inicial realizada por Gemini.
+---
+
+
+---
+### 15. Puntaje de incoherencia:
+
+A partir de las reglas y condiciones detectadas se obtiene un puntaje de rango entre: 0 a 100.
+
+Este valor representa el nivel de incoherencia detectado en el documento.
+Por ejemplo:
+
+* Puntaje igual a 5:
+  Significa que se encontraron pocas inconsistencias en el documento.
+
+* Puntaje igual a 75:
+  indica que se detectaron más elementos que requieren atención.
+
+*Nota: NO representa gravedad médica, diagnóstico, riesgo de muerte ni probabilidad de enfermedad.*
+
+Es exclusivamente un indicador utilizado por el flujo de trabajo, para decidir qué nivel de revisión requiere el documento.
+---
+
+---
+### 16. Clasificación Final:
+Con el puntaje obtenido y los umbrales configurados, LangGraph determina una clasificación final;
+Por ejemplo:
+
+* Normal.
+* Revisión.
+* Revisión Prioritaria.
+* Alerta
+
+Esto permite que el sistema organice automáticamente los documentos.
+---
+
+---
+### 17. Organización Automatica del JSON:
+Una vez terminada la evaluación, MediFlow genera el JSON clínico final;
+Dependiendo del resultado, el archivo se guarda automáticamente en una estructura como:
+
+* Datos_Clinicos/Normal/Receta_Medica/documento.json
+o
+* Datos_Clinicos/Alertas/Alerta/Receta_Medica/documento.json
+
+De esta forma, la ubicación del archivo refleja tanto:
+
+* La clasificación obtenida.
+* El tipo de documento.
+---
+
+---
+### 18. Resumen Final para el Usuario:
+
+Después de guardar el JSON, MediFlow muestra un resumen del procesamiento;
+El usuario puede conocer:
+
+* Categoría del documento
+* Clasificación final
+* Puntaje de incoherencia
+* Nivel de coherencia
+* Reglas utilizadas
+* Información de riesgo detectada
+* Datos faltantes
+* Datos ambiguos
+* Motivos de la clasificación
+* Ruta donde se guardó el JSON
+
+También se muestran todos los niveles de evaluación configurados;
+Esto permite que el usuario pueda entender por qué el sistema clasificó el documento de determinada manera, 
+en lugar de recibir únicamente un resultado.
+---
+
+---
+### 19. Decisión del Usuario sobre el JSON clínico final generado:
+
+Una vez terminado el procesamiento, el usuario puede decidir qué hacer con el JSON generado;
+MediFlow ofrece tres opciones:
+
+1. Mantener el JSON en la ubicación indicada
+2. Guardar el JSON en otra ubicación
+3. Eliminar el JSON generado
+
+Opción 1: Mantener
+El JSON permanece dentro de la estructura creada automáticamente por MediFlow.
+
+Opción 2: Guardar en otra ubicación
+El usuario puede introducir otra ruta;
+MediFlow puede crear la carpeta de destino si es necesario y mover el JSON hacia esa ubicación.
+
+Opción 3: Eliminar
+El usuario puede eliminar el JSON final si considera que no desea conservarlo.
+El archivo original permanece conservado en:
+
+*Almacen_Local/Archivos_Originales/*
+
+Por lo tanto, eliminar el JSON generado no elimina el documento original utilizado para el procesamiento.
+---
+
+---
+### 20. Envio de Correo (Alertas):
+
+MediFlow tiene la capacidad de mandar un correo a la(s) persona(s) encargada(s),
+en caso que el sistema detecte que el archivo subido requiere revisión humanada.
+Manda un mensaje que contiene los siguientes puntos:
+
+* Nombre del Paciente.
+* Nombre del Médico.
+* Tipo de documento.
+* Clasificación del documento.
+* Motivos por los cuales requiere revisión por una persona encargada del área.
+* Muestra la ruta donde se guardo el documento generado.
+
+De esta forma alerta al personal responsable que hay inconsistencias en el archivo, 
+marcando puntos estrategicos para llevar a cabo su revisión.
+---
 
 ----
-### 12. Tecnologias Usadas:
+### 21. Tecnologias Usadas:
 
-1. El prototipo utiliza principalmente:
+El prototipo utiliza principalmente las siguientes herramientas:
 
-* Python
+* Python: Se utiliza como lenguaje principal para controlar todo el flujo de procesamiento.
 
-2. Se utiliza como lenguaje principal para controlar todo el flujo de procesamiento:
+* Gemini: Se utiliza para el análisis multimodal del documento y la extracción de información clínica estructurada.
 
-* Gemini
+* LangGraph: Se utiliza para organizar el flujo de evaluación y clasificación mediante diferentes etapas o nodos.
 
-3. Se utiliza para el análisis multimodal del documento y la extracción de información clínica estructurada:
+* JSON: Se utiliza como formato estructurado para almacenar los datos clínicos obtenidos.
 
-* LangGraph
-
-4. Se utiliza para organizar el flujo de evaluación y clasificación mediante diferentes etapas o nodos:
-
-* JSON
-
-5. Se utiliza como formato estructurado para almacenar los datos clínicos obtenidos:
-
-* python-dotenv
-
-Permite cargar de manera segura variables de configuración desde el archivo: .env
+* python-dotenv: Permite cargar de manera segura variables de configuración desde el archivo: .env;
 Por ejemplo, la clave utilizada para acceder a Gemini.
 
-7. Se utliza para Sistema de archivos de Python:
+También se utlizan:
+Para Sistema de archivos de Python;
 
 las Bibliotecas como:
-
 * os
 * shutil
 * pathlib
 * datetime
 * json
 
-Permiten administrar:
+Que Permiten administrar:
 
 1. Archivos.
 2. Carpetas.
@@ -346,3 +542,4 @@ Permiten administrar:
 4. Fechas.
 5. Copias.
 6. JSON.
+---
