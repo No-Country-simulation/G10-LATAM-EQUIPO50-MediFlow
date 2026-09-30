@@ -1,0 +1,20 @@
+{
+  "sistema_origen": "HIS-SALUD",
+  "fecha_documento": "2026-09-18",
+  "paciente": {
+    "nombre_completo": "Eduardo Mendoza Moreno",
+    "identificacion": {
+      "tipo": "CC",
+      "numero": "583498908"
+    },
+    "fecha_nacimiento": "2002-06-12",
+    "sexo": "M",
+    "cobertura": "Particular"
+  },
+  "profesional": {
+    "nombre": "Dr. Javier Navarro Silva",
+    "registro": "RM 73532-16",
+    "especialidad": "Endocrinología"
+  },
+  "contenido_texto": "RECETA MÉDICA\nDiagnóstico: Diabetes mellitus no insulinodependiente sin mención de complicación   CIE-10: E11.9\n1. Metformina 850 mg - tableta\n    Tomar 1 tableta cada 12 horas por 30 días.   Cantidad total: 60\nIndicaciones: Control en 15 días."
+}
