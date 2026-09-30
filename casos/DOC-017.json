@@ -1,0 +1,20 @@
+{
+  "sistema_origen": "HIS-VITALIA",
+  "fecha_documento": "2026-09-08",
+  "paciente": {
+    "nombre_completo": "Sebastián Jiménez Torres",
+    "identificacion": {
+      "tipo": "CC",
+      "numero": "933846020"
+    },
+    "fecha_nacimiento": "1950-01-22",
+    "sexo": "M",
+    "cobertura": "Nueva Salud EPS"
+  },
+  "profesional": {
+    "nombre": "Dra. Mariana Moreno Navarro",
+    "registro": "RM 39949-53",
+    "especialidad": "Medicina Interna"
+  },
+  "contenido_texto": "PRESCRIPCIÓN MÉDICA\nDiagnóstico: Hipertensión esencial (primaria)   CIE-10: I10\n1. Losartán 50 mg - tableta\n    Tomar 1 tableta cada 6 horas por 30 días.   Cantidad total: 120\nIndicaciones: Tomar con abundante agua."
+}
