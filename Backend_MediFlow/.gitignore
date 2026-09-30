@@ -1,0 +1,21 @@
+#Carpeta de trabajo:
+Archivos_que_no_deben_subirse
+
+# Ignorar las credenciales api_keys:
+.env
+
+# Byte-compiled / optimized files
+__pycache__/
+*.py[cod]
+
+# Archivo de la Mac:
+.DS_Store
+
+# IDEs
+.vscode/
+
+# Logs
+*.log
+
+# Base de datos vectorial de Chroma
+chroma_db/
