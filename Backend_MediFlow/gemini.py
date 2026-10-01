@@ -6,6 +6,14 @@ from librerias import *
 #Configuracion compartida:
 from configuracion import *
 
+#CAMBIO: Importamos time para poder esperar 
+#entre cada intento de comunicacion con Gemini:
+import time 
+
+#CAMBIO: Importamos los errores de Gemini para,
+#poder identificar especificamente el error 503. 
+from google.genai import errors
+
 def subir_archivo_a_gemini(ruta_archivo):
     """
     Envia el archivo a Gemini.
@@ -504,10 +512,46 @@ def procesar_con_gemini(ruta_archivo,tipo_archivo,nombre_archivo):
     print("Por el Equipo50_LATAM_G10, esta analizando el archivo subido\n")
 
     #Paso3 Enviamos el prompt + archivo subido a Gemini
-    respuesta = cliente_gemini.models.generate_content(
-        model = MODELO_GEMINI,
-        contents = [prompt,archivo_gemini]
-    )
+    #CAMBIO: Creamos el numero maximo de intentos que realizara MediFlow
+    #si Gemini presenta un error temporal 503:
+    maximo_intentos = 3 
+    
+    #CAMBIO: Creamos una variable para controlar el numero de intento actual:
+    intento = 1 
+    
+    #CAMBIO: Repetimos la solicitud mientras no superemos el numero maximo de intentos: 
+    while intento <= maximo_intentos:
+        try:
+            #CAMBIO: Mostramos al usuario el intento 
+            #que MediFlow esta realizando:
+            print(f"Intento {intento} de {maximo_intentos} con Gemini...")
+
+            respuesta = cliente_gemini.models.generate_content(model = MODELO_GEMINI,contents = [prompt,archivo_gemini])
+
+            #CAMBIO: Si Gemini responde correctamente, 
+            #salimos del ciclo de intentos. 
+            break
+        #CAMBIO: Capturamos especificamente los errores del servidor de Gemini: 
+        except errors.ServerError as error: 
+            #CAMBIO: Comprobamos si el error corresponde al codigo 503 de servicio no disponible: 
+            if error.code == 503: 
+                #CAMBIO: Si todavia tenemos intentos disponibles, 
+                #esperamos antes de volver a realizar la solicitud:
+                if intento < maximo_intentos: 
+                    #CAMBIO: La espera aumenta dependiendo del numero de intento: 
+                    tiempo_espera = 2 ** intento
+                    print( f"\nGemini no esta disponible temporalmente." f"\nError 503." f"\nEsperando {tiempo_espera} segundos antes" f" del siguiente intento...\n" )
+                    time.sleep(tiempo_espera)
+                    #CAMBIO: Aumentamos el numero de intento: 
+                    intento += 1
+                #CAMBIO: Si ya se utilizaron todos los intentos, 
+                #mostramos el error original: 
+                else:
+                    print( "\nGemini no estuvo disponible despues de " f"{maximo_intentos} intentos." )
+                    raise error
+            #CAMBIO: Si Gemini devuelve otro error de servidor diferente a 503, 
+            #no realizamos nuevos intentos: 
+            else: raise error
 
     #Paso 4 Obtenemos el texto de respuesta que genero Gemini:
     texto_respuesta = respuesta.text

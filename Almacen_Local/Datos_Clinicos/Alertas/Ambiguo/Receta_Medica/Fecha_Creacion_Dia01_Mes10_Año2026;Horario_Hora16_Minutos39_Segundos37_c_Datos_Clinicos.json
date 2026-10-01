@@ -1,0 +1,121 @@
+{
+    "nombre_archivo": "Fecha_Creacion_Dia01_Mes10_Año2026;Horario_Hora16_Minutos39_Segundos37_c.png",
+    "tipo_archivo": "imagen",
+    "documento": {
+        "es_documento_medico": true,
+        "tipo_documento": "Receta Médica",
+        "fecha_documento": "09/08/00",
+        "numero_documento": "52-485034",
+        "institucion_medica": "MINSAP - Hospitales y Policlínicos"
+    },
+    "paciente": {
+        "id_paciente": "3540",
+        "nombre_completo": "JUAN Perez",
+        "fecha_nacimiento": null,
+        "edad": null,
+        "sexo": null,
+        "curp": null,
+        "telefono": null,
+        "correo": null,
+        "direccion": null,
+        "peso_kg": null,
+        "altura_cm": null,
+        "alergias": [],
+        "antecedentes_medicos": [],
+        "antecedentes_quirurgicos": [],
+        "antecedentes_familiares": []
+    },
+    "medico": {
+        "nombre_completo": null,
+        "especialidad": "Dermatólogo",
+        "cedula_profesional": null,
+        "institucion": "MINSAP - Hospitales y Policlínicos",
+        "telefono": null,
+        "correo": null
+    },
+    "consulta": {
+        "fecha": "09/08/00",
+        "hora": null,
+        "motivo_consulta": null,
+        "sintomas": [],
+        "signos": [],
+        "observaciones": null
+    },
+    "diagnosticos": [],
+    "signos_vitales": {
+        "presion_arterial": null,
+        "frecuencia_cardiaca_lpm": null,
+        "frecuencia_respiratoria_rpm": null,
+        "temperatura_c": null,
+        "saturacion_oxigeno_porcentaje": null,
+        "glucosa_mg_dl": null
+    },
+    "medicamentos": [],
+    "tratamiento": {
+        "descripcion": "Baños de hoja de guayaba 01/día",
+        "medicamentos": [],
+        "procedimientos": [],
+        "terapias": [
+            "Baños de hoja de guayaba"
+        ],
+        "recomendaciones": [
+            "Baños de hoja de guayaba 01/día"
+        ],
+        "cuidados": [],
+        "restricciones": [],
+        "dieta": null,
+        "actividad_fisica": null
+    },
+    "estudios": [],
+    "procedimientos": [],
+    "seguimiento": {
+        "proxima_cita": null,
+        "indicaciones_seguimiento": [],
+        "signos_alarma": [],
+        "observaciones": null
+    },
+    "datos_no_legibles_o_ambiguos": [
+        "Nombre manuscrito y firma del médico",
+        "Texto manuscrito en el campo Unidad"
+    ],
+    "observaciones": null,
+    "clasificacion_riesgo": {
+        "urgente": false,
+        "motivo_urgencia": null,
+        "datos_ambiguos": [
+            "Nombre manuscrito del médico"
+        ],
+        "datos_faltantes": [],
+        "clasificacion_final": "ambiguo",
+        "requiere_revision_humana": true
+    },
+    "clasificacion_documento": {
+        "categoria": "Receta Médica"
+    },
+    "validacion_coherencia": {
+        "puntaje_incoherencia": 90,
+        "nivel_coherencia": "alerta",
+        "categoria_reglas_aplicadas": "Receta Médica",
+        "umbrales_utilizados": {
+            "umbral_normal": 20,
+            "umbral_revision": 40,
+            "umbral_alerta": 60
+        },
+        "reglas_utilizadas": {
+            "sin_medicamentos": 30,
+            "sin_medicamentos_tratamiento": 20,
+            "sin_id_paciente": 5,
+            "sin_nombre_paciente": 10,
+            "sin_nombre_medico": 5,
+            "recomendaciones_sin_medicamentos": 20
+        },
+        "motivos": [
+            "La receta no contiene medicamentos.",
+            "No se encontraron medicamentos en el tratamiento.",
+            "Falta el nombre del medico.",
+            "Existen recomendaciones pero no se encontraron medicamentos.",
+            "Se detectaron 3 dato(s) ambiguo(s)."
+        ],
+        "requiere_revision_humana": true
+    }
+}
