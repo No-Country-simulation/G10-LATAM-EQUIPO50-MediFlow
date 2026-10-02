@@ -236,8 +236,83 @@ def actualizar_reglas(reglas: dict):
             detail=f"No fue posible actualizar las reglas: {error}"
         )
 
-#Endpoint para administrar el JSON Final generado por MediFlow.
 
+#CAMBIO NUEVO:
+#Endpoint para consultar los correos configurados
+#que recibiran las alertas de MediFlow.
+@app.get("/configuracion/correos")
+def obtener_configuracion_correos():
+
+    try:
+
+        #Cargamos los correos configurados
+        correos = cargar_correos_destino()
+
+
+        #Devolvemos la configuracion
+        return {"correos_destino": correos}
+
+    except Exception as error:
+        raise HTTPException(status_code=500,detail=str(error))
+
+
+#CAMBIO NUEVO:
+#Endpoint para agregar un nuevo correo
+#que recibira las alertas de MediFlow.
+@app.post("/configuracion/correos")
+def agregar_configuracion_correo(correo: str):
+
+    try:
+
+        #Agregamos el nuevo correo
+        correos = agregar_correo_destino(correo)
+
+
+        #Devolvemos la lista actualizada
+        return {
+            "mensaje": "Correo agregado correctamente.",
+            "Estado": "Ok",
+            "correos_destino": correos
+        }
+
+
+    except ValueError as error:
+        raise HTTPException(status_code=400,detail=str(error))
+
+
+    except Exception as error:
+
+        raise HTTPException(status_code=500,detail=str(error))
+
+
+#CAMBIO NUEVO:
+#Endpoint para eliminar un correo
+#que ya no recibira las alertas de MediFlow.
+@app.delete("/configuracion/correos")
+def eliminar_configuracion_correo(correo: str):
+
+    try:
+
+        #Eliminamos el correo indicado
+        correos = eliminar_correo_destino(correo)
+
+
+        #Devolvemos la lista actualizada
+        return {
+            "mensaje": "Correo eliminado correctamente.",
+            "correos_destino": correos
+        }
+
+
+    except ValueError as error:
+        raise HTTPException(status_code=400,detail=str(error))
+
+
+    except Exception as error:
+        raise HTTPException(status_code=500,detail=str(error))
+
+
+#Endpoint para administrar el JSON Final generado por MediFlow.
 #Este Endpoint permite que posteriormente Streamlit
 #pueda decidir que hacer con el JSON Final:
 #   conservar : Mantener el archivo donde MediFlow lo guardo.
@@ -258,18 +333,12 @@ def administrar_json_final(
 
         #Convertimos la ruta recibida
         #a una ruta absoluta.
-        ruta_json = os.path.abspath(
-            os.path.expanduser(ruta_json)
-        )
+        ruta_json = os.path.abspath(os.path.expanduser(ruta_json))
 
         #Comprobamos que el JSON exista.
         if not os.path.isfile(ruta_json):
 
-            raise HTTPException(
-                status_code=404,
-                detail="El JSON Final no existe en la ruta indicada."
-            )
-
+            raise HTTPException(status_code=404,detail="El JSON Final no existe en la ruta indicada.")
 
         #Normalizamos la accion recibida.
         accion = accion.strip().lower()
@@ -305,8 +374,7 @@ def administrar_json_final(
             #haya enviado una nueva carpeta.
             if not nueva_carpeta:
 
-                raise HTTPException(
-                    status_code=400,
+                raise HTTPException(status_code=400,
                     detail=(
                         "Debes indicar la carpeta "
                         "donde deseas guardar el JSON Final."
@@ -337,8 +405,7 @@ def administrar_json_final(
 
                 except OSError as error:
 
-                    raise HTTPException(
-                        status_code=400,
+                    raise HTTPException(status_code=400,
                         detail=(
                             f"No fue posible crear "
                             f"la nueva carpeta: {error}"
@@ -358,8 +425,7 @@ def administrar_json_final(
             #un archivo con el mismo nombre.
             if os.path.exists(nueva_ruta):
 
-                raise HTTPException(
-                    status_code=409,
+                raise HTTPException(status_code=409,
                     detail=(
                         "Ya existe un archivo con el mismo "
                         "nombre en la carpeta seleccionada."
@@ -722,7 +788,8 @@ async def procesar_archivo(
 
             #Enviamos la alerta utilizando
             #la funcion existente de correo.py.
-            enviar_alerta_correo(
+            correo_enviado = enviar_alerta_correo(
+
                 nombre_paciente,
                 nombre_medico,
                 tipo_documento,

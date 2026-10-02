@@ -6,6 +6,152 @@ from librerias import *
 #Configuracion compartida:
 from configuracion import *
 
+#Cambio Nuevo:
+#Ruta donde se guardara la configuracion de los correos agregados,
+#que recibiran las alertas de MediFlow.
+Carpeta_Configuracion_Correos = os.path.join(Carpeta_Almacen,"configuracion_correos.json")
+
+def cargar_correos_destino():
+    """
+    Carga los correos que recibiran las alertas
+    desde el archivo configuracion_correos.json.
+
+    Si el archivo no existe, utiliza el correo que
+    actualmente se encuentra configurado en EMAIL_DESTINO
+    dentro del archivo .env.
+
+    De esta manera mantenemos compatibilidad con la
+    configuracion anterior de MediFlow.
+    """
+
+    #Verificamos si ya existe el archivo de configuracion
+    if os.path.exists(Carpeta_Configuracion_Correos):
+
+        try:
+
+            #Abrimos el archivo de configuracion
+            with open(
+                Carpeta_Configuracion_Correos,
+                "r",
+                encoding="utf-8"
+            ) as archivo:
+
+                configuracion = json.load(archivo)
+
+            #Obtenemos la lista de correos
+            correos = configuracion.get("correos_destino", [])
+
+            #Verificamos que sea una lista
+            if isinstance(correos, list):
+
+                return correos
+
+        except Exception as error:
+
+            print("\nError al cargar la configuracion de correos:")
+            print(error)
+
+
+    #CAMBIO NUEVO:
+    #Si el archivo todavia no existe,
+    #utilizamos EMAIL_DESTINO del archivo .env
+    #para crear la configuracion inicial.
+
+    correos_iniciales = []
+
+    if EMAIL_DESTINO:
+
+        #Permitimos colocar varios correos separados por coma
+        correos_iniciales = [
+            correo.strip()
+            for correo in EMAIL_DESTINO.split(",")
+            if correo.strip()
+        ]
+
+
+    #CAMBIO NUEVO:
+    #Guardamos automaticamente la configuracion inicial
+    #en el nuevo archivo JSON.
+
+    if correos_iniciales:
+
+        guardar_correos_destino(correos_iniciales)
+
+
+    return correos_iniciales
+
+def guardar_correos_destino(correos):
+    """
+    Guarda la lista de correos que recibiran
+    las alertas de MediFlow.
+    """
+
+    #Nos aseguramos de que exista la carpeta Almacen_Local
+    os.makedirs(Carpeta_Almacen,exist_ok=True)
+
+    #Creamos la estructura que tendra el archivo JSON
+    configuracion = {"correos_destino": correos}
+
+    #Guardamos la configuracion
+    with open(Carpeta_Configuracion_Correos,"w",encoding="utf-8") as archivo:
+
+        json.dump(configuracion,archivo,ensure_ascii=False,indent=4)
+
+
+def agregar_correo_destino(correo):
+    """
+    Agrega un nuevo correo a la lista de destinatarios,
+    Si el correo ya existe, no se vuelve a agregar.
+    """
+    #Quitamos espacios innecesarios
+    correo = correo.strip()
+
+    #Verificamos que se haya recibido un correo
+    if not correo:
+        raise ValueError("El correo no puede estar vacio.")
+
+    #Cargamos los correos actuales
+    correos = cargar_correos_destino()
+
+    #Verificamos si el correo ya existe
+    if correo in correos:
+        return correos
+
+    #Agregamos el nuevo correo
+    correos.append(correo)
+
+    #Guardamos la nueva configuracion
+    guardar_correos_destino(correos)
+
+    return correos
+
+def eliminar_correo_destino(correo):
+    """
+    Elimina un correo de la lista de destinatarios.
+    """
+
+    #Quitamos espacios innecesarios
+    correo = correo.strip()
+
+    #Cargamos los correos actuales
+    correos = cargar_correos_destino()
+
+
+    #Verificamos si el correo existe
+    if correo not in correos:
+
+        raise ValueError("El correo indicado no se encuentra configurado.")
+
+    #Eliminamos el correo
+    correos.remove(correo)
+
+    #Guardamos la nueva configuracion
+    guardar_correos_destino(correos)
+
+
+    return correos
+
+
 def validar_configuracion_correo():
     """
     Verifica que las variables necesarias
@@ -18,8 +164,17 @@ def validar_configuracion_correo():
     if not EMAIL_PASSWORD:
         raise ValueError("No se encontro EMAIL_PASSWORD en el archivo .env")
 
-    if not EMAIL_DESTINO:
-        raise ValueError("No se encontro EMAIL_DESTINO en el archivo .env")
+    #Los destinatarios ahora se obtienen desde
+    #configuracion_correos.json.
+    correos_destino = cargar_correos_destino()
+
+    #Verificamos que exista por lo menos
+    #un destinatario configurado.
+    if not correos_destino:
+
+        raise ValueError("No se encontraron correos destinatarios configurados.")
+
+    
 
 def enviar_alerta_correo(nombre_paciente,nombre_medico,tipo_documento,clasificacion_final,motivo,ruta_json):
     """
@@ -47,6 +202,10 @@ def enviar_alerta_correo(nombre_paciente,nombre_medico,tipo_documento,clasificac
     #Primero verificamos que exista la configuracion para enviar el correo
     validar_configuracion_correo()
 
+    #Obtenemos todos los correos configurados
+    #para recibir las alertas.
+    destinatarios = cargar_correos_destino()
+
     #Creamos el mensaje a enviar por correo
     mensaje = EmailMessage()
 
@@ -56,15 +215,16 @@ def enviar_alerta_correo(nombre_paciente,nombre_medico,tipo_documento,clasificac
     #Cuenta de correo desde la cual se enviara:
     mensaje["From"] = EMAIL_USUARIO
 
+    #Los destinatarios ahora se obtienen
+    #desde configuracion_correos.json.
+    mensaje["To"] = destinatarios
+
     #Medico o responsable del area que recibira la alerta por correo
     #Convertir la cadena en una lista de correos
-    destinatarios = [
-        correo.strip()
-        for correo in EMAIL_DESTINO.split(",")
-    ]
+    #destinatarios = [correo.strip() for correo in EMAIL_DESTINO.split(",")]
 
     #Agregar destinatarios
-    mensaje["To"] = destinatarios
+    #mensaje["To"] = destinatarios
 
     #Agregamos el mensaje del correo
     cuerpo = f"""ALERTA MEDIFLOW
@@ -124,8 +284,12 @@ por el sistema Inteligente de MediFlow.
         #Verificamos que se haya enviado el correo:
         print("\nAlerta por correo enviada Exitosamente!!!")
 
+        #Mostramos todos los destinatarios utilizados
+        #para enviar la alerta.
+        print(f"Destinatarios: {', '.join(destinatarios)}")
+
         #Vemos a quien le mandamos el correo:
-        print(f"Destinatario: {EMAIL_DESTINO}")
+        #print(f"Destinatario: {EMAIL_DESTINO}")
 
         return True
 
