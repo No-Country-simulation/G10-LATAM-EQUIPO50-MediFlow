@@ -50,9 +50,18 @@ from Backend_MediFlow.almacenamiento import *
 #Funciones para enviar alertas por correo.
 from Backend_MediFlow.correo import *
 
-#Funciones para cargar las configuraciones actuales.
-from Backend_MediFlow.umbrales import cargar_configuracion_umbrales
-from Backend_MediFlow.reglas import cargar_configuracion_reglas
+#Funciones para cargar y guardar las configuraciones actuales.
+from Backend_MediFlow.umbrales import (
+    cargar_configuracion_umbrales,
+    guardar_configuracion_umbrales,
+    validar_umbrales
+)
+
+from Backend_MediFlow.reglas import (
+    cargar_configuracion_reglas,
+    guardar_configuracion_reglas,
+    validar_reglas
+)
 
 #Creamos la aplicacion FastAPI de MediFlow.
 app = FastAPI(
@@ -81,9 +90,153 @@ def estado():
         "estado": "activo"
     }
 
+#EndPoint Para consultar los umbrales actuales de MediFlow:
+@app.get("/configuracion/umbrales")
+def obtener_umbrales():
+
+    try:
+
+        #Cargamos los umbrales utilizando
+        #la misma funcion que utiliza el Backend.
+        umbrales = cargar_configuracion_umbrales()
+
+        return {"estado":"ok","umbrales":umbrales}
+
+    except Exception as error:
+
+        raise HTTPException(
+            status_code=500,
+            detail=f"No fue posible cargar los umbrales: {error}"
+        )
+
+#EndPoint Para modificar los umbrales de MediFlow:
+@app.put("/configuracion/umbrales")
+def actualizar_umbrales(umbrales: dict):
+
+    try:
+
+        #Validamos los valores recibidos
+        #utilizando la funcion existente del Backend.
+        if not validar_umbrales(umbrales):
+
+            raise HTTPException(
+                status_code=400,
+                detail=(
+                    "Configuracion de umbrales invalida. "
+                    "Debe cumplirse: "
+                    "0 <= NORMAL < REVISIÓN < ALERTA <= 100."
+                )
+            )
+
+        #Convertimos los valores a enteros
+        #para mantener el mismo formato utilizado
+        #por el Backend.
+        nuevos_umbrales = {
+
+            "umbral_normal":
+                int(umbrales["umbral_normal"]),
+
+            "umbral_revision":
+                int(umbrales["umbral_revision"]),
+
+            "umbral_alerta":
+                int(umbrales["umbral_alerta"])
+        }
+
+        #Guardamos la nueva configuracion
+        #utilizando la funcion existente.
+        guardar_configuracion_umbrales(nuevos_umbrales)
+
+        return {
+
+            "estado":
+                "ok",
+
+            "mensaje":
+                "Los umbrales fueron actualizados correctamente.",
+
+            "umbrales":
+                nuevos_umbrales
+        }
+
+    except HTTPException:
+
+        raise
+
+    except Exception as error:
+
+        raise HTTPException(
+            status_code=500,
+            detail=f"No fue posible actualizar los umbrales: {error}"
+        )
+
+#EndPoint Para consultar las reglas actuales de MediFlow
+@app.get("/configuracion/reglas")
+def obtener_reglas():
+
+    try:
+
+        #Cargamos las reglas utilizando
+        #la misma funcion que utiliza el Backend.
+        reglas = cargar_configuracion_reglas()
+
+        return {"estado":"ok","reglas":reglas}
+
+    except Exception as error:
+
+        raise HTTPException(
+            status_code=500,
+            detail=f"No fue posible cargar las reglas: {error}"
+        )
+
+
+#EndPoint Para modificar las reglas de MediFlow
+@app.put("/configuracion/reglas")
+def actualizar_reglas(reglas: dict):
+
+    try:
+
+        #Validamos las reglas recibidas
+        #utilizando la funcion existente del Backend.
+        if not validar_reglas(reglas):
+
+            raise HTTPException(
+                status_code=400,
+                detail=(
+                    "La configuracion de reglas no es valida. "
+                    "Los valores deben ser numeros enteros "
+                    "entre 0 y 100."
+                )
+            )
+
+        #Guardamos las nuevas reglas
+        #utilizando la funcion existente.
+        guardar_configuracion_reglas(reglas)
+
+        return {
+
+            "estado":
+                "ok",
+
+            "mensaje":
+                "Las reglas fueron actualizadas correctamente.",
+
+            "reglas":
+                reglas
+        }
+
+    except HTTPException:
+
+        raise
+
+    except Exception as error:
+
+        raise HTTPException(
+            status_code=500,
+            detail=f"No fue posible actualizar las reglas: {error}"
+        )
 
 #ENDPOINT Para procesar el documento completo
-
 #Endpoint para recibir un archivo y ejecutar
 #el flujo completo de MediFlow.
 @app.post("/procesar")

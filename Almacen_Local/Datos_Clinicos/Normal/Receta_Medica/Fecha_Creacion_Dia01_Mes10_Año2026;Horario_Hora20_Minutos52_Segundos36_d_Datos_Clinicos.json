@@ -1,0 +1,171 @@
+{
+    "nombre_archivo": "Fecha_Creacion_Dia01_Mes10_Año2026;Horario_Hora20_Minutos52_Segundos36_d.png",
+    "tipo_archivo": "imagen",
+    "documento": {
+        "es_documento_medico": true,
+        "tipo_documento": "Receta Médica",
+        "fecha_documento": "31/07/2024",
+        "numero_documento": "8185",
+        "institucion_medica": "UNIVERSIDAD MICHOACANA DE SAN NICOLAS DE HIDALGO"
+    },
+    "paciente": {
+        "id_paciente": null,
+        "nombre_completo": "Joshua Yamile Sánchez Morales",
+        "fecha_nacimiento": "09/04/1997",
+        "edad": "27 años",
+        "sexo": "Masculino",
+        "curp": null,
+        "telefono": null,
+        "correo": null,
+        "direccion": null,
+        "peso_kg": null,
+        "altura_cm": null,
+        "alergias": [],
+        "antecedentes_medicos": [],
+        "antecedentes_quirurgicos": [],
+        "antecedentes_familiares": []
+    },
+    "medico": {
+        "nombre_completo": "Dr. TOMAS ARRUÑADA SANDOVAL",
+        "especialidad": "MEDICO CIRUJANO Y PARTERO",
+        "cedula_profesional": "744500",
+        "institucion": "UNIVERSIDAD MICHOACANA DE SAN NICOLAS DE HIDALGO",
+        "telefono": null,
+        "correo": null
+    },
+    "consulta": {
+        "fecha": "31/07/2024",
+        "hora": null,
+        "motivo_consulta": null,
+        "sintomas": [],
+        "signos": [],
+        "observaciones": null
+    },
+    "diagnosticos": [],
+    "signos_vitales": {
+        "presion_arterial": null,
+        "frecuencia_cardiaca_lpm": null,
+        "frecuencia_respiratoria_rpm": null,
+        "temperatura_c": "36",
+        "saturacion_oxigeno_porcentaje": null,
+        "glucosa_mg_dl": null
+    },
+    "medicamentos": [
+        {
+            "nombre": "PARACETAMOL",
+            "principio_activo": "PARACETAMOL",
+            "presentacion": null,
+            "concentracion": "500MG",
+            "dosis": null,
+            "unidad_dosis": null,
+            "via_administracion": "ORAL",
+            "frecuencia": "UNA CADA 8 HS",
+            "duracion": "CUATRO DÍAS",
+            "cantidad": null,
+            "indicaciones": "UNA CADA 8 HS DURANTE CUATRO DÍAS VIA DE ADMINISTRACION ORAL"
+        },
+        {
+            "nombre": "AZITROMICINA",
+            "principio_activo": "AZITROMICINA",
+            "presentacion": "TABLETA",
+            "concentracion": "500MG",
+            "dosis": "1",
+            "unidad_dosis": "TABLETA",
+            "via_administracion": "ORAL",
+            "frecuencia": "CADA DIA",
+            "duracion": "3 DÍAS",
+            "cantidad": null,
+            "indicaciones": "UNA TABLETA CADA DIA DURANTE 3 DÍAS VIA DE ADMINISTRACION ORAL"
+        },
+        {
+            "nombre": "LORATADINA",
+            "principio_activo": "LORATADINA",
+            "presentacion": "CAPSULA",
+            "concentracion": "10MG",
+            "dosis": "1",
+            "unidad_dosis": "CAPSULA",
+            "via_administracion": "ORAL",
+            "frecuencia": "CADA DIA",
+            "duracion": "4 DIAS",
+            "cantidad": null,
+            "indicaciones": "UNA CAPSULA CADA DIA DURANTE 4 DIAS VIA DE ADMINISTRACION ORAL"
+        },
+        {
+            "nombre": "AMBROXOL",
+            "principio_activo": "AMBROXOL",
+            "presentacion": null,
+            "concentracion": "10ML",
+            "dosis": "10",
+            "unidad_dosis": "ML",
+            "via_administracion": null,
+            "frecuencia": "CADA 8 HRS",
+            "duracion": "4 DIAS",
+            "cantidad": null,
+            "indicaciones": "10 ML CADA 8 HRS DURANTE 4 DIAS"
+        }
+    ],
+    "tratamiento": {
+        "descripcion": null,
+        "medicamentos": [
+            "PARACETAMOL 500MG - UNA CADA 8 HS DURANTE CUATRO DÍAS VIA DE ADMINISTRACION ORAL",
+            "AZITROMICINA 500MG - UNA TABLETA CADA DIA DURANTE 3 DÍAS VIA DE ADMINISTRACION ORAL",
+            "LORATADINA 10MG - UNA CAPSULA CADA DIA DURANTE 4 DIAS VIA DE ADMINISTRACION ORAL",
+            "AMBROXOL 10ML - 10 ML CADA 8 HRS DURANTE 4 DIAS"
+        ],
+        "procedimientos": [],
+        "terapias": [],
+        "recomendaciones": [
+            "FAVOR DE TOMAR EL TRATAMIENTO COMPLETO",
+            "FAVOR DE PRESENTAR ESTA RECETA EN SU PROXIMA CITA"
+        ],
+        "cuidados": [],
+        "restricciones": [],
+        "dieta": null,
+        "actividad_fisica": null
+    },
+    "estudios": [],
+    "procedimientos": [],
+    "seguimiento": {
+        "proxima_cita": null,
+        "indicaciones_seguimiento": [
+            "FAVOR DE PRESENTAR ESTA RECETA EN SU PROXIMA CITA"
+        ],
+        "signos_alarma": [],
+        "observaciones": null
+    },
+    "datos_no_legibles_o_ambiguos": [],
+    "observaciones": null,
+    "clasificacion_riesgo": {
+        "urgente": false,
+        "motivo_urgencia": null,
+        "datos_ambiguos": [],
+        "datos_faltantes": [],
+        "clasificacion_final": "normal",
+        "requiere_revision_humana": false
+    },
+    "clasificacion_documento": {
+        "categoria": "Receta Médica"
+    },
+    "validacion_coherencia": {
+        "puntaje_incoherencia": 5,
+        "nivel_coherencia": "normal",
+        "categoria_reglas_aplicadas": "Receta Médica",
+        "umbrales_utilizados": {
+            "umbral_normal": 20,
+            "umbral_revision": 40,
+            "umbral_alerta": 60
+        },
+        "reglas_utilizadas": {
+            "sin_medicamentos": 30,
+            "sin_medicamentos_tratamiento": 20,
+            "sin_id_paciente": 5,
+            "sin_nombre_paciente": 10,
+            "sin_nombre_medico": 5,
+            "recomendaciones_sin_medicamentos": 20
+        },
+        "motivos": [
+            "Falta el identificador del paciente."
+        ],
+        "requiere_revision_humana": false
+    }
+}
