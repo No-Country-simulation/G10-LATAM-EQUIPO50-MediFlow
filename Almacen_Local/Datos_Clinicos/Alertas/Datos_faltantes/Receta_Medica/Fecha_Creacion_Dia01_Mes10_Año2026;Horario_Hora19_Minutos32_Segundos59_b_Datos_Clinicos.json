@@ -1,0 +1,125 @@
+{
+    "nombre_archivo": "Fecha_Creacion_Dia01_Mes10_Año2026;Horario_Hora19_Minutos32_Segundos59_b.png",
+    "tipo_archivo": "imagen",
+    "documento": {
+        "es_documento_medico": true,
+        "tipo_documento": "Receta Médica",
+        "fecha_documento": "Todos los días",
+        "numero_documento": "14042",
+        "institucion_medica": "Centro Multidisciplinario de Cáncer - Panama Cancer Clinic"
+    },
+    "paciente": {
+        "id_paciente": null,
+        "nombre_completo": "Para tí",
+        "fecha_nacimiento": null,
+        "edad": null,
+        "sexo": null,
+        "curp": null,
+        "telefono": null,
+        "correo": null,
+        "direccion": null,
+        "peso_kg": null,
+        "altura_cm": null,
+        "alergias": [],
+        "antecedentes_medicos": [],
+        "antecedentes_quirurgicos": [],
+        "antecedentes_familiares": []
+    },
+    "medico": {
+        "nombre_completo": "tu Doc Anticáncer",
+        "especialidad": null,
+        "cedula_profesional": null,
+        "institucion": "Panama Cancer Clinic",
+        "telefono": "(507) 310-2869",
+        "correo": "citas@panamacancerclinic.com"
+    },
+    "consulta": {
+        "fecha": "Todos los días",
+        "hora": null,
+        "motivo_consulta": null,
+        "sintomas": [],
+        "signos": [],
+        "observaciones": null
+    },
+    "diagnosticos": [],
+    "signos_vitales": {
+        "presion_arterial": null,
+        "frecuencia_cardiaca_lpm": null,
+        "frecuencia_respiratoria_rpm": null,
+        "temperatura_c": null,
+        "saturacion_oxigeno_porcentaje": null,
+        "glucosa_mg_dl": null
+    },
+    "medicamentos": [],
+    "tratamiento": {
+        "descripcion": null,
+        "medicamentos": [],
+        "procedimientos": [],
+        "terapias": [],
+        "recomendaciones": [
+            "1. Recuerda darle gracias a Dios todos los días.",
+            "2. Come sano",
+            "3. Haz ejercicio (15-20 min/día)",
+            "4. Comparte con amigos y familia",
+            "5. Evita los excesos (todo en moderación)",
+            "6. No disruptores (sin toxinas)"
+        ],
+        "cuidados": [],
+        "restricciones": [
+            "Evita los excesos",
+            "No disruptores (sin toxinas)"
+        ],
+        "dieta": "Come sano",
+        "actividad_fisica": "Haz ejercicio (15-20 min/día)"
+    },
+    "estudios": [],
+    "procedimientos": [],
+    "seguimiento": {
+        "proxima_cita": null,
+        "indicaciones_seguimiento": [],
+        "signos_alarma": [],
+        "observaciones": null
+    },
+    "datos_no_legibles_o_ambiguos": [],
+    "observaciones": null,
+    "clasificacion_riesgo": {
+        "urgente": false,
+        "motivo_urgencia": null,
+        "datos_ambiguos": [],
+        "datos_faltantes": [
+            "Edad",
+            "Cédula",
+            "Fecha con formato de calendario"
+        ],
+        "clasificacion_final": "datos_faltantes",
+        "requiere_revision_humana": true
+    },
+    "clasificacion_documento": {
+        "categoria": "Receta Médica"
+    },
+    "validacion_coherencia": {
+        "puntaje_incoherencia": 75,
+        "nivel_coherencia": "alerta",
+        "categoria_reglas_aplicadas": "Receta Médica",
+        "umbrales_utilizados": {
+            "umbral_normal": 20,
+            "umbral_revision": 40,
+            "umbral_alerta": 60
+        },
+        "reglas_utilizadas": {
+            "sin_medicamentos": 30,
+            "sin_medicamentos_tratamiento": 20,
+            "sin_id_paciente": 5,
+            "sin_nombre_paciente": 10,
+            "sin_nombre_medico": 5,
+            "recomendaciones_sin_medicamentos": 20
+        },
+        "motivos": [
+            "La receta no contiene medicamentos.",
+            "No se encontraron medicamentos en el tratamiento.",
+            "Falta el identificador del paciente.",
+            "Existen recomendaciones pero no se encontraron medicamentos."
+        ],
+        "requiere_revision_humana": true
+    }
+}
