@@ -236,6 +236,234 @@ def actualizar_reglas(reglas: dict):
             detail=f"No fue posible actualizar las reglas: {error}"
         )
 
+#Endpoint para administrar el JSON Final generado por MediFlow.
+
+#Este Endpoint permite que posteriormente Streamlit
+#pueda decidir que hacer con el JSON Final:
+#   conservar : Mantener el archivo donde MediFlow lo guardo.
+#   mover     : Cambiar el JSON a otra carpeta.
+#   eliminar  : Eliminar el JSON Final.
+#
+#IMPORTANTE:
+#El archivo original NO se elimina.
+#Solamente se administra el JSON Final.
+@app.put("/json-final")
+def administrar_json_final(
+    ruta_json: str,
+    accion: str,
+    nueva_carpeta: str = None
+):
+
+    try:
+
+        #Convertimos la ruta recibida
+        #a una ruta absoluta.
+        ruta_json = os.path.abspath(
+            os.path.expanduser(ruta_json)
+        )
+
+        #Comprobamos que el JSON exista.
+        if not os.path.isfile(ruta_json):
+
+            raise HTTPException(
+                status_code=404,
+                detail="El JSON Final no existe en la ruta indicada."
+            )
+
+
+        #Normalizamos la accion recibida.
+        accion = accion.strip().lower()
+
+
+        #CAMBIO NUEVO:
+        #OPCION 1:
+        #Conservar el JSON donde MediFlow lo guardo.
+        if accion == "conservar":
+
+            return {
+
+                "estado":
+                    "ok",
+
+                "mensaje":
+                    "El JSON Final se conservara en su ubicacion actual.",
+
+                "ruta_json_final":
+                    ruta_json,
+
+                "accion":
+                    "conservar"
+            }
+
+
+        #CAMBIO NUEVO:
+        #OPCION 2:
+        #Mover el JSON a otra carpeta.
+        elif accion == "mover":
+
+            #Comprobamos que Streamlit
+            #haya enviado una nueva carpeta.
+            if not nueva_carpeta:
+
+                raise HTTPException(
+                    status_code=400,
+                    detail=(
+                        "Debes indicar la carpeta "
+                        "donde deseas guardar el JSON Final."
+                    )
+                )
+
+
+            #Limpiamos posibles comillas
+            #que puedan venir desde la ruta.
+            nueva_carpeta = nueva_carpeta.strip("'\"")
+
+            #Expandimos ~ por si el usuario
+            #lo utiliza en la ruta.
+            nueva_carpeta = os.path.expanduser(nueva_carpeta)
+
+            #Convertimos la nueva ruta
+            #a una ruta absoluta.
+            nueva_carpeta = os.path.abspath(nueva_carpeta)
+
+
+            #Comprobamos si la carpeta existe.
+            if not os.path.isdir(nueva_carpeta):
+
+                #Si no existe, la creamos.
+                try:
+
+                    os.makedirs(nueva_carpeta,exist_ok=True)
+
+                except OSError as error:
+
+                    raise HTTPException(
+                        status_code=400,
+                        detail=(
+                            f"No fue posible crear "
+                            f"la nueva carpeta: {error}"
+                        )
+                    )
+
+
+            #Obtenemos el nombre original
+            #del JSON Final.
+            nombre_json = os.path.basename(ruta_json)
+
+            #Construimos la nueva ruta.
+            nueva_ruta = os.path.join(nueva_carpeta,nombre_json)
+
+
+            #Comprobamos si ya existe
+            #un archivo con el mismo nombre.
+            if os.path.exists(nueva_ruta):
+
+                raise HTTPException(
+                    status_code=409,
+                    detail=(
+                        "Ya existe un archivo con el mismo "
+                        "nombre en la carpeta seleccionada."
+                    )
+                )
+
+
+            #Movemos el JSON Final
+            #desde la ubicacion actual
+            #hasta la nueva carpeta.
+            shutil.move(ruta_json,nueva_ruta)
+
+
+            return {
+
+                "estado":
+                    "ok",
+
+                "mensaje":
+                    "El JSON Final fue movido correctamente.",
+
+                "ruta_json_anterior":
+                    ruta_json,
+
+                "ruta_json_final":
+                    nueva_ruta,
+
+                "accion":
+                    "mover"
+            }
+
+
+        #CAMBIO NUEVO:
+        #OPCION 3:
+        #Eliminar solamente el JSON Final.
+        elif accion == "eliminar":
+
+            #Eliminamos el JSON Final.
+            os.remove(ruta_json)
+
+
+            return {
+
+                "estado":
+                    "ok",
+
+                "mensaje":
+                    "El JSON Final fue eliminado correctamente.",
+
+                "ruta_json_final":
+                    None,
+
+                "accion":
+                    "eliminar"
+            }
+
+
+        #CAMBIO NUEVO:
+        #Si Streamlit envia una accion
+        #que MediFlow no reconoce.
+        else:
+
+            raise HTTPException(
+                status_code=400,
+                detail=(
+                    "Accion no valida. "
+                    "Debes utilizar: "
+                    "conservar, mover o eliminar."
+                )
+            )
+
+
+    except HTTPException:
+
+        #Si FastAPI ya genero un error HTTP,
+        #lo devolvemos sin modificarlo.
+        raise
+
+
+    except OSError as error:
+
+        #Capturamos errores relacionados
+        #con archivos y carpetas.
+        raise HTTPException(
+            status_code=500,
+            detail=(
+                f"No fue posible administrar "
+                f"el JSON Final: {error}"
+            )
+        )
+
+
+    except Exception as error:
+
+        #Capturamos cualquier otro error.
+        raise HTTPException(
+            status_code=500,
+            detail=(
+                f"Error al administrar "
+                f"el JSON Final: {error}"
+            )
+        )
+
+
 #ENDPOINT Para procesar el documento completo
 #Endpoint para recibir un archivo y ejecutar
 #el flujo completo de MediFlow.
