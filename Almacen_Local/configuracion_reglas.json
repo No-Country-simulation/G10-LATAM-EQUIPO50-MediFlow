@@ -1,0 +1,31 @@
+{
+    "Receta Médica": {
+        "sin_medicamentos": 30,
+        "sin_medicamentos_tratamiento": 20,
+        "sin_id_paciente": 5,
+        "sin_nombre_paciente": 10,
+        "sin_nombre_medico": 5,
+        "recomendaciones_sin_medicamentos": 20
+    },
+    "Informe de Estudio de Diagnóstico por Imágenes/Laboratorio": {
+        "sin_estudios": 40,
+        "estudio_sin_resultado": 10,
+        "maximo_estudio_sin_resultado": 20
+    },
+    "Orden de Solicitud de Procedimiento": {
+        "sin_procedimientos": 40
+    },
+    "Epicrisis / Informe de Alta": {
+        "sin_diagnosticos": 20,
+        "sin_tratamiento": 20,
+        "sin_seguimiento": 10
+    },
+    "Certificado Médico": {
+        "sin_nombre_paciente": 20,
+        "sin_nombre_medico": 20
+    },
+    "ambiguidad": {
+        "por_dato": 5,
+        "maximo": 20
+    }
+}

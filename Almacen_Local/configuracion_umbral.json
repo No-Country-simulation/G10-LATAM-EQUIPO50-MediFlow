@@ -1,0 +1,5 @@
+{
+    "umbral_normal": 20,
+    "umbral_revision": 40,
+    "umbral_alerta": 60
+}
