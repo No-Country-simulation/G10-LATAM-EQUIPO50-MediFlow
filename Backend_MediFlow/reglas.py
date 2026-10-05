@@ -233,8 +233,7 @@ def solicitar_configuracion_reglas():
         print("\nLa configuracion NO es valida!!!!: ")
 
         print("Se utilizaran las reglas por DEFECTO!!")
-
-        reglas = json.loads(json.dump(REGLAS_DEFECTO,ensure_ascii=False))
+        reglas = json.loads(json.dumps(REGLAS_DEFECTO,ensure_ascii=False))
 
     mostrar_explicacion_reglas(reglas)
 

@@ -86,11 +86,8 @@ def nodo_validar_coherencia_documental(estado):
     #Posteriormente seleccionaremos automaticamente
     #las reglas de acuerdo con la categoria
     reglas = estado.get("reglas",REGLAS_DEFECTO)
-
     datos = asegurar_estructura_clasificacion(datos)
-
     categoria = datos["clasificacion_documento"].get("categoria","Otro")
-
     categoria = normalizar_categoria(categoria)
 
     #Aqui ocurre la seleccion automatica:
@@ -103,23 +100,17 @@ def nodo_validar_coherencia_documental(estado):
     #El usuario NO necesita seleccionar manualmente la categoria
     
     reglas_categoria = reglas.get(categoria,{})
-
     puntaje = 0
-
     motivos = []
-
     paciente = datos.get("paciente",{})
-
     medico = datos.get("medico",{})
 
     tratamiento = datos.get("tratamiento",{})
 
     #Aplicando Reglas para la categoria: RECETA MEDICA
     if categoria == "Receta Médica":
-
         if not datos.get("medicamentos"):
             puntaje += reglas_categoria.get("sin_medicamentos",0)
-
             motivos.append("La receta no contiene medicamentos.")
 
         if not tratamiento.get("medicamentos"):
@@ -227,8 +218,9 @@ def nodo_validar_coherencia_documental(estado):
     riesgo = datos["clasificacion_riesgo"]
 
     ambiguos = riesgo.get("datos_ambiguos",[])
-    #Cambio
-    datos_ilegibles = datos.get("datos_no_legibles_o_ambiguos")
+    
+    # Se añade [] para evitar errores si "datos_no_legibles_o_ambiguos" no está presente
+    datos_ilegibles = datos.get("datos_no_legibles_o_ambiguos") or []
 
     cantidad_ambiguedades = (len(ambiguos) + len(datos_ilegibles))
     
