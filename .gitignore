@@ -27,7 +27,8 @@ chroma_db/
 casos/referencia/generar_dataset.py
 
 # ignorar almcen local
-Almacen_Local/
+#Almacen_Local/
+
 #ignorar evaluacio y evluacion resultados
 evaluacion.py
 evaluacion_resultados/
