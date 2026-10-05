@@ -19,3 +19,15 @@ __pycache__/
 
 # Base de datos vectorial de Chroma
 chroma_db/
+
+# ignorar entorno virtual
+.venv/
+
+# Ignorar archivos 
+casos/referencia/generar_dataset.py
+
+# ignorar almcen local
+Almacen_Local/
+#ignorar evaluacio y evluacion resultados
+evaluacion.py
+evaluacion_resultados/

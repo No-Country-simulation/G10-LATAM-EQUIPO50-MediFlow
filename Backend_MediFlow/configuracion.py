@@ -38,7 +38,7 @@ print("Cliente de Gemini creado")
 #Modelo de IA que usaremos
 #Mantenemos el modelo en una variable independiente
 #para poder cambiarlo facilmente
-MODELO_GEMINI = "gemini-3.6-flash"
+MODELO_GEMINI = "gemini-3.5-flash-lite"
 
 #Configuracion De Carpetas:
 #Obtenemos la ubicación del archivo Python que estamos ejecutando.
