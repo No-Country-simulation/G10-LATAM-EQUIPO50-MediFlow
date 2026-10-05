@@ -26,11 +26,11 @@ if not URL_API:
 
 #Configuracion principal de MediFlow:
 #Configuramos el titulo de la aplicacion.
-#st.set_page_config(
-#   page_title="MediFlow",
-#  page_icon="🏥",
-# layout="wide"
-#)
+st.set_page_config(
+   page_title="MediFlow",
+  page_icon="🏥",
+ layout="wide"
+)
 
 #Titulo principal de MediFlow.
 #CAMBIO NUEVO: Utilizamos un encabezado personalizado para
@@ -40,7 +40,7 @@ if not URL_API:
 #combinar el fondo blanco con los colores azules de MediFlow.
 st.markdown("""
 <div style="background-color: white; padding: 25px; border-radius: 15px; margin-bottom: 25px; border-left: 7px solid #1496C7;">
-<h1 style="color: #0B4F6C; margin-bottom: 5px;">🏥 MediFlow</h1>
+<h1 style="color: #0B4F6C; margin-bottom: 5px;">🏥 MediFlow Equipo50 LATAM G-10</h1>
 <p style="color: #000000; font-size: 18px; margin-top: 0px;">Bienvenido a MediFlow. Sistema de procesamiento y validacion de documentos clinicos.</p>
 </div>
 """, unsafe_allow_html=True)
@@ -635,6 +635,47 @@ with pestana_configuracion:
         #CAMBIO NUEVO: Cambiamos el color del titulo de Umbrales a negro.
         st.markdown('<h3 class="titulo-configuracion">Configuracion de Umbrales!</h3>', unsafe_allow_html=True)
 
+        # NUEVO: Explicación de los umbrales
+        with st.expander("ℹ️ ¿Qué significan los umbrales?"):
+            st.markdown("""
+            ### Interpretación de los umbrales
+
+            Los umbrales permiten determinar el nivel de inconsistencia
+            encontrado en el documento procesado por MediFlow.
+
+            **NORMAL**
+    
+            El puntaje se encuentra dentro de un nivel bajo de
+            inconsistencias y no requiere una revisión especial.
+
+            **REVISIÓN**
+    
+            El documento presenta inconsistencias que deben ser
+            revisadas por una persona.
+
+            **REVISIÓN PRIORITARIA**
+    
+            El documento presenta un nivel mayor de inconsistencias,
+            por lo que se recomienda realizar una revisión humana
+            con mayor prioridad.
+
+            **ALERTA**
+    
+            El documento presenta un nivel alto de inconsistencias
+            y requiere atención y revisión humana.
+
+            ### Importante
+
+            El puntaje de **0 a 100 representa el nivel de
+            inconsistencia detectado en el documento, ENTRE MAYOR PUNTAJE más inconsistente es**.
+
+            Este puntaje **NO representa la gravedad médica del
+            paciente y no constituye un diagnóstico médico**.
+
+            Los valores de los umbrales pueden modificarse desde
+            esta sección de configuración.
+            """)
+
         #Boton para consultar los umbrales.
         if st.button("Cargar umbrales"):
             try:
@@ -766,6 +807,49 @@ with pestana_configuracion:
         #CAMBIO NUEVO: Cambiamos el color del titulo de Reglas a negro.
         st.markdown('<h3 class="titulo-configuracion">Configuracion de Reglas!</h3>', unsafe_allow_html=True)
 
+        # NUEVO: Explicación de las reglas
+        with st.expander("ℹ️ ¿Cómo funcionan las reglas?"):
+            st.markdown("""
+            ### Interpretación de las reglas
+
+            Las reglas permiten establecer cuánto aporta cada tipo de
+            inconsistencia al puntaje final del documento.
+
+            Cada regla tiene un peso que MediFlow utiliza durante el
+            análisis del documento.
+
+            Por ejemplo, una regla puede evaluar:
+            
+            -Información faltante.
+
+            -Información ambigua.
+
+            -Información inconsistente.
+
+            -Datos importantes que no fueron encontrados.
+
+            -Situaciones que requieren una revisión humana.
+
+            ### ¿Qué significa modificar un peso?
+
+            Un peso más alto significa que esa condición tendrá una
+            mayor influencia sobre el puntaje final de inconsistencia.
+
+            Un peso más bajo significa que esa condición tendrá una
+            menor influencia sobre el puntaje final.
+
+            ### Importante
+
+            Las reglas **no realizan un diagnóstico médico**.
+
+            Su función es ayudar a MediFlow a identificar documentos
+            que presentan posibles inconsistencias y determinar cuándo
+            es recomendable realizar una revisión humana.
+
+            Los pesos de las reglas pueden modificarse desde esta
+            sección sin necesidad de modificar directamente el código.
+            """)
+        
         #Boton para cargar las reglas actuales.
         if st.button("Cargar reglas"):
             try:
