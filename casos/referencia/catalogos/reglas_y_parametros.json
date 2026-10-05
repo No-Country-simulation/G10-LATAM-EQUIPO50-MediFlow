@@ -1,0 +1,52 @@
+{
+  "pais": "Colombia",
+  "tipo_documento": "CC",
+  "regex_matricula": "^RM \\d{5}-\\d{2}$",
+  "vigencia_receta_dias": 30,
+  "fecha_referencia": "2026-09-18",
+  "valores_criticos": {
+    "Potasio": {
+      "menor_que": null,
+      "mayor_que": 6.0
+    },
+    "Troponina I": {
+      "menor_que": null,
+      "mayor_que": 0.5
+    },
+    "Hemoglobina": {
+      "menor_que": 7.0,
+      "mayor_que": null
+    },
+    "Glucosa en ayunas": {
+      "menor_que": null,
+      "mayor_que": 400
+    }
+  },
+  "reglas_enrutamiento": [
+    {
+      "prioridad": 1,
+      "condicion": "urgencia == alta",
+      "destino": "urgencias"
+    },
+    {
+      "prioridad": 2,
+      "condicion": "conflictos o baja confianza o categoria == otro",
+      "destino": "revision_humana"
+    },
+    {
+      "prioridad": 3,
+      "condicion": "categoria == receta_medica",
+      "destino": "farmacia"
+    },
+    {
+      "prioridad": 4,
+      "condicion": "categoria == orden_procedimiento",
+      "destino": "auditoria_autorizaciones"
+    },
+    {
+      "prioridad": 5,
+      "condicion": "otro caso (informe, epicrisis, certificado)",
+      "destino": "historia_clinica_electronica"
+    }
+  ]
+}

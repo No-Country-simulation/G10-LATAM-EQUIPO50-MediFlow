@@ -1,0 +1,65 @@
+{
+  "J18.9": {
+    "descripcion": "Neumonía, no especificada"
+  },
+  "J02.9": {
+    "descripcion": "Faringitis aguda, no especificada"
+  },
+  "N39.0": {
+    "descripcion": "Infección de vías urinarias, sitio no especificado"
+  },
+  "I10": {
+    "descripcion": "Hipertensión esencial (primaria)"
+  },
+  "E11.9": {
+    "descripcion": "Diabetes mellitus no insulinodependiente sin mención de complicación"
+  },
+  "E78.5": {
+    "descripcion": "Hiperlipidemia no especificada"
+  },
+  "J45.9": {
+    "descripcion": "Asma, no especificada"
+  },
+  "K29.7": {
+    "descripcion": "Gastritis, no especificada"
+  },
+  "K80.2": {
+    "descripcion": "Cálculo de la vesícula biliar sin colecistitis"
+  },
+  "M54.5": {
+    "descripcion": "Lumbago no especificado"
+  },
+  "S82.6": {
+    "descripcion": "Fractura del maléolo externo"
+  },
+  "I20.0": {
+    "descripcion": "Angina inestable"
+  },
+  "K35.8": {
+    "descripcion": "Apendicitis aguda, otra y la no especificada"
+  },
+  "E03.9": {
+    "descripcion": "Hipotiroidismo, no especificado"
+  },
+  "D50.9": {
+    "descripcion": "Anemia por deficiencia de hierro sin otra especificación"
+  },
+  "F32.9": {
+    "descripcion": "Episodio depresivo, no especificado"
+  },
+  "J30.4": {
+    "descripcion": "Rinitis alérgica, no especificada"
+  },
+  "N20.0": {
+    "descripcion": "Cálculo del riñón"
+  },
+  "M17.1": {
+    "descripcion": "Otras gonartrosis primarias"
+  },
+  "Z00.0": {
+    "descripcion": "Examen médico general"
+  },
+  "R07.4": {
+    "descripcion": "Dolor en el pecho, no especificado"
+  }
+}

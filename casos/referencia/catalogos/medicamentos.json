@@ -1,0 +1,122 @@
+{
+  "Amoxicilina": {
+    "concentracion": "500 mg",
+    "via": "oral",
+    "mg_por_unidad": 500,
+    "dosis_maxima_diaria_mg": 4000
+  },
+  "Acetaminofén": {
+    "concentracion": "500 mg",
+    "via": "oral",
+    "mg_por_unidad": 500,
+    "dosis_maxima_diaria_mg": 4000
+  },
+  "Ibuprofeno": {
+    "concentracion": "400 mg",
+    "via": "oral",
+    "mg_por_unidad": 400,
+    "dosis_maxima_diaria_mg": 2400
+  },
+  "Losartán": {
+    "concentracion": "50 mg",
+    "via": "oral",
+    "mg_por_unidad": 50,
+    "dosis_maxima_diaria_mg": 100
+  },
+  "Metformina": {
+    "concentracion": "850 mg",
+    "via": "oral",
+    "mg_por_unidad": 850,
+    "dosis_maxima_diaria_mg": 2550
+  },
+  "Omeprazol": {
+    "concentracion": "20 mg",
+    "via": "oral",
+    "mg_por_unidad": 20,
+    "dosis_maxima_diaria_mg": 80
+  },
+  "Salbutamol inhalador": {
+    "concentracion": "100 mcg/dosis",
+    "via": "inhalada",
+    "mg_por_unidad": 0.1,
+    "dosis_maxima_diaria_mg": 1.6
+  },
+  "Atorvastatina": {
+    "concentracion": "20 mg",
+    "via": "oral",
+    "mg_por_unidad": 20,
+    "dosis_maxima_diaria_mg": 80
+  },
+  "Azitromicina": {
+    "concentracion": "500 mg",
+    "via": "oral",
+    "mg_por_unidad": 500,
+    "dosis_maxima_diaria_mg": 500
+  },
+  "Nitrofurantoína": {
+    "concentracion": "100 mg",
+    "via": "oral",
+    "mg_por_unidad": 100,
+    "dosis_maxima_diaria_mg": 400
+  },
+  "Levotiroxina": {
+    "concentracion": "50 mcg",
+    "via": "oral",
+    "mg_por_unidad": 0.05,
+    "dosis_maxima_diaria_mg": 0.3
+  },
+  "Loratadina": {
+    "concentracion": "10 mg",
+    "via": "oral",
+    "mg_por_unidad": 10,
+    "dosis_maxima_diaria_mg": 20
+  },
+  "Prednisona": {
+    "concentracion": "20 mg",
+    "via": "oral",
+    "mg_por_unidad": 20,
+    "dosis_maxima_diaria_mg": 80
+  },
+  "Enoxaparina": {
+    "concentracion": "40 mg/0.4 mL",
+    "via": "subcutánea",
+    "mg_por_unidad": 40,
+    "dosis_maxima_diaria_mg": 200
+  },
+  "Ceftriaxona": {
+    "concentracion": "1 g",
+    "via": "intravenosa",
+    "mg_por_unidad": 1000,
+    "dosis_maxima_diaria_mg": 4000
+  },
+  "Diclofenaco": {
+    "concentracion": "50 mg",
+    "via": "oral",
+    "mg_por_unidad": 50,
+    "dosis_maxima_diaria_mg": 150
+  },
+  "Ácido acetilsalicílico": {
+    "concentracion": "100 mg",
+    "via": "oral",
+    "mg_por_unidad": 100,
+    "dosis_maxima_diaria_mg": 325
+  },
+  "Sulfato ferroso": {
+    "concentracion": "300 mg",
+    "via": "oral",
+    "mg_por_unidad": 300,
+    "dosis_maxima_diaria_mg": 900
+  },
+  "Sertralina": {
+    "concentracion": "50 mg",
+    "via": "oral",
+    "mg_por_unidad": 50,
+    "dosis_maxima_diaria_mg": 200
+  },
+  "Metoclopramida": {
+    "concentracion": "10 mg",
+    "via": "oral",
+    "mg_por_unidad": 10,
+    "dosis_maxima_diaria_mg": 30
+  }
+}
