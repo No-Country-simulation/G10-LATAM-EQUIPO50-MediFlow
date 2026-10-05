@@ -9,6 +9,10 @@ from configuracion import *
 #Configuracion de reglas:
 from reglas import *
 
+
+# validacion clinica
+from validacion_clinica import nodo_validacion_clinica
+
 def normalizar_categoria(categoria):
     """Valida la categoría entregada por Gemini: """
     categorias_permitidas = {
@@ -390,10 +394,12 @@ def construir_grafo_clasificacion():
     grafo.add_node("detectar_ambiguedad", nodo_detectar_ambiguedad)
     grafo.add_node("detectar_datos_faltantes", nodo_detectar_datos_faltantes)
     grafo.add_node("decidir_ruta", nodo_decidir_ruta)
+    grafo.add_node("validacion_clinica", nodo_validacion_clinica)
 
     grafo.add_edge(START, "clasificar_documento")
     grafo.add_edge("clasificar_documento", "validar_coherencia_documental")
-    grafo.add_edge("validar_coherencia_documental", "detectar_urgencia")
+    grafo.add_edge("validar_coherencia_documental", "validacion_clinica")
+    grafo.add_edge("validacion_clinica", "detectar_urgencia")
     grafo.add_edge("detectar_urgencia", "detectar_ambiguedad")
     grafo.add_edge("detectar_ambiguedad", "detectar_datos_faltantes")
     grafo.add_edge("detectar_datos_faltantes", "decidir_ruta")
