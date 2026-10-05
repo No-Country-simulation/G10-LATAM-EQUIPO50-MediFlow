@@ -14,6 +14,8 @@ import time
 #poder identificar especificamente el error 503. 
 from google.genai import errors
 
+
+
 def subir_archivo_a_gemini(ruta_archivo):
     """
     Envia el archivo a Gemini.
@@ -280,6 +282,25 @@ Del archivo subido y sin inventar nada, Extrae esta información cuando esté di
 - Signos de alarma
 - Observaciones
 
+Aplicando CRITERIO DE URGENCIA (obligatorio):
+
+Marca "urgente": true SOLO si se cumple alguna de estas condiciones:
+
+1. El documento declara prioridad explicita: "URGENTE", "STAT",
+   "inmediato", "de urgencia".
+   Las palabras "Prioritaria" o "Preferente" indican prioridad MEDIA
+   y NO deben marcarse como urgente.
+2. Un resultado de laboratorio o una conclusion de imagen indica un
+   hallazgo que requiere atencion inmediata.
+3. El texto describe un cuadro clinico EN CURSO que requiere atencion
+   inmediata: dolor toracico actual, abdomen agudo, sangrado activo,
+   dificultad respiratoria.
+
+NO marques urgente por la gravedad del diagnostico en si mismo.
+Una receta ambulatoria, un certificado medico o un informe de
+resultados NUNCA son urgentes, aunque el diagnostico sea grave.
+
+
 Aplicando Reglas sobre el FORMATO DE RESPUESTA:
 Devuelve ÚNICAMENTE JSON válido.
 
@@ -288,7 +309,6 @@ NO utilices Markdown.
 NO escribas:
 
 ```json
-
 NO agregues explicaciones antes o después
 del JSON.
 
@@ -406,6 +426,9 @@ RECUERDA:
    "datos_no_legibles_o_ambiguos".
 5. CONSERVAR EXACTAMENTE EL NOMBRE DE ARCHIVO.
 6. DEVOLVER ÚNICAMENTE JSON VÁLIDO.
+7. TODAS las claves del JSON van en minusculas, sin tildes y sin
+   caracteres especiales. Usa exactamente: "codigo", "descripcion",
+   "rango_referencia", "interpretacion". Nunca "código" ni "interpretación".
 
 """
 
