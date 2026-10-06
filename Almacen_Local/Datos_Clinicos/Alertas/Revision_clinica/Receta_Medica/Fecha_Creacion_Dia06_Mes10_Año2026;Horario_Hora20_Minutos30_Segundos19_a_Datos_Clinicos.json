@@ -1,0 +1,148 @@
+{
+    "nombre_archivo": "Fecha_Creacion_Dia06_Mes10_Año2026;Horario_Hora20_Minutos30_Segundos19_a.png",
+    "tipo_archivo": "imagen",
+    "documento": {
+        "es_documento_medico": true,
+        "tipo_documento": "Receta Médica",
+        "fecha_documento": "23 feb, 2023",
+        "numero_documento": "37",
+        "institucion_medica": "Clínica Mexico Terán Ote. 327 Zona Centro Piedras Blancas, Coahuila"
+    },
+    "paciente": {
+        "id_paciente": "206360989",
+        "nombre_completo": "Noelia de los Angeles Vargas Solano",
+        "fecha_nacimiento": null,
+        "edad": "35 años, 5 meses, 23 días",
+        "sexo": null,
+        "curp": null,
+        "telefono": null,
+        "correo": null,
+        "direccion": null,
+        "peso_kg": 60.0,
+        "altura_cm": 165.0,
+        "alergias": [
+            "Ácaros"
+        ],
+        "antecedentes_medicos": [],
+        "antecedentes_quirurgicos": [],
+        "antecedentes_familiares": []
+    },
+    "medico": {
+        "nombre_completo": "Fernanda Vargas",
+        "especialidad": "Medicina General",
+        "cedula_profesional": "MED19187",
+        "institucion": "Universidad de las Ciencias Médicas. UCR.",
+        "telefono": "+52 11111111 (ext 12)",
+        "correo": "clinmex@hulipractice.com"
+    },
+    "consulta": {
+        "fecha": "23 feb, 2023",
+        "hora": "12:58:15 pm",
+        "motivo_consulta": null,
+        "sintomas": [],
+        "signos": [],
+        "observaciones": null
+    },
+    "diagnosticos": [
+        {
+            "nombre": "Historia personal de alergia a otros agentes antibióticos",
+            "descripcion": "Historia personal de alergia a otros agentes antibióticos.",
+            "codigo": "Z88.1",
+            "tipo": null
+        }
+    ],
+    "signos_vitales": {
+        "presion_arterial": "120/80 mmHg",
+        "frecuencia_cardiaca_lpm": null,
+        "frecuencia_respiratoria_rpm": null,
+        "temperatura_c": 37.0,
+        "saturacion_oxigeno_porcentaje": null,
+        "glucosa_mg_dl": null
+    },
+    "medicamentos": [
+        {
+            "nombre": "Amoxicilina acido clavulanico",
+            "principio_activo": "Amoxicilina acido clavulanico",
+            "presentacion": "tabletas",
+            "concentracion": "875mg/125mg",
+            "dosis": "1",
+            "unidad_dosis": "tableta",
+            "via_administracion": "vía oral",
+            "frecuencia": "1 vez cada 8 días",
+            "duracion": null,
+            "cantidad": "Caja con 12 presentaciones",
+            "indicaciones": "Tomar 1 vez cada 8 días."
+        }
+    ],
+    "tratamiento": {
+        "descripcion": null,
+        "medicamentos": [
+            "Amoxicilina acido clavulanico 875mg/125mg tabletas vía oral. Caja con 12 presentaciones."
+        ],
+        "procedimientos": [],
+        "terapias": [],
+        "recomendaciones": [],
+        "cuidados": [],
+        "restricciones": [],
+        "dieta": null,
+        "actividad_fisica": null
+    },
+    "estudios": [],
+    "procedimientos": [],
+    "seguimiento": {
+        "proxima_cita": null,
+        "indicaciones_seguimiento": [],
+        "signos_alarma": [],
+        "observaciones": null
+    },
+    "datos_no_legibles_o_ambiguos": [],
+    "observaciones": null,
+    "clasificacion_riesgo": {
+        "urgente": false,
+        "motivo_urgencia": null,
+        "datos_ambiguos": [],
+        "datos_faltantes": [],
+        "clasificacion_final": "revision_clinica",
+        "requiere_revision_humana": true
+    },
+    "clasificacion_documento": {
+        "categoria": "Receta Médica"
+    },
+    "validacion_coherencia": {
+        "puntaje_incoherencia": 0,
+        "nivel_coherencia": "normal",
+        "categoria_reglas_aplicadas": "Receta Médica",
+        "umbrales_utilizados": {
+            "umbral_normal": 20,
+            "umbral_revision": 40,
+            "umbral_alerta": 60
+        },
+        "reglas_utilizadas": {
+            "sin_medicamentos": 30,
+            "sin_medicamentos_tratamiento": 20,
+            "sin_id_paciente": 5,
+            "sin_nombre_paciente": 10,
+            "sin_nombre_medico": 5,
+            "recomendaciones_sin_medicamentos": 20
+        },
+        "motivos": [],
+        "requiere_revision_humana": false
+    },
+    "validacion_clinica": {
+        "conflictos": [
+            {
+                "tipo": "medicamento_sin_posologia",
+                "detalle": "No se pudo verificar la dosis de Amoxicilina acido clavulanico (falta concentracion o frecuencia)."
+            },
+            {
+                "tipo": "matricula_formato_invalido",
+                "detalle": "La matricula 'MED19187' no cumple el formato esperado."
+            }
+        ],
+        "puntaje_clinico": 35,
+        "conflictos_criticos": [],
+        "hallazgos_criticos": [],
+        "urgencia_por_hallazgo_critico": false,
+        "requiere_revision_humana": true
+    }
+}

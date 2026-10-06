@@ -40,4 +40,4 @@ EXPOSE 8501
 # Cambio Nuevo:
 # Streamlit es ahora la aplicacion principal.
 # No se utiliza FastAPI ni Uvicorn.
-CMD ["streamlit", "run", "Frontend/app_streamlit.py", "--server.address=0.0.0.0", "--server.port=8501"]
+CMD ["streamlit", "run", "Frontend/app_streamlit_backend_directo.py", "--server.address=0.0.0.0", "--server.port=8501"]

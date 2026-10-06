@@ -1,3 +1,5 @@
-[
-    "jo.moya.mora@gmail.com"
-]
+{
+    "correos_destino": [
+        "jo.moya.mora@gmail.com"
+    ]
+}

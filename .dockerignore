@@ -5,22 +5,18 @@
 .github
 .gitignore
 
-
 #Variables de entorno 
 #El archivo .env se carga mediante docker-compose.yml
 #utilizando env_file.
 .env
-
 
 #Python
 __pycache__/
 *.py[cod]
 *.pyo
 
-
 #Archivos de Mac
 .DS_Store
-
 
 #Visual Studio Code
 .vscode/
@@ -34,6 +30,22 @@ venv/
 env/
 
 #Archivos temporales de MediFlow
-# No es necesario copiar los archivos temporales
-# existentes dentro de la imagen.
-Almacen_Local/Archivos_Temporales/
+#No es necesario copiar los archivos temporales
+#existentes dentro de la imagen.
+#Almacen_Local/Archivos_Temporales/
+Almacen_Local/Archivos_Temporales/*
+Almacen_Local/Archivos_Originales/*
+Almacen_Local/Datos_Clinicos/*
+
+# Documentacion
+README.md
+*.md
+
+# Archivos de prueba
+*.jpg
+*.jpeg
+*.png
+*.bmp
+*.tiff
+*.webp
+*.pdf
