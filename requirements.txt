@@ -1,7 +1,7 @@
 #El archivo Dockerfile, tendrá instalado una version de python: 3.11-slim, ya que manejo la version: 3.11.13
 
 # === Cloud (OCI) ===
-#oci
+google-cloud-storage          # sube/mueve objetos entre los 3 buckets (cloud/gcs_storage.py)
 
 # === LLM y orquestacion ===
 google-genai==2.25.0
