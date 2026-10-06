@@ -1,14 +1,24 @@
 #El archivo Dockerfile, tendrá instalado una version de python: 3.11-slim, ya que manejo la version: 3.11.13
 
 # === Cloud (OCI) ===
-oci
+#oci
 
-# === LLM y orquestación ===
+# === LLM y orquestacion ===
 google-genai==2.25.0
 langgraph==1.2.12
 
-# === Validación de datos ===
-pydantic>=2.0.0
+# === Validacion de datos ===
+pydantic==2.13.4
 
-# === Backend / interfaz ===
+# === Backend / API ===
+fastapi==0.138.1
+uvicorn==0.49.0
+
+# === Interfaz grafica ===
+streamlit==1.58.0
+
+# === Variables de entorno ===
 python-dotenv==1.2.2
+
+# === Peticiones HTTP ===
+requests==2.34.2
