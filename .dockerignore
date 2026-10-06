@@ -1,0 +1,39 @@
+#Archivos que no deben copiarse a la imagen Docker
+
+#Git:
+.git
+.github
+.gitignore
+
+
+#Variables de entorno 
+#El archivo .env se carga mediante docker-compose.yml
+#utilizando env_file.
+.env
+
+
+#Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+
+#Archivos de Mac
+.DS_Store
+
+
+#Visual Studio Code
+.vscode/
+
+#Logs
+*.log
+
+#Entornos virtuales 
+venv/
+.venv/
+env/
+
+#Archivos temporales de MediFlow
+# No es necesario copiar los archivos temporales
+# existentes dentro de la imagen.
+Almacen_Local/Archivos_Temporales/

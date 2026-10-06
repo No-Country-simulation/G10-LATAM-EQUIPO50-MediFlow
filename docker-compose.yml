@@ -1,0 +1,42 @@
+
+# Docker Compose de MediFlow
+services:
+
+  # Aplicacion principal de MediFlow
+  mediflow:
+
+    #Construccion de la imagen
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    # Nombre del contenedor:
+    container_name: mediflow
+
+    #Variables de entorno:
+    #Las variables de .env se cargan directamente
+    #al contenedor.
+    #El archivo .env NO se copia a la imagen Docker.
+    env_file:
+      - .env
+
+
+    #Puertos:
+    #Streamlit utiliza el puerto 8501.
+    ports:
+      - "8501:8501"
+
+    #Almacenamiento persistente:
+    #Almacen_Local permanece fuera del contenedor,    #
+    #Esto permite conservar:
+    # - Archivos originales
+    # - Datos clinicos
+    # - Configuraciones
+    # - Archivos generados
+    # aunque el contenedor sea reconstruido.
+    volumes:
+      - ./Almacen_Local:/app/Almacen_Local
+
+
+    #Reinicio automatico
+    restart: unless-stopped
