@@ -5,7 +5,7 @@ según la responsabilidad de cada parte.
 
 ## Estructura
 
-Backedn_MediFlow/
+Backend_MediFlow/
 * main.py
 * librerias.py
 * configuracion.py
@@ -34,7 +34,7 @@ Contiene las variables compartidas:
 - Extensiones permitidas.
 
 ### umbrales.py
-Contiene toda la configuración de los umbrales de inconsistencia.
+Contiene toda la configuración de los umbrales de clasificación.
 
 ### reglas.py
 Contiene las reglas modificables que utiliza LangGraph.
