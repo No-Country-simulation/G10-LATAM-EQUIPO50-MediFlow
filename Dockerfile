@@ -25,6 +25,7 @@ RUN pip install --no-cache-dir --upgrade pip && \
 #Streamlit se comunicara directamente con el backend.
 COPY Backend_MediFlow ./Backend_MediFlow
 COPY Frontend ./Frontend
+COPY cloud ./cloud
 
 # Crear carpetas de almacenamiento
 # Se crean las carpetas utilizadas por MediFlow
