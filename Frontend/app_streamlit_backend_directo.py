@@ -428,6 +428,9 @@ with pestana_procesamiento:
 
                     ruta_guardada,nombre_generado = (guardar_archivo_original(ruta_archivo))
 
+                    from cloud.sincronizar_almacenamiento import sincronizar_archivo_original, sincronizar_json_final   
+                    sincronizar_archivo_original(ruta_guardada, nombre_generado)
+
 
                     #CAMBIO NUEVO:
                     #Paso 6:
@@ -514,6 +517,7 @@ with pestana_procesamiento:
                         clasificacion_final,
                         categoria
                     )
+                    sincronizar_json_final(ruta_json, clasificacion_final)
 
 
                     #CAMBIO NUEVO:
