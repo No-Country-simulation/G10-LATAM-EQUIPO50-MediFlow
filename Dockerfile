@@ -21,7 +21,7 @@ RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
 #Copiar archivos del proyecto:
-#Se copian directamente Backend_MediFlow y Frontend,
+#Se copian directamente Backend_MediFlow, Frontend y cloud al contenedor.
 #Streamlit se comunicara directamente con el backend.
 COPY Backend_MediFlow ./Backend_MediFlow
 COPY Frontend ./Frontend

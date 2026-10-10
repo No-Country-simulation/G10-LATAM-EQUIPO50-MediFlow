@@ -29,6 +29,6 @@ casos/referencia/generar_dataset.py
 # ignorar almcen local
 #Almacen_Local/
 
-#ignorar evaluacio y evluacion resultados
+#ignorar evaluacion y evaluacion resultados
 evaluacion.py
 evaluacion_resultados/
