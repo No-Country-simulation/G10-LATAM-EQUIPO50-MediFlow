@@ -36,11 +36,11 @@ El desarrollo técnico y funcional de este sistema comprende las siguientes fase
 |---|---|
 | Lenguaje / orquestación | Python puro + LangGraph |
 | Extracción / clasificación | Gemini (multimodal — lee PDF/imagen/JSON directo) |
-| Despliegue | OCI Compute, Ampere A1 Always Free |
-| Almacenamiento | OCI Object Storage — buckets `recibidos` / `procesados` / `auditoria_humana` |
+| Despliegue | OCI Compute, Ampere A1 Always Free (Descartado) / Google Cloud|
+| Almacenamiento | OCI Object Storage — buckets `recibidos` / `procesados` / `auditoria_humana` | 
 | Notificaciones | Correo (SMTP/Gmail) en casos Urgente/Ambiguo |
 | Gestión de tareas | Trello |
-| Framework de interfaz | Por definir — Streamlit vs. FastAPI |
+| Framework de interfaz | Streamlit vs. FastAPI |
  
 > **Cambio de arquitectura (semana 1):** el plan original usaba Qwen2.5 + mDeBERTa corriendo en máquina virtual vía PyTorch/Transformers. El equipo confirmó el cambio a Gemini + LangGraph para reducir el riesgo de latencia en la CPU limitada de OCI Always Free y simplificar el pipeline (ya no hace falta OCR aparte). Historial completo en [`docs/arquitectura.md`](docs/arquitectura.md).
  
@@ -51,7 +51,7 @@ El desarrollo técnico y funcional de este sistema comprende las siguientes fase
 | José Moya | Backend, arquitectura y orquestación |
 | Anahí Ramírez| LLM & ML, grafo de decisión, puntaje de confianza y orquestación|
 | Andrés Mustafá | Cloud & Infraestructura (OCI); contrato de datos, tablero de Trello y documentación/arquitectura |
-| Juan Pablo Palacio | Ingesta de documentos, Casos de prueba |
+| Juan Pablo Palacio | Ingesta de documentos, Casos de prueba | validación documentos
 | Jonatan Cuero | Interfaz |
  
 ## Arquitectura
