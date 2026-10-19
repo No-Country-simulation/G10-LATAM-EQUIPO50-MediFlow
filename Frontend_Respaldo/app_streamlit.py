@@ -26,11 +26,11 @@ if not URL_API:
 
 #Configuracion principal de MediFlow:
 #Configuramos el titulo de la aplicacion.
-st.set_page_config(
-   page_title="MediFlow",
-  page_icon="🏥",
- layout="wide"
-)
+#st.set_page_config(
+   #page_title="MediFlow",
+  #page_icon="🏥",
+ #layout="wide"
+#)
 
 #Titulo principal de MediFlow.
 #CAMBIO NUEVO: Utilizamos un encabezado personalizado para

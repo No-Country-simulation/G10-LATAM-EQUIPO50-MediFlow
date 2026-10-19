@@ -3,6 +3,7 @@
 #Permite crear la interfaz grafica de Streamlit.
 import streamlit as st
 
+
 #Permite trabajar con archivos y rutas.
 import os
 
@@ -20,6 +21,15 @@ import json
 
 # Permite cargar las variables del archivo .env
 from dotenv import load_dotenv
+
+
+#Configuracion principal de MediFlow:
+#Configuramos el titulo de la aplicacion.
+st.set_page_config(
+   page_title="MediFlow",
+  page_icon="🏥",
+ layout="wide"
+)
 
 # Carga las variables del archivo .env
 load_dotenv()
@@ -132,14 +142,6 @@ def guardar_correos_streamlit(correos):
             indent=4
         )
 
-
-#Configuracion principal de MediFlow:
-#Configuramos el titulo de la aplicacion.
-st.set_page_config(
-   page_title="MediFlow",
-  page_icon="🏥",
- layout="wide"
-)
 
 #Titulo principal de MediFlow.
 #CAMBIO NUEVO: Utilizamos un encabezado personalizado para
