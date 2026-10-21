@@ -23,6 +23,14 @@ import json
 from dotenv import load_dotenv
 
 
+# Permita calcular el tiempo de procesamiento de MediFlow.
+# Punto 6. Flujo
+import time
+
+#Permite calcular la hora limite de atencion de cada documento.
+from datetime import datetime, timedelta
+
+
 #Configuracion principal de MediFlow:
 #Configuramos el titulo de la aplicacion.
 st.set_page_config(
@@ -30,6 +38,7 @@ st.set_page_config(
   page_icon="🏥",
  layout="wide"
 )
+
 
 # Carga las variables del archivo .env
 load_dotenv()
@@ -141,6 +150,45 @@ def guardar_correos_streamlit(correos):
             ensure_ascii=False,
             indent=4
         )
+        
+
+#CAMBIO NUEVO:
+#Tiempo objetivo de atencion para cada nivel de clasificacion.
+#No es una prediccion: es el tiempo maximo en que el area responsable
+#deberia atender el documento segun su prioridad.
+TIEMPOS_OBJETIVO_MINUTOS = {
+    "urgente": 0,
+    "alerta": 30,
+    "revision_clinica": 60,
+    "revision_prioritaria": 120,
+    "revision": 240,
+    "datos_faltantes": 240,
+    "ambiguo": 120,
+    "normal": 1440
+}
+
+# Piunto 6. Flujo
+def texto_tiempo_objetivo(clasificacion):
+    """
+    Devuelve el tiempo objetivo de atencion y la hora limite
+    correspondientes a la clasificacion recibida.
+    """
+    minutos = TIEMPOS_OBJETIVO_MINUTOS.get(clasificacion, 1440)
+
+    if minutos == 0:
+        return "Atencion inmediata"
+
+    #Convertimos los minutos a un texto legible.
+    if minutos < 60:
+        duracion = f"{minutos} min"
+    elif minutos < 1440:
+        duracion = f"{minutos // 60} h"
+    else:
+        duracion = f"{minutos // 1440} dia(s)"
+
+    hora_limite = datetime.now() + timedelta(minutes=minutos)
+
+    return f"Atencion objetivo: {duracion} (antes de las {hora_limite:%H:%M del %d/%m})"
 
 
 #Titulo principal de MediFlow.
@@ -397,6 +445,14 @@ with pestana_procesamiento:
             #MediFlow procesa el documento.
             with st.spinner("MediFlow esta procesando el documento..."):
                 try:
+                    
+                    
+                    # Punto 6. Flujo
+                    #Lista donde se registra la duracion de cada etapa
+                    #del recorrido del documento (trazabilidad del triaje).
+                    etapas = []
+                    inicio_total = time.perf_counter()
+                    inicio_etapa = time.perf_counter()
 
                     #CAMBIO NUEVO:
                     #Paso 3:
@@ -440,6 +496,14 @@ with pestana_procesamiento:
                     #la funcion existente del Backend.
 
                     mime_type = obtener_mime_type(ruta_archivo)
+                    
+                    # Punto 6. Flujo
+                    etapas.append({
+                        "etapa": "Ingesta y validacion",
+                        "detalle": f"Formato {tipo_archivo}",
+                        "duracion_s": round(time.perf_counter() - inicio_etapa, 2)
+                    })
+                    inicio_etapa = time.perf_counter()
 
 
                     #CAMBIO NUEVO:
@@ -451,6 +515,14 @@ with pestana_procesamiento:
                         tipo_archivo,
                         nombre_generado
                     )
+                    
+                    # Punto 6. Flujo
+                    etapas.append({
+                        "etapa": "Extraccion con Gemini",
+                        "detalle": "Lectura multimodal del documento",
+                        "duracion_s": round(time.perf_counter() - inicio_etapa, 2)
+                    })
+                    inicio_etapa = time.perf_counter()
 
 
                     #Cambio Nuevo:
@@ -506,6 +578,26 @@ with pestana_procesamiento:
                             "clasificacion_documento"
                         ]["categoria"]
                     )
+                    validacion_coherencia = datos_clinicos_finales.get("validacion_coherencia", {})
+                    validacion_clinica = datos_clinicos_finales.get("validacion_clinica", {})
+
+                    etapas.append({
+                        "etapa": "Clasificacion LangGraph",
+                        "detalle": categoria,
+                        "duracion_s": round(time.perf_counter() - inicio_etapa, 2)
+                    })
+                    etapas.append({
+                        "etapa": "Validacion de reglas",
+                        "detalle": f"Puntaje {validacion_coherencia.get('puntaje_incoherencia', 0)} | "
+                                   f"{len(validacion_coherencia.get('motivos', []))} motivo(s)",
+                        "duracion_s": 0.0
+                    })
+                    etapas.append({
+                        "etapa": "Validacion clinica",
+                        "detalle": f"{len(validacion_clinica.get('conflictos', []))} conflicto(s)",
+                        "duracion_s": 0.0
+                    })
+                    inicio_etapa = time.perf_counter()
 
 
                     #CAMBIO NUEVO:
@@ -520,6 +612,11 @@ with pestana_procesamiento:
                         categoria
                     )
                     sincronizar_json_final(ruta_json, clasificacion_final)
+                    etapas.append({
+                        "etapa": "Guardado y sincronizacion",
+                        "detalle": "JSON final almacenado",
+                        "duracion_s": round(time.perf_counter() - inicio_etapa, 2)
+                    })
 
 
                     #CAMBIO NUEVO:
@@ -764,6 +861,11 @@ with pestana_procesamiento:
 
                         "datos_clinicos":
                             datos_clinicos_finales,
+                            
+                         "trazabilidad": {
+                            "tiempo_total_s": round(time.perf_counter() - inicio_total, 2),
+                            "etapas": etapas
+                        },
 
                         "umbrales_utilizados":
                             umbrales
@@ -848,34 +950,211 @@ with pestana_procesamiento:
             st.write("**Nivel de coherencia:**")
 
             st.info(nivel_coherencia)
+            
+        
+        # Punto 6. flujo - cambio final para mostrar la trazabilidad del documento
+        #CAMBIO NUEVO:
+        #Recorrido del documento (trazabilidad del triaje).
+        #Se muestra como una cuadricula de tarjetas con iconos y tiempos,
+        #y debajo un panel desplegable por etapa con el detalle completo.
+        #IMPORTANTE: el HTML va sin indentacion, porque Streamlit interpreta
+        #las lineas indentadas como bloques de codigo y no las renderiza.
+        trazabilidad = resultado.get("trazabilidad", {})
+        datos_clinicos_traza = resultado.get("datos_clinicos", {})
 
-        #Puntajes de Inconsistencia:
-        st.subheader("Puntaje de inconsistencia")
+        if trazabilidad:
 
-        st.metric("Puntaje",puntaje_inconsistencia)
+            st.subheader("Recorrido del documento")
 
-        #Revision Humana:
-        st.subheader("Revision humana")
+            #Datos que alimentan el resumen y el detalle de cada etapa.
+            coherencia = datos_clinicos_traza.get("validacion_coherencia", {})
+            clinica = datos_clinicos_traza.get("validacion_clinica", {})
+            riesgo_traza = datos_clinicos_traza.get("clasificacion_riesgo", {})
 
-        if requiere_revision_humana:
+            #Icono de cada etapa. Se busca por el nombre registrado
+            #en la trazabilidad durante el procesamiento.
+            iconos = {
+                "Ingesta y validacion": "📄",
+                "Extraccion con Gemini": "🤖",
+                "Clasificacion LangGraph": "🏷️",
+                "Validacion de reglas": "📋",
+                "Validacion clinica": "🩺",
+                "Guardado y sincronizacion": "💾"
+            }
 
-            st.warning("MediFlow determino que el documento requiere revision humana.")
+            #Color del borde segun el resultado de cada etapa:
+            #verde sin hallazgos, naranja con hallazgos, rojo si es critico.
+            VERDE = "#2E7D32"
+            NARANJA = "#EF6C00"
+            ROJO = "#C62828"
 
-        else:
+            def estado_etapa(nombre):
+                """
+                Devuelve el color del borde y el texto resumen de una etapa,
+                usando unicamente datos que MediFlow ya genero.
+                """
+                if nombre == "Ingesta y validacion":
+                    return VERDE, f"Formato {resultado.get('tipo_archivo', '-')}"
 
-            st.success("MediFlow determino que el documento no requiere revision humana.")
+                if nombre == "Extraccion con Gemini":
+                    campos = (
+                        len(datos_clinicos_traza.get("diagnosticos", []))
+                        + len(datos_clinicos_traza.get("medicamentos", []))
+                        + len(datos_clinicos_traza.get("estudios", []))
+                    )
+                    ambiguos = len(datos_clinicos_traza.get("datos_no_legibles_o_ambiguos", []))
+                    color = NARANJA if ambiguos else VERDE
+                    return color, f"{campos} elemento(s) | {ambiguos} ambiguo(s)"
 
-        #Alerta por Correo:
-        if requiere_revision_humana:
+                if nombre == "Clasificacion LangGraph":
+                    color = ROJO if riesgo_traza.get("urgente") else VERDE
+                    return color, categoria_documental
 
-            if correo_enviado:
+                if nombre == "Validacion de reglas":
+                    puntaje = coherencia.get("puntaje_incoherencia", 0)
+                    motivos = len(coherencia.get("motivos", []))
+                    color = NARANJA if puntaje > 0 else VERDE
+                    return color, f"Puntaje {puntaje} | {motivos} motivo(s)"
 
-                st.success("La alerta por correo fue enviada correctamente!")
+                if nombre == "Validacion clinica":
+                    conflictos = len(clinica.get("conflictos", []))
+                    criticos = len(clinica.get("hallazgos_criticos", []))
+                    if criticos:
+                        return ROJO, f"{criticos} hallazgo(s) critico(s)"
+                    color = NARANJA if conflictos else VERDE
+                    return color, f"{conflictos} conflicto(s)"
 
+                return VERDE, "Completado"
+
+            etapas = trazabilidad.get("etapas", [])
+
+            #Dibujamos las tarjetas en filas de tres para que todo
+            #quepa en pantalla sin desplazamiento horizontal.
+            for inicio in range(0, len(etapas), 3):
+
+                fila = etapas[inicio:inicio + 3]
+                columnas = st.columns(3)
+
+                for posicion, etapa in enumerate(fila):
+
+                    nombre_etapa = etapa["etapa"]
+                    color, resumen = estado_etapa(nombre_etapa)
+                    icono = iconos.get(nombre_etapa, "•")
+                    numero = inicio + posicion + 1
+
+                    with columnas[posicion]:
+
+                        st.markdown(
+f'<div style="background:white;border-left:6px solid {color};'
+f'border-radius:10px;padding:14px;margin-bottom:10px;'
+f'box-shadow:0 1px 4px rgba(0,0,0,0.08);">'
+f'<div style="font-size:26px;">{icono}</div>'
+f'<div style="color:#0B4F6C;font-weight:700;font-size:14px;margin-top:4px;">'
+f'{numero}. {nombre_etapa}</div>'
+f'<div style="color:#000;font-size:12px;margin:6px 0;min-height:32px;">{resumen}</div>'
+f'<div style="color:{color};font-weight:700;font-size:16px;">{etapa["duracion_s"]} s</div>'
+f'</div>',
+                            unsafe_allow_html=True
+                        )
+
+            #Barra final con la cola de destino asignada al documento.
+            if clasificacion_final == "urgente":
+                color_destino = ROJO
+                texto_destino = "🚨 COLA DE URGENCIAS MEDICAS"
+            elif requiere_revision_humana:
+                color_destino = NARANJA
+                texto_destino = "👤 COLA DE REVISION HUMANA"
             else:
+                color_destino = VERDE
+                texto_destino = "✅ PROCESAMIENTO AUTOMATICO"
+                
+            st.markdown(
+                    f'<div style="background:{color_destino};border-radius:12px;padding:18px;'
+                    f'text-align:center;margin-top:6px;">'
+                    f'<div style="color:white;font-weight:700;font-size:20px;">{texto_destino}</div>'
+                    f'<div style="color:white;font-size:14px;margin-top:6px;">{categoria_documental}</div>'
+                    f'<div style="color:white;font-size:13px;margin-top:4px;">'
+                    f'Clasificacion final: {clasificacion_final} &nbsp;|&nbsp; '
+                    f'Procesado en {trazabilidad.get("tiempo_total_s", 0)} s</div>'
+                    f'<div style="color:white;font-weight:700;font-size:15px;margin-top:10px;'
+                    f'border-top:1px solid rgba(255,255,255,0.4);padding-top:10px;">'
+                    f'⏱️ {texto_tiempo_objetivo(clasificacion_final)}</div>'
+                    f'</div>',
+                unsafe_allow_html=True
+            )
 
-                st.warning("El documento requiere revision humana, pero no se confirmo el envio del correo.")
 
+
+            #Detalle completo de cada etapa, desplegable bajo las tarjetas.
+            st.write("")
+            st.caption("Detalle de cada etapa")
+
+            for numero, etapa in enumerate(etapas, start=1):
+
+                nombre_etapa = etapa["etapa"]
+                icono = iconos.get(nombre_etapa, "•")
+
+                with st.expander(f"{icono}  {numero}. {nombre_etapa}  —  {etapa['duracion_s']} s"):
+
+                    if nombre_etapa == "Ingesta y validacion":
+                        st.write("**Archivo recibido:**", resultado.get("archivo_recibido"))
+                        st.write("**Tipo detectado:**", resultado.get("tipo_archivo"))
+                        st.write("**MIME type:**", resultado.get("mime_type"))
+
+                    elif nombre_etapa == "Extraccion con Gemini":
+                        st.write("**Diagnosticos extraidos:**",
+                                 len(datos_clinicos_traza.get("diagnosticos", [])))
+                        st.write("**Medicamentos extraidos:**",
+                                 len(datos_clinicos_traza.get("medicamentos", [])))
+                        st.write("**Estudios extraidos:**",
+                                 len(datos_clinicos_traza.get("estudios", [])))
+
+                        ambiguos = datos_clinicos_traza.get("datos_no_legibles_o_ambiguos", [])
+                        if ambiguos:
+                            st.warning("Datos no legibles o ambiguos:")
+                            for dato in ambiguos:
+                                st.write(f"- {dato}")
+
+                    elif nombre_etapa == "Clasificacion LangGraph":
+                        st.write("**Categoria asignada:**", categoria_documental)
+                        st.write("**Urgencia declarada por Gemini:**",
+                                 riesgo_traza.get("urgente", False))
+                        if riesgo_traza.get("motivo_urgencia"):
+                            st.warning(riesgo_traza["motivo_urgencia"])
+
+                    elif nombre_etapa == "Validacion de reglas":
+                        st.write("**Puntaje de inconsistencia:**",
+                                 coherencia.get("puntaje_incoherencia", 0))
+                        st.write("**Nivel:**", coherencia.get("nivel_coherencia", "normal"))
+
+                        motivos = coherencia.get("motivos", [])
+                        if motivos:
+                            st.write("**Motivos detectados:**")
+                            for motivo in motivos:
+                                st.write(f"- {motivo}")
+                        else:
+                            st.success("No se detectaron inconsistencias documentales.")
+
+                        st.write("**Reglas aplicadas:**")
+                        st.json(coherencia.get("reglas_utilizadas", {}))
+
+                    elif nombre_etapa == "Validacion clinica":
+                        conflictos = clinica.get("conflictos", [])
+                        if conflictos:
+                            for conflicto in conflictos:
+                                st.error(f"{conflicto['tipo']}: {conflicto['detalle']}")
+                        else:
+                            st.success("No se detectaron conflictos clinicos.")
+
+                        for hallazgo in clinica.get("hallazgos_criticos", []):
+                            st.error(f"Valor critico: {hallazgo}")
+
+                        st.write("**Puntaje clinico:**", clinica.get("puntaje_clinico", 0))
+
+                    elif nombre_etapa == "Guardado y sincronizacion":
+                        st.write("**JSON final:**")
+                        st.code(resultado.get("ruta_json_final", "No disponible"))
+                        
         #Ruta del JSON Final:
         st.subheader("JSON Final")
 
