@@ -309,7 +309,6 @@ with pestana_procesamiento:
                     #Comprobamos si FastAPI respondio
                     #correctamente.
                     if respuesta.status_code == 200:
-
                         #Convertimos la respuesta
                         #de FastAPI a JSON.
                         resultado = respuesta.json()
@@ -317,18 +316,14 @@ with pestana_procesamiento:
                         #Guardamos el resultado
                         #en la sesion de Streamlit.
                         st.session_state["resultado_mediflow"] = (resultado)
-
                         #Mostramos mensaje de procesamiento.
                         st.success("Documento procesado correctamente por MediFlow.")
 
                     else:
-
                         #Intentamos obtener el mensaje
                         #de error enviado por FastAPI.
                         try:
-
                             error_api = respuesta.json()
-
                             mensaje_error = error_api.get("detail","Error desconocido.")
 
                         except Exception:
@@ -495,59 +490,43 @@ with pestana_procesamiento:
                             st.success(resultado_json.get("mensaje","El JSON fue conservado correctamente."))
 
                         else:
-
                             try:
-
                                 error_api = (respuesta_json.json())
-
                                 mensaje_error = (error_api.get("detail","Error desconocido."))
 
                             except Exception:
-
                                 mensaje_error = (respuesta_json.text)
-
+                                
                             st.error(mensaje_error)
 
                     except Exception as error:
-
                         st.error(f"Error al conservar el JSON: {error}")
 
             #Si el usuario desea Mover el archivo JSON de lugar:
             elif accion_json == "Mover":
-
                 st.write("Indica la carpeta donde deseas guardar el JSON Final.")
 
                 #Permitimos introducir
                 #la nueva ruta.
                 nueva_carpeta = st.text_input("Ruta de la nueva carpeta:")
-
                 if st.button("Mover JSON Final"):
-
                     if not nueva_carpeta:
-
                         st.warning("Debes indicar una carpeta.")
 
                     else:
-
                         try:
-
                             #Enviamos la nueva ruta
                             #al endpoint /json-final.
                             respuesta_json = requests.put(f"{URL_API}/json-final",params={"ruta_json":ruta_json_final,"accion":"mover","nueva_carpeta":nueva_carpeta},timeout=30)
-
                             if respuesta_json.status_code == 200:
-
                                 resultado_json = (respuesta_json.json())
-
                                 #Actualizamos la ruta
                                 #del JSON Final.
                                 nueva_ruta_json = (resultado_json.get("ruta_json_final"))
-
                                 st.success(
                                     resultado_json.get("mensaje","El JSON fue movido correctamente."))
 
                                 st.code(nueva_ruta_json)
-
                                 #Actualizamos la informacion
                                 #guardada en Streamlit.
                                 resultado["ruta_json_final"] = nueva_ruta_json
@@ -557,19 +536,15 @@ with pestana_procesamiento:
                             else:
 
                                 try:
-
                                     error_api = (respuesta_json.json())
-
                                     mensaje_error = (error_api.get("detail","Error desconocido."))
 
                                 except Exception:
-
                                     mensaje_error = (respuesta_json.text)
 
                                 st.error(mensaje_error)
 
                         except Exception as error:
-
                             st.error(f"Error al mover el JSON: {error}")
 
             #Si el usuario decide eliminar el JSON Final:
@@ -679,38 +654,27 @@ with pestana_configuracion:
         #Boton para consultar los umbrales.
         if st.button("Cargar umbrales"):
             try:
-
                 #Consultamos el endpoint
                 #GET /configuracion/umbrales.
                 respuesta = requests.get(f"{URL_API}/configuracion/umbrales",timeout=30)
-
                 if respuesta.status_code == 200:
-
                     datos_umbrales = (respuesta.json())
-
                     umbrales = datos_umbrales["umbrales"]
-
                     #Guardamos los umbrales
                     #en la sesion de Streamlit.
                     st.session_state["umbrales"] = umbrales
-
                 else:
-
                     st.error("No fue posible cargar los umbrales.")
 
             except Exception as error:
-
                 st.error(f"Error al consultar los umbrales: {error}")
 
         #Comprobamos si los umbrales
         #fueron cargados.
         if "umbrales" in st.session_state:
-
             umbrales = st.session_state["umbrales"]
-
             #Mostramos los valores actuales.
             st.write("Valores actuales:")
-
             st.write(umbrales)
 
             #Creamos campos para modificar
@@ -912,19 +876,13 @@ with pestana_configuracion:
 
 
                     if respuesta.status_code == 200:
-
                         resultado = (respuesta.json())
-
                         st.success(resultado.get("mensaje","Las reglas fueron actualizadas."))
-
                         #Actualizamos las reglas
                         #guardadas en Streamlit.
                         st.session_state["reglas"] = reglas_nuevas
-
                     else:
-
                         try:
-
                             error_api = (respuesta.json())
 
                             mensaje_error = (error_api.get("detail","Configuracion invalida."))
@@ -979,26 +937,20 @@ with pestana_configuracion:
         #fueron cargados.
         if "correos" in st.session_state:
             correos = st.session_state["correos"]
-
             st.write("Correos configurados:")
-
             #Mostramos cada correo.
             for correo in correos:
                 st.write(f"Correo, {correo}")
             st.divider()
-
             #Por si el Usuraio quiere Agregar mas correos:
             st.write("Agregar nuevo correo:")
-
             nuevo_correo = st.text_input("Correo:")
 
             if st.button("Agregar correo"):
                 if not nuevo_correo:
                     st.warning("Debes escribir un correo.")
                 else:
-
                     try:
-
                         #Enviamos el correo
                         #al endpoint POST.
                         respuesta = requests.post(
