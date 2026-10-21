@@ -16,6 +16,7 @@ WORKDIR /app
 # Se copia solamente requirements.txt para instalar
 # las librerias necesarias para la nueva arquitectura.
 COPY requirements.txt .
+COPY casos/referencia/catalogos ./casos/referencia/catalogos
 
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt

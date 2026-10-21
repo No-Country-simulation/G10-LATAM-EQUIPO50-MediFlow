@@ -35,9 +35,6 @@ services:
     # - Archivos generados
     # aunque el contenedor sea reconstruido.
 
-    environment:
-      # La app leerá esta variable dentro del contenedor
-      - GOOGLE_APPLICATION_CREDENTIALS=/app/gcp-dev-key.json
     volumes:
       - ./Almacen_Local:/app/Almacen_Local
       # Monta la clave de la máquina real dentro del contenedor

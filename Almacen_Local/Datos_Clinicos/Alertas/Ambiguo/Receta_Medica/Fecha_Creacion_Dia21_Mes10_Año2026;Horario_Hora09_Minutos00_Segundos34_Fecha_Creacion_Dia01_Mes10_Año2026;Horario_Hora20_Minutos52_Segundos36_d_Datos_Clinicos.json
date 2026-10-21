@@ -1,0 +1,214 @@
+{
+    "nombre_archivo": "Fecha_Creacion_Dia21_Mes10_Año2026;Horario_Hora09_Minutos00_Segundos34_Fecha_Creacion_Dia01_Mes10_Año2026;Horario_Hora20_Minutos52_Segundos36_d.png",
+    "tipo_archivo": "imagen",
+    "documento": {
+        "es_documento_medico": true,
+        "tipo_documento": "Receta Médica",
+        "fecha_documento": "31/07/2024",
+        "numero_documento": "8185",
+        "institucion_medica": "UNIVERSIDAD MICHOACANA DE SAN NICOLAS DE HIDALGO"
+    },
+    "paciente": {
+        "id_paciente": null,
+        "nombre_completo": "Joshua Yamile Sánchez Morales",
+        "fecha_nacimiento": "09/04/1997",
+        "edad": 27,
+        "sexo": "Masculino",
+        "curp": null,
+        "telefono": null,
+        "correo": null,
+        "direccion": null,
+        "peso_kg": null,
+        "altura_cm": null,
+        "alergias": [],
+        "antecedentes_medicos": [],
+        "antecedentes_quirurgicos": [],
+        "antecedentes_familiares": []
+    },
+    "medico": {
+        "nombre_completo": "Dr. TOMAS ARRUÑADA SANDOVAL",
+        "especialidad": "MEDICO CIRUJANO Y PARTERO",
+        "cedula_profesional": "244500",
+        "institucion": "UNIVERSIDAD MICHOACANA DE SAN NICOLAS DE HIDALGO",
+        "telefono": null,
+        "correo": null
+    },
+    "consulta": {
+        "fecha": "31/07/2024",
+        "hora": null,
+        "motivo_consulta": null,
+        "sintomas": [],
+        "signos": [],
+        "observaciones": null
+    },
+    "diagnosticos": [],
+    "signos_vitales": {
+        "presion_arterial": null,
+        "frecuencia_cardiaca_lpm": null,
+        "frecuencia_respiratoria_rpm": null,
+        "temperatura_c": 36,
+        "saturacion_oxigeno_porcentaje": null,
+        "glucosa_mg_dl": null
+    },
+    "medicamentos": [
+        {
+            "nombre": "PARACETAMOL",
+            "principio_activo": "PARACETAMOL",
+            "presentacion": null,
+            "concentracion": "500MG",
+            "dosis": "UNA",
+            "unidad_de_dosis": null,
+            "via_de_administracion": "ORAL",
+            "frecuencia": "CADA 8 HS",
+            "duracion": "CUATRO DÍAS",
+            "cantidad": null,
+            "indicaciones": null
+        },
+        {
+            "nombre": "AZITROMICINA",
+            "principio_activo": "AZITROMICINA",
+            "presentacion": "TABLETA",
+            "concentracion": "500MG",
+            "dosis": "UNA",
+            "unidad_de_dosis": "TABLETA",
+            "via_de_administracion": "ORAL",
+            "frecuencia": "CADA DIA",
+            "duracion": "3 DÍAS",
+            "cantidad": null,
+            "indicaciones": null
+        },
+        {
+            "nombre": "LORATADINA",
+            "principio_activo": "LORATADINA",
+            "presentacion": "CAPSULA",
+            "concentracion": "10MG",
+            "dosis": "UNA",
+            "unidad_de_dosis": "CAPSULA",
+            "via_de_administracion": "ORAL",
+            "frecuencia": "CADA DIA",
+            "duracion": "4 DIAS",
+            "cantidad": null,
+            "indicaciones": null
+        },
+        {
+            "nombre": "AMBROXOL",
+            "principio_activo": "AMBROXOL",
+            "presentacion": null,
+            "concentracion": "10ML",
+            "dosis": "10 ML",
+            "unidad_de_dosis": "ML",
+            "via_de_administracion": null,
+            "frecuencia": "CADA 8 HRS",
+            "duracion": "4 DIAS",
+            "cantidad": null,
+            "indicaciones": null
+        }
+    ],
+    "tratamiento": {
+        "descripcion": null,
+        "medicamentos": [],
+        "procedimientos": [],
+        "terapias": [],
+        "recomendaciones": [
+            "FAVOR DE TOMAR EL TRATAMIENTO COMPLETO",
+            "FAVOR DE PRESENTAR ESTA RECETA EN SU PROXIMA CITA QUE SERÁ"
+        ],
+        "cuidados": [],
+        "restricciones": [],
+        "dieta": null,
+        "actividad_fisica": null
+    },
+    "estudios": [],
+    "procedimientos": [],
+    "seguimiento": {
+        "proxima_cita": null,
+        "indicaciones_seguimiento": [
+            "FAVOR DE PRESENTAR ESTA RECETA EN SU PROXIMA CITA"
+        ],
+        "signos_alarma": [],
+        "observaciones": null
+    },
+    "datos_no_legibles_o_ambiguos": [],
+    "observaciones": null,
+    "clasificacion_riesgo": {
+        "urgente": false,
+        "motivo_urgencia": null,
+        "datos_ambiguos": [
+            "Para Ambroxol, la indicación '10ML' junto al nombre del medicamento es ambigua, podría referirse a la concentración de la solución o a la dosis por toma, aunque la dosis también se especifica como '10 ML'.",
+            "La palabra 'DIAS' en la duración de Ambroxol ('4 DIAS') está ligeramente cortada/parcialmente ilegible."
+        ],
+        "datos_faltantes": [
+            "Hora de elaboración del documento.",
+            "Peso del paciente.",
+            "Altura del paciente.",
+            "Presión arterial del paciente.",
+            "Frecuencia cardiaca del paciente.",
+            "Frecuencia respiratoria del paciente.",
+            "Vía de administración para Ambroxol.",
+            "Fecha de la próxima cita."
+        ],
+        "clasificacion_final": "ambiguo",
+        "requiere_revision_humana": true
+    },
+    "clasificacion_documento": {
+        "categoria": "Receta Médica"
+    },
+    "validacion_coherencia": {
+        "puntaje_incoherencia": 55,
+        "nivel_coherencia": "revision_prioritaria",
+        "categoria_reglas_aplicadas": "Receta Médica",
+        "umbrales_utilizados": {
+            "umbral_normal": 20,
+            "umbral_revision": 40,
+            "umbral_alerta": 60
+        },
+        "reglas_utilizadas": {
+            "sin_medicamentos": 30,
+            "sin_medicamentos_tratamiento": 20,
+            "sin_id_paciente": 5,
+            "sin_nombre_paciente": 10,
+            "sin_nombre_medico": 5,
+            "recomendaciones_sin_medicamentos": 20
+        },
+        "motivos": [
+            "No se encontraron medicamentos en el tratamiento.",
+            "Falta el identificador del paciente.",
+            "Existen recomendaciones pero no se encontraron medicamentos.",
+            "Se detectaron 2 dato(s) ambiguo(s)."
+        ],
+        "requiere_revision_humana": true
+    },
+    "validacion_clinica": {
+        "conflictos": [
+            {
+                "tipo": "receta_vencida",
+                "detalle": "La receta tiene 812 dias; la vigencia es de 30."
+            },
+            {
+                "tipo": "medicamento_sin_posologia",
+                "detalle": "No se pudo verificar la dosis de AZITROMICINA (falta concentracion o frecuencia)."
+            },
+            {
+                "tipo": "medicamento_sin_posologia",
+                "detalle": "No se pudo verificar la dosis de LORATADINA (falta concentracion o frecuencia)."
+            },
+            {
+                "tipo": "medicamento_sin_posologia",
+                "detalle": "No se pudo verificar la dosis de AMBROXOL (falta concentracion o frecuencia)."
+            },
+            {
+                "tipo": "matricula_formato_invalido",
+                "detalle": "La matricula '244500' no cumple el formato esperado."
+            },
+            {
+                "tipo": "paciente_sin_identificacion",
+                "detalle": "No se identifico el documento del paciente."
+            }
+        ],
+        "puntaje_clinico": 100,
+        "conflictos_criticos": [],
+        "hallazgos_criticos": [],
+        "urgencia_por_hallazgo_critico": false,
+        "requiere_revision_humana": true
+    }
+}

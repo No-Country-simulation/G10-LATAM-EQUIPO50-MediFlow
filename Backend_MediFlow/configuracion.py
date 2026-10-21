@@ -5,15 +5,6 @@
 #del archivo librerias.py
 from librerias import *
 
-
-# Configuramos el icono de la pestaña como emoji para que el navegador
-# no intente buscar /favicon.png y rompa el hilo ASGI de Uvicorn.
-st.set_page_config(
-    page_title="MediFlow",
-    page_icon="🏥",
-    layout="wide"
-)
-
 #Variables importantes de configuracion de MediFlow:
 GCP_PROJECT_ID = os.getenv("GCP_PROJECT_ID")
 MODELO_GEMINI = os.getenv("MODELO_GEMINI", "gemini-2.5-flash") # Valor por defecto seguro

@@ -16,28 +16,6 @@ from google.genai import errors
 from google.genai import types
 
 
-def subir_archivo_a_gemini(ruta_archivo):
-    """
-    Envia el archivo a Gemini.
-    IMPORTANTE:
-    Aqui NO estamos analizando todavia el documento
-    Después utilizaremos el archivo subido
-    para realizar el analisis
-    """
-
-    #Testeando:
-    print("\nSubiendo Archivo a Gemini")
-    print(f"\nArchivo:\n{ruta_archivo}")
-
-    # Subimos el Archivo
-    archivo_gemini = cliente_gemini.files.upload(file = ruta_archivo)
-    print("\nArchivo subido correctamente!!!")
-
-    #Mostramos la informacion proporcionada por Gemini:
-    print(f"\nNombre asignado por Gemini:" f"\n{archivo_gemini.name}")
-
-    return archivo_gemini
-
 def crear_prompt_prueba(tipo_archivo,nombre_archivo):
     """
     Pidiendo Estructura clinica Gemini

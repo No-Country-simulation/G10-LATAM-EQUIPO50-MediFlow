@@ -1,0 +1,210 @@
+{
+    "nombre_archivo": "Fecha_Creacion_Dia21_Mes10_Año2026;Horario_Hora08_Minutos58_Segundos32_Fecha_Creacion_Dia01_Mes10_Año2026;Horario_Hora15_Minutos36_Segundos01_c.png",
+    "tipo_archivo": "imagen",
+    "documento": {
+        "es_documento_medico": true,
+        "tipo_documento": "Receta Médica",
+        "fecha_documento": "2000-08-09",
+        "numero_documento": "52-48503",
+        "institucion_medica": "MINSAP Hospitales y Policlínicos"
+    },
+    "paciente": {
+        "id_paciente": null,
+        "nombre_completo": "JUAN Peraz",
+        "fecha_nacimiento": null,
+        "edad": null,
+        "sexo": null,
+        "curp": null,
+        "telefono": null,
+        "correo": null,
+        "direccion": null,
+        "peso_kg": null,
+        "altura_cm": null,
+        "alergias": [],
+        "antecedentes_medicos": [],
+        "antecedentes_quirurgicos": [],
+        "antecedentes_familiares": []
+    },
+    "medico": {
+        "nombre_completo": null,
+        "especialidad": "DERMATOLOGO",
+        "cedula_profesional": null,
+        "institucion": "MINSAP Hospitales y Policlínicos",
+        "telefono": null,
+        "correo": null
+    },
+    "consulta": {
+        "fecha": "2000-08-09",
+        "hora": null,
+        "motivo_consulta": null,
+        "sintomas": [],
+        "signos": [],
+        "observaciones": null
+    },
+    "diagnosticos": [],
+    "signos_vitales": {
+        "presion_arterial": null,
+        "frecuencia_cardiaca_lpm": null,
+        "frecuencia_respiratoria_rpm": null,
+        "temperatura_c": null,
+        "saturacion_oxigeno_porcentaje": null,
+        "glucosa_mg_dl": null
+    },
+    "medicamentos": [
+        {
+            "nombre": "Baños de hoja de guayaba",
+            "principio_activo": "Hoja de guayaba",
+            "presentacion": "Baños",
+            "concentracion": null,
+            "dosis": null,
+            "unidad_de_dosis": null,
+            "via_de_administracion": "Tópica",
+            "frecuencia": "ou/dia",
+            "duracion": null,
+            "cantidad": null,
+            "indicaciones": null
+        }
+    ],
+    "tratamiento": {
+        "descripcion": "Baños de hoja de guayaba, ou/dia",
+        "medicamentos": [
+            {
+                "nombre": "Baños de hoja de guayaba",
+                "principio_activo": "Hoja de guayaba",
+                "presentacion": "Baños",
+                "concentracion": null,
+                "dosis": null,
+                "unidad_de_dosis": null,
+                "via_de_administracion": "Tópica",
+                "frecuencia": "ou/dia",
+                "duracion": null,
+                "cantidad": null,
+                "indicaciones": null
+            }
+        ],
+        "procedimientos": [],
+        "terapias": [],
+        "recomendaciones": [],
+        "cuidados": [],
+        "restricciones": [],
+        "dieta": null,
+        "actividad_fisica": null
+    },
+    "estudios": [],
+    "procedimientos": [],
+    "seguimiento": {
+        "proxima_cita": null,
+        "indicaciones_seguimiento": [],
+        "signos_alarma": [],
+        "observaciones": null
+    },
+    "datos_no_legibles_o_ambiguos": [
+        "El nombre completo del médico (bajo 'MEDICO') es ilegible/ambiguo debido a la caligrafía y el sello superpuesto.",
+        "La palabra 'ou' en la frecuencia 'ou/dia' de la prescripción es de significado ambiguo en cuanto a la dosis o frecuencia exacta.",
+        "El texto de la 'Unidad' 'Santy Cubr' es parcialmente legible y puede ser ambiguo."
+    ],
+    "observaciones": null,
+    "clasificacion_riesgo": {
+        "urgente": false,
+        "motivo_urgencia": null,
+        "datos_ambiguos": [
+            "El nombre del médico es ilegible/ambiguo debido a la caligrafía y el sello.",
+            "El término 'ou' en la prescripción 'ou/dia' es ambiguo en cuanto a la dosis o frecuencia exacta.",
+            "El texto de la 'Unidad' 'Santy Cubr' es parcialmente legible y puede ser ambiguo."
+        ],
+        "datos_faltantes": [
+            "ID del paciente",
+            "Fecha de nacimiento del paciente",
+            "Edad del paciente",
+            "Sexo del paciente",
+            "CURP del paciente",
+            "Teléfono del paciente",
+            "Correo del paciente",
+            "Dirección del paciente",
+            "Peso del paciente",
+            "Altura del paciente",
+            "Alergias del paciente",
+            "Antecedentes médicos del paciente",
+            "Antecedentes quirúrgicos del paciente",
+            "Antecedentes familiares del paciente",
+            "Cédula profesional del médico",
+            "Teléfono del médico",
+            "Correo del médico",
+            "Hora de la consulta",
+            "Motivo de consulta",
+            "Síntomas",
+            "Signos",
+            "Diagnósticos",
+            "Signos vitales (Presión arterial, Frecuencia cardiaca, Frecuencia respiratoria, Temperatura, Saturación de oxígeno, Glucosa)",
+            "Duración del medicamento",
+            "Cantidad del medicamento",
+            "Indicaciones específicas del medicamento (más allá de la descripción)",
+            "Procedimientos",
+            "Terapias",
+            "Recomendaciones",
+            "Cuidados",
+            "Restricciones",
+            "Dieta",
+            "Actividad física",
+            "Próxima cita",
+            "Indicaciones de seguimiento",
+            "Signos de alarma"
+        ],
+        "clasificacion_final": "ambiguo",
+        "requiere_revision_humana": true
+    },
+    "clasificacion_documento": {
+        "categoria": "Receta Médica"
+    },
+    "validacion_coherencia": {
+        "puntaje_incoherencia": 30,
+        "nivel_coherencia": "revision",
+        "categoria_reglas_aplicadas": "Receta Médica",
+        "umbrales_utilizados": {
+            "umbral_normal": 20,
+            "umbral_revision": 40,
+            "umbral_alerta": 60
+        },
+        "reglas_utilizadas": {
+            "sin_medicamentos": 30,
+            "sin_medicamentos_tratamiento": 20,
+            "sin_id_paciente": 5,
+            "sin_nombre_paciente": 10,
+            "sin_nombre_medico": 5,
+            "recomendaciones_sin_medicamentos": 20
+        },
+        "motivos": [
+            "Falta el identificador del paciente.",
+            "Falta el nombre del medico.",
+            "Se detectaron 6 dato(s) ambiguo(s)."
+        ],
+        "requiere_revision_humana": true
+    },
+    "validacion_clinica": {
+        "conflictos": [
+            {
+                "tipo": "receta_vencida",
+                "detalle": "La receta tiene 9569 dias; la vigencia es de 30."
+            },
+            {
+                "tipo": "medicamento_sin_posologia",
+                "detalle": "No se pudo verificar la dosis de Baños de hoja de guayaba (falta concentracion o frecuencia)."
+            },
+            {
+                "tipo": "matricula_ausente",
+                "detalle": "El documento no indica la matricula o registro del profesional."
+            },
+            {
+                "tipo": "paciente_sin_identificacion",
+                "detalle": "No se identifico el documento del paciente."
+            }
+        ],
+        "puntaje_clinico": 100,
+        "conflictos_criticos": [
+            "matricula_ausente"
+        ],
+        "hallazgos_criticos": [],
+        "urgencia_por_hallazgo_critico": false,
+        "requiere_revision_humana": true
+    }
+}

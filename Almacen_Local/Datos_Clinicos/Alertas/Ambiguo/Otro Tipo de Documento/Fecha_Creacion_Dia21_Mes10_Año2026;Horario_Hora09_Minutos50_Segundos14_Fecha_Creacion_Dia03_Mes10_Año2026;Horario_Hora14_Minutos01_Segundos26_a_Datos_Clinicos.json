@@ -1,0 +1,242 @@
+{
+    "nombre_archivo": "Fecha_Creacion_Dia21_Mes10_Año2026;Horario_Hora09_Minutos50_Segundos14_Fecha_Creacion_Dia03_Mes10_Año2026;Horario_Hora14_Minutos01_Segundos26_a.pdf",
+    "tipo_archivo": "pdf",
+    "documento": {
+        "es_documento_medico": true,
+        "tipo_documento": "Nota Médica",
+        "fecha_documento": "2015-10-23",
+        "numero_documento": null,
+        "institucion_medica": null
+    },
+    "paciente": {
+        "id_paciente": null,
+        "nombre_completo": "Itzel Arontes Buenrostro",
+        "fecha_nacimiento": null,
+        "edad": "22 años",
+        "sexo": "Femenino",
+        "curp": null,
+        "telefono": null,
+        "correo": null,
+        "direccion": null,
+        "peso_kg": 57.0,
+        "altura_cm": 159.0,
+        "alergias": [],
+        "antecedentes_medicos": [
+            "Gastritis de 5 años de evolución, en tratamiento con omeprazol 20mg 1tab/24hrs",
+            "Cefalea tipo migraña (cuadros recurrentes)"
+        ],
+        "antecedentes_quirurgicos": [],
+        "antecedentes_familiares": []
+    },
+    "medico": {
+        "nombre_completo": null,
+        "especialidad": null,
+        "cedula_profesional": null,
+        "institucion": null,
+        "telefono": null,
+        "correo": null
+    },
+    "consulta": {
+        "fecha": "2015-10-23",
+        "hora": null,
+        "motivo_consulta": "Presentar cuadros recurrentes de cefalea tipo migraña",
+        "sintomas": [
+            "Cefalea tipo migraña",
+            "Fotofobia",
+            "Acufenos",
+            "Fosfenos",
+            "Nauseas",
+            "Epigastralgia",
+            "Vomito (en 3 ocasiones)",
+            "Sensación de angustia",
+            "Ataques de estrés",
+            "Tensión muscular",
+            "Astenia",
+            "Mialgias",
+            "Dificultad para realizar sus actividades diarias y concentrarse",
+            "Falta de ánimo",
+            "Dificultad para conciliar el sueño"
+        ],
+        "signos": [
+            "Ligera palidez de tegumentos",
+            "Leve deshidratación en mucosas",
+            "Ruidos peristálticos disminuidos",
+            "Dolor en epigastrio (a la palpación profunda)"
+        ],
+        "observaciones": "Epigastralgia que se presenta durante situaciones de estrés y no cede a tratamiento farmacológico. Padecimiento actual inició hace 2 meses tras haber sido víctima de un asalto."
+    },
+    "diagnosticos": [
+        {
+            "nombre": "Cefalea tipo migraña",
+            "descripcion": "Cuadros recurrentes de cefalea tipo migraña, acompañada de fotofobia, acufenos, fosfenos, nauseas, epigastralgia y vómito.",
+            "codigo": null,
+            "tipo": "Clínico"
+        },
+        {
+            "nombre": "Gastritis",
+            "descripcion": "5 años de evolución, en tratamiento con omeprazol.",
+            "codigo": null,
+            "tipo": "Crónico"
+        },
+        {
+            "nombre": "Trastorno depresivo mayor",
+            "descripcion": "Datos sugerentes, se envía a servicio de Psiquiatría para una valoración detallada.",
+            "codigo": null,
+            "tipo": "Sospecha"
+        }
+    ],
+    "signos_vitales": {
+        "presion_arterial": "110/70mmHg",
+        "frecuencia_cardiaca_lpm": 86,
+        "frecuencia_respiratoria_rpm": 22,
+        "temperatura_c": null,
+        "saturacion_oxigeno_porcentaje": null,
+        "glucosa_mg_dl": null
+    },
+    "medicamentos": [
+        {
+            "nombre": "Omeprazol",
+            "principio_activo": "Omeprazol",
+            "presentacion": "Tableta",
+            "concentracion": "20mg",
+            "dosis": 1,
+            "unidad_de_dosis": "tableta",
+            "via_de_administracion": "Oral",
+            "frecuencia": "c/2 24hrs",
+            "duracion": null,
+            "cantidad": null,
+            "indicaciones": "Para gastritis"
+        },
+        {
+            "nombre": "Sumatriptan",
+            "principio_activo": "Sumatriptan",
+            "presentacion": null,
+            "concentracion": "50mg",
+            "dosis": null,
+            "unidad_de_dosis": null,
+            "via_de_administracion": null,
+            "frecuencia": "en caso de migraña",
+            "duracion": null,
+            "cantidad": null,
+            "indicaciones": "Migraña"
+        }
+    ],
+    "tratamiento": {
+        "descripcion": "Plan de tratamiento médico según la nota médica.",
+        "medicamentos": [
+            "Omeprazol 20mg 1tab c/2 24hrs",
+            "Sumatriptan 50mg en caso de migraña"
+        ],
+        "procedimientos": [
+            "Rx AP y Lateral cráneo"
+        ],
+        "terapias": [],
+        "recomendaciones": [
+            "Valoración detallada por servicio de Psiquiatría",
+            "Referencia a servicio de neurología (posterior a Rx cráneo)"
+        ],
+        "cuidados": [],
+        "restricciones": [],
+        "dieta": null,
+        "actividad_fisica": null
+    },
+    "estudios": [
+        {
+            "tipo": "Radiografía",
+            "nombre": "Rx AP y Lateral cráneo",
+            "fecha": null,
+            "resultado": null,
+            "unidades": null,
+            "rango_de_referencia": null,
+            "interpretacion": null
+        }
+    ],
+    "procedimientos": [],
+    "seguimiento": {
+        "proxima_cita": null,
+        "indicaciones_seguimiento": [
+            "Envío a servicio de Psiquiatría para una valoración detallada.",
+            "Rx AP y Lateral cráneo para posterior referencia a servicio de neurología."
+        ],
+        "signos_alarma": [],
+        "observaciones": null
+    },
+    "datos_no_legibles_o_ambiguos": [
+        "Frecuencia de Omeprazol: En antecedentes se menciona '1tab/24hrs', mientras que en el plan se indica '1tab c/2 24hrs'. Esta última notación es inusual y contradictoria con el antecedente."
+    ],
+    "observaciones": null,
+    "clasificacion_riesgo": {
+        "urgente": false,
+        "motivo_urgencia": null,
+        "datos_ambiguos": [
+            "Frecuencia de Omeprazol: En antecedentes se menciona '1tab/24hrs', mientras que en el plan se indica '1tab c/2 24hrs'. Esta última notación es inusual y contradictoria con el antecedente."
+        ],
+        "datos_faltantes": [
+            "ID del paciente",
+            "Fecha de nacimiento del paciente",
+            "CURP del paciente",
+            "Teléfono del paciente",
+            "Correo del paciente",
+            "Dirección del paciente",
+            "Alergias del paciente",
+            "Antecedentes quirúrgicos del paciente",
+            "Antecedentes familiares del paciente",
+            "Nombre completo del médico",
+            "Especialidad del médico",
+            "Cédula profesional del médico",
+            "Institución del médico",
+            "Teléfono del médico",
+            "Correo del médico",
+            "Hora de la consulta",
+            "Duración de medicamentos",
+            "Cantidad de medicamentos",
+            "Presentación de Sumatriptan",
+            "Dosis de Sumatriptan",
+            "Unidad de dosis de Sumatriptan",
+            "Vía de administración de Sumatriptan"
+        ],
+        "clasificacion_final": "ambiguo",
+        "requiere_revision_humana": true
+    },
+    "clasificacion_documento": {
+        "categoria": "Otro"
+    },
+    "validacion_coherencia": {
+        "puntaje_incoherencia": 10,
+        "nivel_coherencia": "normal",
+        "categoria_reglas_aplicadas": "Otro",
+        "umbrales_utilizados": {
+            "umbral_normal": 20,
+            "umbral_revision": 40,
+            "umbral_alerta": 60
+        },
+        "reglas_utilizadas": {},
+        "motivos": [
+            "Se detectaron 2 dato(s) ambiguo(s)."
+        ],
+        "requiere_revision_humana": false
+    },
+    "validacion_clinica": {
+        "conflictos": [
+            {
+                "tipo": "medicamento_sin_posologia",
+                "detalle": "No se pudo verificar la dosis de Omeprazol (falta concentracion o frecuencia)."
+            },
+            {
+                "tipo": "medicamento_sin_posologia",
+                "detalle": "No se pudo verificar la dosis de Sumatriptan (falta concentracion o frecuencia)."
+            },
+            {
+                "tipo": "matricula_ausente",
+                "detalle": "El documento no indica la matricula o registro del profesional."
+            }
+        ],
+        "puntaje_clinico": 70,
+        "conflictos_criticos": [
+            "matricula_ausente"
+        ],
+        "hallazgos_criticos": [],
+        "urgencia_por_hallazgo_critico": false,
+        "requiere_revision_humana": true
+    }
+}

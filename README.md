@@ -1,545 +1,423 @@
-# G10-LATAM-EQUIPO50-MediFlow:
+# G10-LATAM-EQUIPO50-MediFlow
 
 Agente Autónomo para Triaje, Extracción y Enrutamiento de Documentos Clínicos
 
-# Sector Empresarial: HealthTech / Gestión Hospitalaria / Aseguradoras de Salud & Clínicas Médicas.
-# Hackathon ONE G10 — Oracle Next Education & Alura
+**Sector Empresarial:** HealthTech / Gestión Hospitalaria / Aseguradoras de Salud & Clínicas Médicas
+**Hackathon ONE G10 — Oracle Next Education & Alura**
 
---
+---
 
-# Descripción del Proyecto 2: 🏥 MediFlow
+## Descripción del proyecto: 🏥 MediFlow
 
-MediFlow; Debe resolver desafíos complejos de visión multimodal, extracción estructurada de datos clínicos,
-lógica de decisión condicional y manejo de casos ambiguos o urgentes (como datos ilegibles,
-prescripciones de alto riesgo o solicitudes de urgencia).
+MediFlow resuelve desafíos complejos de visión multimodal, extracción estructurada de datos clínicos, lógica de decisión condicional y manejo de casos ambiguos o urgentes (como datos ilegibles, prescripciones de alto riesgo o solicitudes de urgencia).
 
 El objetivo del proyecto es diseñar, construir e implementar un agente de inteligencia artificial autónomo, especializado en la automatización del flujo de trabajo documental para entornos de salud.
-El desarrollo técnico y funcional de este sistema comprende las siguientes fases básicas detalladas:
 
---
+### Etapas del proyecto
 
-## Etapas del proyecto:
+- **Recepción y procesamiento multiformato:** el sistema procesa archivos PDF, imágenes (recetas manuscritas, órdenes de laboratorio, estudios diagnósticos) y documentos JSON ya estructurados.
+- **Clasificación automatizada de documentos:** cada documento se clasifica en una de seis categorías (Receta Médica, Informe de Estudio de Diagnóstico por Imágenes/Laboratorio, Orden de Solicitud de Procedimiento, Epicrisis / Informe de Alta, Certificado Médico, Otro) y se evalúa mediante un puntaje de incoherencia documental y una validación clínica determinística.
+- **Extracción de entidades y datos clínicos:** Gemini (en Vertex AI) lee el documento directamente y extrae los datos del paciente, del profesional médico, signos vitales, tratamiento, estudios y procedimientos, sin un paso de OCR independiente.
+- **Enrutamiento inteligente:** un grafo de decisión en LangGraph determina la clasificación final del documento, lo organiza automáticamente y dispara una alerta por correo electrónico cuando el caso requiere revisión humana.
+- **Despliegue en la nube:** la aplicación se despliega en Google Cloud Run, con Google Cloud Storage como almacenamiento persistente.
+- **Almacenamiento en OCI (en implementación):** se agregará el almacenamiento en OCI Object Storage (Always Free). Todavía no está implementado; ver [`docs/infraestructura_cloud.md`](docs/infraestructura_cloud.md).
 
-- **Módulo de Recepción y Procesamiento MultiFormato:** el sistema procesa archivos PDF, imágenes (recetas manuscritas, órdenes de laboratorio, estudios diagnósticos) y documentos JSON ya estructurados — ver [formatos de entrada aceptados](docs/contrato-datos.md#formatos-de-entrada-aceptados).
-
-- **Motor de Clasificación Automatizada de Documentos:** el sistema clasifica cada documento en dos dimensiones — **Tipo de Documento** (Clínico / Receta / Otro) y **Situación** (Normal / Urgente / Ambiguo) — y asigna el destino correspondiente. Ver [`docs/contrato_datos.md`](docs/contrato_datos.md).
-
-- **Componente de Extracción de Entidades y Datos Clínicos:** Gemini lee el documento directamente (PDF, imagen o JSON) y extrae los datos del paciente (nombre, diagnósticos, medicamentos, dosis, fechas) y del médico (nombre, matrícula, especialidad).
-
-- **Flujo de Enrutamiento Inteligente:** LangGraph orquesta la clasificación y decide el enrutamiento; los casos Urgente o Ambiguo disparan una alerta por correo (`envio_correo.py`) y quedan marcados para revisión humana.
-
-- **Despliegue en OCI:** proyecto desplegado en una instancia OCI Compute (Ampere A1, Always Free), para demostración y uso público. Detalle en [`docs/infraestructura_cloud.md`](docs/infraestructura_cloud.md).
+---
 
 ## Estado actual del proyecto
- 
+
 | Área | Decisión |
 |---|---|
-| Lenguaje / orquestación | Python puro + LangGraph |
-| Extracción / clasificación | Gemini (multimodal — lee PDF/imagen/JSON directo) |
-| Despliegue | OCI Compute, Ampere A1 Always Free |
-| Almacenamiento | OCI Object Storage — buckets `recibidos` / `procesados` / `auditoria_humana` |
-| Notificaciones | Correo (SMTP/Gmail) en casos Urgente/Ambiguo |
+| Lenguaje / orquestación | Python + LangGraph (grafo de 7 nodos) |
+| Extracción / clasificación | Gemini en Vertex AI (multimodal — lee PDF, imagen y JSON directamente), autenticado con las credenciales de Google Cloud, sin API key |
+| Validación clínica | Capa determinística con catálogos de referencia (CIE-10, medicamentos, valores críticos) |
+| Interfaz | Streamlit (`Frontend/app_streamlit_backend_directo.py`) |
+| Despliegue | Google Cloud Run (contenedor Docker). OCI Compute se descartó por falta de capacidad |
+| Almacenamiento | Google Cloud Storage — buckets `recibidos` / `procesados` / `auditoria-humana` (implementado). OCI Object Storage, Always Free (en implementación) |
+| Notificaciones | Correo electrónico (SMTP/Gmail) para casos que requieren revisión, con cuentas dedicadas al proyecto; las credenciales viven en Secret Manager |
 | Gestión de tareas | Trello |
-| Framework de interfaz | Por definir — Streamlit vs. FastAPI |
- 
-> **Cambio de arquitectura (semana 1):** el plan original usaba Qwen2.5 + mDeBERTa corriendo en máquina virtual vía PyTorch/Transformers. El equipo confirmó el cambio a Gemini + LangGraph para reducir el riesgo de latencia en la CPU limitada de OCI Always Free y simplificar el pipeline (ya no hace falta OCR aparte). Historial completo en [`docs/arquitectura.md`](docs/arquitectura.md).
- 
+
 ## Equipo
 
 | Integrante | Rol |
 |---|---|
 | José Moya | Backend, arquitectura y orquestación |
-| Anahí Ramírez| LLM & ML, grafo de decisión, puntaje de confianza y orquestación|
-| Andrés Mustafá | Cloud & Infraestructura (OCI); contrato de datos, tablero de Trello y documentación/arquitectura |
-| Juan Pablo Palacio | Ingesta de documentos, Casos de prueba |
+| Anahí Ramírez | LLM & ML, grafo de decisión, puntaje de confianza y orquestación |
+| Andrés Mustafá | Cloud e infraestructura; contrato de datos, tablero de Trello y documentación/arquitectura |
+| Juan Pablo Palacio | Ingesta de documentos, casos de prueba |
 | Jonatan Cuero | Interfaz |
- 
-## Arquitectura
- 
-Gemini lee el documento (PDF/imagen/JSON) y extrae la información; LangGraph clasifica por Tipo de Documento y Situación, y decide el enrutamiento — incluyendo la alerta por correo en casos Urgente/Ambiguo. Diagrama completo en [`docs/arquitectura.md`](docs/arquitectura.md).
- 
-## Cloud & Infraestructura (OCI)
- 
-Cuenta Always Free existente, compartment dedicado, 3 buckets segregados por estado, acceso del equipo vía IAM, y despliegue en Compute con VCN mínima. Detalle completo, en [`docs/infraestructura_cloud.md`](docs/infraestructura_cloud.md).
- 
-## Contrato de datos
- 
-Formatos de entrada aceptados (PDF / Imagen / JSON, con ejemplo real) y el JSON de salida estructurado. Detalle completo en [`docs/contrato-datos.md`](docs/contrato-datos.md).
- 
+
+## Documentación
+
+| Documento | Contenido |
+|---|---|
+| [`docs/arquitectura.md`](docs/arquitectura.md) | Diagrama del grafo de decisión, evaluación del documento, componentes e historial de decisiones |
+| [`docs/contrato_datos.md`](docs/contrato_datos.md) | Formatos de entrada, tipos de documento y estructura del JSON de salida |
+| [`docs/infraestructura_cloud.md`](docs/infraestructura_cloud.md) | Arquitectura de despliegue, identidad y permisos, correos de las alertas, guía de despliegue, OCI (planificado) y desarrollo local |
+| [`docs/cambios_produccion.md`](docs/cambios_produccion.md) | Cambios de la rama `production` respecto de `main`, necesarios para el despliegue en Cloud Run |
+| [`Backend_MediFlow/README_Backend.md`](Backend_MediFlow/README_Backend.md) | Documentación técnica del backend |
+
+## Ramas
+
+| Rama | Uso |
+|---|---|
+| `main` | Desarrollo |
+| `production` | Despliegue en Google Cloud Run (Gemini en Vertex AI y ajustes de configuración). Ver [`docs/cambios_produccion.md`](docs/cambios_produccion.md) |
+
 ## Flujo de trabajo del equipo
- 
+
 - **Reunión obligatoria:** lunes y jueves
 - **Reunión diaria (daily):** martes, miércoles y viernes
-- **Gestión de tareas:** Trello https://trello.com/invite/b/6aacb00e8ac49dd1ff659f13/ATTI57ded9186f44107980c9f4c455e4bef3E2FDC5AF/g10-latam-equipo50-mediflow
+- **Gestión de tareas:** Trello — https://trello.com/invite/b/6aacb00e8ac49dd1ff659f13/ATTI57ded9186f44107980c9f4c455e4bef3E2FDC5AF/g10-latam-equipo50-mediflow
 - **Commits:** prefijo por tipo — `feat:`, `fix:`, `docs:`, `test:`
 
 ### Estructura del tablero de Trello
- 
-- **Listas:** `Listos para iniciar` → `En desarrollo` → `Pausado` → `Concluido`
-- **Etiquetas por área:** `Cloud`, `Arquitectura/Agente`, `Backend`, `Interfaz`, `Docs`. 
-- **Convención de tarjetas:** una tarjeta por tarea concreta, no por persona ni por día — así se puede ver de un vistazo qué está bloqueado y por qué.
 
-## Instrucciones de ejecución
- 
-> TODO — completar cuando el backend esté armado.
- 
+- **Listas:** `Listos para iniciar` → `En desarrollo` → `Pausado` → `Concluido`
+- **Etiquetas por área:** `Cloud`, `Arquitectura/Agente`, `Backend`, `Interfaz`, `Docs`
+- **Convención de tarjetas:** una tarjeta por tarea concreta, no por persona ni por día, para ver de un vistazo qué está bloqueado y por qué.
+
+---
+
+## Instalación y configuración del entorno
+
+Este proyecto requiere un ambiente virtual aislado para gestionar sus dependencias de forma segura y evitar conflictos entre librerías. Se recomienda **Anaconda** (o **Miniconda**) para administrarlo.
+
+### 📌 Requisitos previos
+
+1. **Git** instalado.
+2. **Anaconda Distribution** o **Miniconda** (versión más ligera):
+   - 📥 [Descargar Anaconda](https://www.anaconda.com/download)
+   - 📥 [Descargar Miniconda](https://docs.conda.io/en/latest/miniconda.html)
+3. **Google Cloud CLI** (en macOS: `brew install --cask google-cloud-sdk`). Es necesario para ejecutar la aplicación, porque Gemini corre en Vertex AI y se autentica con las credenciales de Google Cloud.
+4. Una cuenta de Google con acceso al proyecto de Google Cloud de MediFlow (rol `roles/aiplatform.user`; la asigna quien administra el proyecto).
+5. **Docker Desktop**, solo si se va a ejecutar la aplicación en contenedor.
+
+### 🚀 Pasos para configurar el ambiente
+
+Abrir la terminal (o **Anaconda Prompt** en Windows) y ejecutar:
+
 ```bash
-# Clonar el repo
-git clone <url-del-repo>
-cd mediflow
- 
-# Entorno local (conda)
-conda create --name mediflow_env python=3.11.13 -y
+git clone https://github.com/No-Country-simulation/G10-LATAM-EQUIPO50-MediFlow.git
+cd G10-LATAM-EQUIPO50-MediFlow
+
+# 1. Crear el ambiente virtual con la versión de Python del proyecto (incluye pip)
+conda create --name mediflow_env python=3.11.13 pip -y
 conda activate mediflow_env
-pip install -r requirements.txt
- 
-# Entorno de despliegue en la instancia OCI (venv)
-# python3 -m venv venv && source venv/bin/activate && pip install -r requirements.txt
- 
-cp .env.example .env    # completar OCI, GEMINI_API_KEY y credenciales de correo
+
+# 2. Verificar que se usa el Python del ambiente y no el del sistema
+python -c "import sys; print(sys.executable)"            # debe apuntar a una ruta que contenga /envs/mediflow_env/
+python -m pip --version # debe mostrar la misma ruta del ambiente
+
+# 3. Instalar las dependencias (siempre con "python -m pip")
+python -m pip install -r requirements.txt
+
+# 4. Autenticarse en Google Cloud (credenciales personales, sin claves de cuenta de servicio)
+gcloud auth application-default login
+
+# 5. Crear el archivo de variables de entorno a partir de la plantilla y completarlo
+cp .env.example .env
+
+# 6. Ejecutar la aplicación
+python -m streamlit run Frontend/app_streamlit_backend_directo.py
 ```
- 
-Ya no hace falta instalar Tesseract ni Poppler en el servidor — Gemini lee PDF/imagen directamente, sin OCR local.
- 
-### Variables de entorno necesarias
- 
+
+El nombre `mediflow_env` puede reemplazarse por el que se prefiera.
+
+`.env.example` es la plantilla versionada, sin valores secretos; `.env` es la copia personal con los valores reales y no se versiona.
+
+Para ejecutar el proyecto en la rama `production` o desplegarlo en Google Cloud Run, ver [`docs/infraestructura_cloud.md`](docs/infraestructura_cloud.md).
+
+#### Solución de problemas: `error: externally-managed-environment`
+
+El mensaje lo emite el Python administrado por el sistema (en macOS, el instalado con Homebrew). Si aparece con el ambiente activado, significa que el `python` que se está ejecutando **no es el del ambiente de conda**: el prefijo `(mediflow_env)` del prompt indica que el ambiente está activo, no que contenga su propio Python. Esto ocurre cuando el ambiente se creó sin Python o cuando otro Python queda antes en el `PATH`. Para resolverlo:
+
+1. Comprobar qué Python se está usando:
+
+   ```bash
+   python -c "import sys; print(sys.executable)"   # debe contener /envs/mediflow_env/
+   ```
+
+   Se consulta `sys.executable` y no `which python` porque en zsh `python` suele ser un alias de `python3` (`python: aliased to python3`), y `which` muestra el alias en vez de la ruta real del intérprete.
+
+   Si la ruta termina en `/anaconda3/bin/python3` o `/miniconda3/bin/python3` (sin `/envs/`), el ambiente activo es `base`, no `mediflow_env`: verificar que `mediflow_env` existe con `conda env list` y activarlo con `conda activate mediflow_env`. Las dependencias no deben instalarse en `base`.
+
+2. Si no apunta al ambiente, recrearlo incluyendo Python y pip de forma explícita:
+
+   ```bash
+   conda deactivate
+   conda env remove -n mediflow_env -y
+   conda create -n mediflow_env python=3.11 pip -y
+   conda activate mediflow_env
+   python -c "import sys; print(sys.executable)"
+   ```
+
+3. Si el intérprete mostrado sigue sin apuntar al ambiente, invocar su intérprete por ruta absoluta (`$CONDA_PREFIX` apunta a la carpeta del ambiente activo):
+
+   ```bash
+   "$CONDA_PREFIX/bin/python" -m pip install -r requirements.txt
+   "$CONDA_PREFIX/bin/python" -m streamlit run Frontend/app_streamlit_backend_directo.py
+   ```
+
+4. No utilizar `--break-system-packages`: modifica el Python del sistema y no es necesario si se trabaja dentro de un ambiente que tenga su propio Python.
+
+#### Solución de problemas: `command not found: streamlit` o `ModuleNotFoundError`
+
+Indica que las dependencias no están instaladas en el ambiente activo. Los paquetes se instalan por ambiente (no por carpeta de proyecto), y activar un ambiente no instala nada: un ambiente nuevo comienza vacío. Para comprobarlo:
+
+```bash
+python -c "import sys; print(sys.executable)"                                         # debe contener /envs/mediflow_env/
+python -m pip list | grep -i -E "streamlit|langgraph|google"
+```
+
+Si la lista está vacía, repetir la instalación desde la raíz del repositorio y revisar las últimas líneas de la salida en busca de errores:
+
+```bash
+conda install pip -y
+python -m pip install -r requirements.txt
+```
+
+Para ejecutar la aplicación se recomienda `python -m streamlit run ...`, que garantiza el uso del Python del ambiente activo.
+
+### Ejecución con Docker
+
+```bash
+docker compose up --build
+```
+
+La aplicación queda disponible en `http://localhost:8501`. Requiere Docker Desktop en ejecución, el archivo `.env` y credenciales de Google Cloud dentro del contenedor (Gemini se ejecuta en Vertex AI); el procedimiento está en [`docs/infraestructura_cloud.md`](docs/infraestructura_cloud.md#desarrollo-local).
+
+### Variables de entorno
+
 | Variable | Descripción |
 |---|---|
-| `OCI_CONFIG_FILE` | Ruta al config file de OCI (`~/.oci/config`) |
-| `OCI_BUCKET_RECIBIDOS` | Nombre del bucket de documentos recibidos |
-| `OCI_BUCKET_PROCESADOS` | Nombre del bucket de documentos procesados |
-| `OCI_BUCKET_AUDITORIA` | Nombre del bucket de la cola de auditoría humana |
-| `GEMINI_API_KEY` | API key de Gemini (Google AI Studio) |
-| `Email_Usuario` / `Email_Password` / `Email_Destino` | Credenciales de la cuenta que envía las alertas por correo (`envio_correo.py`) |
- 
+| `GCP_PROJECT_ID` | ID del proyecto de Google Cloud donde se usa Gemini en Vertex AI (obligatoria) |
+| `MODELO_GEMINI` | Modelo de Gemini que utiliza el backend (opcional; por defecto `gemini-2.5-flash`) |
+| `EMAIL_USUARIO` | Cuenta de Gmail dedicada al proyecto que envía las alertas por correo |
+| `EMAIL_PASSWORD` | Contraseña de aplicación de esa cuenta de Gmail (no la contraseña de acceso) |
+| `EMAIL_DESTINO` | Destinatario(s) de las alertas, separados por comas |
+| `GCS_BUCKET_RECIBIDOS` | Nombre del bucket de documentos recibidos |
+| `GCS_BUCKET_PROCESADOS` | Nombre del bucket de documentos procesados |
+| `GCS_BUCKET_AUDITORIA` | Nombre del bucket de auditoría humana |
+
+`GEMINI_API_KEY` ya no se usa: Gemini se autentica con las credenciales de Google Cloud. Las variables de OCI se definirán cuando se implemente el almacenamiento en OCI. En Cloud Run, los valores de correo se leen desde Secret Manager; ver [`docs/infraestructura_cloud.md`](docs/infraestructura_cloud.md#variables-de-entorno).
+
+---
+
+## Funcionamiento del pipeline
+
+### 1. Preparación del entorno
+
+Antes de comenzar el procesamiento, el programa prepara las carpetas y configuraciones necesarias. La estructura utilizada permite separar los documentos originales, los datos clínicos generados, los documentos normales y los documentos que requieren revisión o atención:
+
+```
+Almacen_Local/
+├── Archivos_Originales/    # archivos originales subidos por el usuario
+└── Datos_Clinicos/         # JSON clínicos generados
+```
+
+Los resultados quedan organizados automáticamente según la clasificación obtenida.
+
+### 2. Configuración de los niveles de evaluación
+
+El sistema permite configurar los umbrales utilizados por LangGraph. Los valores representan un puntaje de incoherencia: cuántas inconsistencias o problemas se detectan en la información del documento. Por defecto:
+
+| Puntaje | Nivel |
+|---|---|
+| 0 a 19 | Normal |
+| 20 a 39 | Revisión |
+| 40 a 59 | Revisión prioritaria |
+| 60 a 100 | Alerta |
+
+> Este puntaje no representa la gravedad médica del paciente, no es un diagnóstico y tampoco una probabilidad de enfermedad.
+
+El usuario puede modificar estos valores al iniciar el programa, para adaptar el comportamiento del sistema a las necesidades del proyecto.
+
+### 3. Configuración de reglas
+
+Además de los umbrales, MediFlow permite configurar las reglas utilizadas durante la evaluación. Estas reglas ayudan a determinar si existe una posible inconsistencia entre:
+
+- La categoría identificada.
+- La información contenida en el documento.
+- Los datos clínicos extraídos.
+- Los datos faltantes.
+- Los datos ambiguos.
+- Las características esperadas para cada tipo de documento.
+
+Por ejemplo, una Receta Médica debe contener determinada información propia de una receta; si el contenido extraído no coincide con lo esperado para esa categoría, el sistema aumenta el puntaje de incoherencia.
+
+### 4. Selección del archivo
+
+Desde la interfaz web, el usuario carga el documento que desea procesar. En modo terminal (`Backend_MediFlow/main.py`), el usuario selecciona el documento introduciendo la ruta manualmente o arrastrando el archivo sobre la terminal; el programa limpia la ruta recibida y valida que el archivo exista.
+
+Tipos de archivo admitidos: `.jpg`, `.jpeg`, `.png`, `.bmp`, `.tiff`, `.webp`, `.pdf` y `.json`.
+
+### 5. Validación del archivo
+
+Antes de comenzar el procesamiento, MediFlow comprueba que el archivo tenga una extensión permitida. Esto evita procesar formatos que el sistema no contempla; si la extensión no es válida, el programa detiene el procesamiento y solicita un archivo compatible.
+
+### 6. Conservación del documento original
+
+El archivo original se conserva sin modificarse. Antes de comenzar el análisis, MediFlow realiza una copia del documento en `Almacen_Local/Archivos_Originales/` con un nombre controlado, para evitar problemas con archivos del mismo nombre. El nombre incorpora fecha, hora y nombre original, y mantiene una referencia del documento utilizado para generar la información clínica.
+
+### 7. Identificación del tipo de archivo
+
+MediFlow identifica el tipo de documento por su extensión para indicarle a Gemini cómo debe interpretarlo:
+
+| Extensión | Tipo MIME enviado |
+|---|---|
+| `.pdf` | `application/pdf` |
+| `.png` | `image/png` |
+| `.jpg`, `.jpeg` | `image/jpeg` |
+| `.webp` | `image/webp` |
+| `.json`, `.bmp`, `.tiff` | `application/octet-stream` |
+
+### 8. Envío del documento a Gemini
+
+Una vez validado el archivo, MediFlow utiliza Gemini en Vertex AI como modelo multimodal para analizarlo. El archivo se lee como bytes y se envía dentro de la misma solicitud, junto con las instrucciones (prompt); no se sube antes a ningún servicio. Esto permite trabajar con información clínica en diferentes formatos: texto, imágenes, PDF e información estructurada. Si Gemini responde con un error temporal 503, MediFlow reintenta hasta tres veces, con una espera creciente entre intentos. El objetivo de esta etapa no es realizar un diagnóstico médico, sino extraer y estructurar la información que aparece en el documento subido por el usuario.
+
+### 9. Extracción de información clínica
+
+Gemini transforma la información encontrada en el documento en un objeto estructurado. Identifica, por ejemplo: paciente, médico, institución, fecha, tipo de documento, medicamentos, tratamientos, indicaciones, estudios y procedimientos. La información se organiza en JSON estructurado para ser procesada automáticamente por LangGraph. El esquema de la salida está descrito en [`docs/contrato_datos.md`](docs/contrato_datos.md).
+
+### 10. Regla importante: no inventar información
+
+El sistema está diseñado para que Gemini no complete información que no aparezca en el documento. Cuando un dato no está disponible se mantiene como `null` o, en el caso de listas, como `[]`. Esto permite distinguir entre *dato encontrado* y *dato no disponible*, y que un dato faltante pueda ser identificado posteriormente por LangGraph.
+
+### 11. Clasificación del documento
+
+Después de obtener el JSON generado por Gemini, el flujo pasa a LangGraph, que identifica la categoría del documento. Las categorías utilizadas son:
+
+- Receta Médica
+- Informe de Estudio de Diagnóstico por Imágenes/Laboratorio
+- Orden de Solicitud de Procedimiento
+- Epicrisis / Informe de Alta
+- Certificado Médico
+- Otro
+
+### 12. Evaluación del documento
+
+LangGraph analiza diferentes señales que pueden indicar que el documento necesita revisión: información urgente, información ambigua, datos faltantes, información que no coincide y problemas de coherencia del documento.
+
+> Estas señales no representan un diagnóstico médico; su función es identificar documentos que pueden requerir una revisión adicional.
+
+### 13. Validación de coherencia
+
+El sistema utiliza las reglas configuradas para comprobar si la información encontrada tiene sentido con respecto al tipo de documento identificado. Por ejemplo, si el documento se identificó como Receta Médica pero la información encontrada no corresponde claramente a una receta, el resultado es una posible inconsistencia. Esto evita depender únicamente de la clasificación inicial realizada por Gemini.
+
+### 14. Puntaje de incoherencia
+
+A partir de las reglas y condiciones detectadas se obtiene un puntaje entre 0 y 100 que representa el nivel de incoherencia detectado en el documento. Un puntaje de 5 indica pocas inconsistencias; un puntaje de 75 indica más elementos que requieren atención.
+
+> No representa gravedad médica, diagnóstico, riesgo de muerte ni probabilidad de enfermedad. Es exclusivamente un indicador del flujo de trabajo para decidir qué nivel de revisión requiere el documento.
+
+### 15. Validación clínica determinística
+
+Una capa adicional, sin llamadas a ninguna API, revisa con reglas y catálogos de referencia lo que Gemini extrajo: fechas, códigos CIE-10, medicamentos y dosis, valores críticos de laboratorio, formato de la matrícula profesional y documentos de doble propósito. Un valor crítico de laboratorio clasifica el documento como `urgente` aunque Gemini no lo haya indicado; conflictos críticos o un puntaje clínico alto lo clasifican como `revision_clinica`. Es código determinista y auditable.
+
+### 16. Clasificación final
+
+Con el puntaje obtenido, la validación clínica y los umbrales configurados, LangGraph determina la clasificación final, con la siguiente prioridad:
+
+```
+urgente > ambiguo > datos_faltantes > revision_clinica > alerta > revision_prioritaria > revision > normal
+```
+
+Esto permite que el sistema organice automáticamente los documentos. Toda clasificación distinta de `normal` requiere revisión humana.
+
+### 17. Organización automática del JSON
+
+Una vez terminada la evaluación, MediFlow genera el JSON clínico final. Dependiendo del resultado, el archivo se guarda automáticamente en una estructura como:
+
+- `Datos_Clinicos/Normal/Receta_Medica/documento.json`
+- `Datos_Clinicos/Alertas/Alerta/Receta_Medica/documento.json`
+
+La ubicación del archivo refleja tanto la clasificación obtenida como el tipo de documento.
+
+### 18. Sincronización con la nube
+
+Además del almacenamiento local, desde la interfaz web el archivo original se sube al bucket `recibidos` de Google Cloud Storage y el JSON final al bucket `procesados` (clasificación `normal`) o `auditoria-humana` (cualquier otra clasificación). Si la sincronización falla, el error se registra en el log y el procesamiento continúa con el almacenamiento local. La sincronización con OCI Object Storage (Always Free) está planificada y aún no está implementada. Detalle en [`docs/infraestructura_cloud.md`](docs/infraestructura_cloud.md).
+
+### 19. Resumen final para el usuario
+
+Después de guardar el JSON, MediFlow muestra un resumen del procesamiento: categoría del documento, clasificación final, puntaje de incoherencia, nivel de coherencia, reglas utilizadas, información de riesgo detectada, datos faltantes, datos ambiguos, motivos de la clasificación y ruta donde se guardó el JSON. También se muestran todos los niveles de evaluación configurados, para que el usuario pueda entender por qué el sistema clasificó el documento de determinada manera, en lugar de recibir únicamente un resultado.
+
+### 20. Decisión del usuario sobre el JSON clínico final
+
+Una vez terminado el procesamiento, el usuario puede decidir qué hacer con el JSON generado:
+
+1. **Conservar** el JSON en la ubicación indicada: permanece dentro de la estructura creada automáticamente por MediFlow.
+2. **Mover** el JSON a otra ubicación: el usuario introduce otra ruta; MediFlow crea la carpeta de destino si es necesario y mueve el JSON.
+3. **Eliminar** el JSON generado: el archivo original permanece conservado en `Almacen_Local/Archivos_Originales/`, por lo que eliminar el JSON no elimina el documento original utilizado para el procesamiento.
+
+Estas acciones se aplican a la copia local; la copia sincronizada en Cloud Storage no se modifica.
+
+### 21. Envío de correo (alertas)
+
+Cuando el sistema detecta que el archivo requiere revisión humana, MediFlow envía un correo a la(s) persona(s) encargada(s), con: nombre del paciente, nombre del médico, tipo de documento, clasificación del documento, motivos por los cuales requiere revisión y ruta donde se guardó el documento generado. De esta forma alerta al personal responsable sobre las inconsistencias del archivo y señala los puntos clave para su revisión.
+
+El correo se envía desde una cuenta de Gmail dedicada al proyecto (`EMAIL_USUARIO`, con su contraseña de aplicación `EMAIL_PASSWORD`) a los destinatarios de `EMAIL_DESTINO`. En Cloud Run esos tres valores se leen desde Secret Manager. La lista de destinatarios que se edita desde la interfaz se guarda en el disco local, que en Cloud Run no es persistente: el valor permanente es `EMAIL_DESTINO`. Detalle en [`docs/infraestructura_cloud.md`](docs/infraestructura_cloud.md#correos-de-las-alertas).
+
+---
+
 ## Casos de prueba
- 
-**100 documentos de prueba ya están en `casos/`** (65 PDF, 25 imagen, 10 JSON) — nombrados `DOC-001` a `DOC-100`.
- 
+
+La carpeta `casos/` contiene 100 documentos de prueba sintéticos en `casos/documents/` (65 PDF, 25 imágenes y 10 JSON), nombrados `DOC-001` a `DOC-100`. En `casos/referencia/` se encuentran los datos de referencia: `ground_truth.jsonl`, `manifest.csv` y los catálogos de la validación clínica (`catalogos/`).
+
+## Tecnologías utilizadas
+
+| Tecnología | Uso |
+|---|---|
+| Python 3.11 | Lenguaje principal; controla todo el flujo de procesamiento |
+| Gemini (`google-genai`) en Vertex AI | Análisis multimodal del documento y extracción de información clínica estructurada |
+| LangGraph | Organiza el flujo de evaluación y clasificación en nodos |
+| Streamlit | Interfaz web |
+| Google Cloud Run | Despliegue del contenedor |
+| Google Cloud Storage | Almacenamiento persistente de documentos y resultados |
+| Google Secret Manager | Correos y contraseña de las alertas en producción |
+| OCI Object Storage (Always Free) | Almacenamiento adicional (planificado) |
+| Docker / Docker Compose | Empaquetado y ejecución local del servicio |
+| JSON | Formato estructurado de los datos clínicos |
+| python-dotenv | Carga de variables de configuración desde `.env` (por ejemplo, el proyecto de Google Cloud y los correos) |
+| `os`, `shutil`, `pathlib`, `datetime`, `json` | Administración de archivos, carpetas, rutas, fechas, copias y JSON |
+
 ## Estructura del repositorio
- 
+
 ```
 G10-LATAM-EQUIPO50-MediFlow/
 ├── README.md
 ├── requirements.txt
-├── .env
-├── app.py                    # interfaz (Streamlit/FastAPI)
-├── agent/
-│   ├── ingesta_archivos.py
-│   ├── extraccion.py          # llamada a Gemini
-│   └── grafo_decision.py      # LangGraph — Tipo de Documento / Situación
+├── .env.example
+├── Dockerfile
+├── docker-compose.yml
+├── .dockerignore
+├── Backend_MediFlow/
+│   ├── README_Backend.md
+│   ├── main.py                    # ejecución en modo terminal
+│   ├── configuracion.py
+│   ├── umbrales.py
+│   ├── reglas.py
+│   ├── archivos.py
+│   ├── gemini.py
+│   ├── langgraph_mediflow.py      # grafo de decisión
+│   ├── validacion_clinica.py      # validación clínica determinística
+│   ├── almacenamiento.py
+│   ├── resultados.py
+│   └── correo.py
+├── Frontend/
+│   └── app_streamlit_backend_directo.py
+├── Frontend_Respaldo/             # versión anterior (FastAPI + Streamlit), sin uso activo
 ├── cloud/
-│   └── oci_storage.py         # wrapper de subida/movimiento de objetos
-├── envio_correo.py            # alertas por correo (Urgente/Ambiguo)
-├── casos/                 # 100 casos de prueba (PDF/imagen/JSON)
+│   ├── gcloud_storage.py
+│   └── sincronizar_almacenamiento.py
+├── casos/                         # documentos de prueba y datos de referencia
 └── docs/
     ├── arquitectura.md
-    ├── contrato-datos.md
-    └── infraestructura-cloud.md
+    ├── contrato_datos.md
+    ├── infraestructura_cloud.md
+    └── cambios_produccion.md
 ```
-
-Este proyecto requiere un ambiente virtual aislado para gestionar sus dependencias de forma segura y evitar conflictos entre librerías. Se recomienda el uso de **Anaconda** (o **Miniconda**) para la administración del entorno.
-
----
-
-## 📌 Requisitos Previos
-
-1. Tener **Git** instalado.
-2. Descargar e instalar **Anaconda Distribution** (o **Miniconda** si prefieres una versión más ligera):
-   - 📥 [Descargar Anaconda](https://www.anaconda.com/download)
-   - 📥 [Descargar Miniconda](https://docs.conda.io/en/latest/miniconda.html)
-
----
-
-## 🚀 Pasos para Configurar el Ambiente Virtual
-
-Abre tu terminal (o **Anaconda Prompt** en Windows) y ejecuta los siguientes comandos:
-
-### 1. Crear el ambiente virtual
-Crea un ambiente de Conda especificando la versión de Python recomendada para este proyecto:
-
-```bash
-
-```
-conda create --name mi_proyecto_env python=3.11.13 -y 
-
-Nota: Puedes cambiar mi_proyecto_env por el nombre que prefieras para tu entorno.
 
 ## Licencia
- 
+
 Proyecto académico — Hackathon ONE G10 Equipo50, Oracle Next Education & Alura.
-# Configuración del Entorno de Desarrollo
-
-------
-### 2. Preparación de Entorno:
-
-Antes de comenzar el procesamiento, el programa prepara las carpetas y configuraciones necesarias.
-
-La estructura utilizada por MediFlow permite separar:
-
-1. Los documentos originales.
-2. Los datos clínicos generados.
-3. Los documentos normales.
-4. Los documentos que requieren revisión o atención.
-
-La estructura general puede quedar de esta manera:
-
-Almacen_Local:
-* Carpeta Archivos_Originales: Aquí se guardan los archivos originales subidos por el usuario.
-* Carpeta Datos_Clínicos: Aquí se guardan los JSON clínicos generados.
-
-Esto permite que los resultados queden organizados automáticamente dependiendo de la clasificación obtenida.
----
-### 3. Configuración de los Niveles de Evaluación:
-
-El sistema permite configurar los valores de los umbrales utilizados por LangGraph,
-Los valores representan un puntaje de incoherencia, es decir,
-qué tantas inconsistencias o problemas detectados existen en la información del documento.
-
-Por defecto, el sistema puede trabajar con los siguientes rangos:
-
-*  0 a 19     Normal.
-* 20 a 39     Revisión.
-* 40 a 59     Revisión prioritaria.
-* 50 a 100    Alerta.
-
-*Nota: Es importante saber que este puntaje no representa la gravedad médica del paciente, no es un diagnóstico y tampoco representa una probabilidad de enfermedad.*
-
-El usuario puede modificar estos valores al iniciar el programa;
-Esto permite adaptar el comportamiento del sistema dependiendo de las necesidades del proyecto.
-
-----
-
----
-### 4. Configuración de Reglas:
-
-Además de los umbrales, MediFlow permite configurar las reglas utilizadas durante la evaluación.
-
-Estas reglas ayudan a determinar si existe una posible inconsistencia entre:
-
-* La categoría identificada.
-* La información contenida en el documento.
-* Los datos clínicos extraídos.
-* Los datos faltantes.
-* Los datos ambiguos.
-* Las características esperadas para cada tipo de documento.
-
-Por ejemplo, una Receta Médica debería contener determinada información propia de una receta;
-Si el contenido extraído no coincide con lo esperado para esa categoría, el sistema puede aumentar el puntaje de incoherencia.
-
----
-
----
-### 5. Selección de Archivo:
-
-El usuario selecciona desde la terminal el documento que desea procesar,
-El programa permite trabajar con diferentes tipos de archivos, entre ellos:
-
-* .jpg
-* .png
-* .jpeg
-* .bmp
-* .webb
-* .pdf
-* .json
-
-El usuario puede introducir la ruta manualmente o utilizar una ruta obtenida mediante arrastrar y soltar el archivo sobre la terminal;
-Después el programa limpia la ruta recibida y valida que el archivo exista.
----
-
----
-### 6. Validación de Archivo:
-
-Antes de comenzar el procesamiento, MediFlow comprueba que el archivo tenga una extensión permitida;
-Esto evita intentar procesar formatos que el sistema no contempla;
-Si el archivo no tiene una extensión válida, el programa detiene el procesamiento y solicita un archivo compatible.
-
----
-
----
-### 7. Conservación del Documento Original:
-
-Una de las características importantes del flujo es que el archivo original se conserva sin modificarse;
-Antes de comenzar el análisis, MediFlow realiza una copia del documento dentro de:
-
-*Almacen_Local/Archivos_Originales/*
-
-Además, el sistema genera un nombre controlado para evitar problemas con archivos que tengan el mismo nombre;
-
-El nombre se incorpora con la información siguiente:
-
-* Fecha
-* Hora
-* Nombre original
-
-La finalidad es mantener una referencia del documento original utilizado para generar la información clínica.
----
-
----
-### 8. Identificación de Tipo de Archivo:
-
-MediFlow identifica el tipo de documento para determinar cómo debe ser enviado a Gemini,
-Por ejemplo:
-
-* PDF application/pdf
-* PNG  -> image/png
-* JPEG -> image/jpeg
-* JSON -> application/json
-
-Esta información permite que Gemini reciba correctamente el archivo.
----
-
----
-### 9. Envio del Documento a Gemini:
-
-Una vez validado el archivo, MediFlow utiliza Gemini como modelo multimodal para analizar el documento;
-Gemini recibe el archivo directamente y analiza su contenido;
-Esto permite trabajar con documentos que pueden contener información clínica en diferentes formatos, como:
-
-* Texto.
-* Imágenes.
-* PDFs.
-* Información estructurada.
-
-El objetivo de esta etapa no es realizar un diagnóstico médico;
-Su función es extraer y estructurar la información que aparece en el documento subido por el usuario.
----
-
----
-### 10. Extracción de información Clínica:
-
-Gemini transforma la información encontrada en el documento en un objeto estructurado;
-Por ejemplo, puede identificar información relacionada con:
-
-* Paciente
-* Médico
-* Institución
-* Fecha
-* Tipo de documento
-* Medicamentos
-* Tratamientos
-* Indicaciones
-* Estudios
-* Procedimientos
-
-La información se organiza en formato JSON estructurado para que posteriormente pueda ser procesada automáticamente por LangGraph.
----
-
----
-### 11. Regla IMPORTANTE: No inventar Información
-
-El sistema está diseñado para que Gemini no complete información que no aparezca en el documento.
-Cuando un dato no está disponible, debe mantenerse como:
-
-* Null
-
-o cuando se trata de una lista:
-
-* []
-
-Esto es importante porque el sistema trabaja con información clínica y debe distinguir entre: Dato encontrado y Dato NO disponible;
-De esta manera, un dato faltante puede ser identificado posteriormente por LangGraph.
----
-
----
-### 12. Clasificación del Documento:
-
-Después de obtener el JSON generado por Gemini, el flujo pasa a LangGraph;
-Una de sus responsabilidades es identificar la categoría que se encuentra en el documento.
-Las categorías utilizadas por el sistema son:
-
-* Receta Médica
-* Informe de Estudio de Diagnóstico por Imágenes/Laboratorio
-* Orden de Solicitud de Procedimiento
-* Epicrisis / Informe de Alta
-* Certificado Médico
-* Otro
-
-Esta clasificación permite organizar automáticamente los documentos.
----
-
----
-### 13. Evaluación del Documento:
-
-LangGraph también participa en la evaluación del documento;
-El sistema analiza diferentes señales que pueden indicar que el documento necesita revisión;
-Entre ellas pueden encontrarse:
-
-* Información urgente
-* Información ambigua
-* Datos faltantes
-* Información que no coincide
-* Problemas de coherencia del documento
-
-*Nota: Estas señales no representan un diagnóstico médico; Su función es identificar documentos que pueden requerir una revisión adicional.*
----
-
----
-### 14. Validación de Coherencia:
-
-Una de las partes importantes del flujo es la validación de coherencia entre el documento y su categoría;
-El sistema utiliza las reglas configuradas para comprobar si la información encontrada tiene sentido con respecto al tipo de documento identificado.
-Por ejemplo:
-
-* Documento identificado:
-  Receta Médica
-
-* Información encontrada:
-  Datos que no corresponden
-  claramente a una receta
-
-* Resultado:
-  Posible inconsistencia
-
-Esto evita depender únicamente de la clasificación inicial realizada por Gemini.
----
-
-
----
-### 15. Puntaje de incoherencia:
-
-A partir de las reglas y condiciones detectadas se obtiene un puntaje de rango entre: 0 a 100.
-
-Este valor representa el nivel de incoherencia detectado en el documento.
-Por ejemplo:
-
-* Puntaje igual a 5:
-  Significa que se encontraron pocas inconsistencias en el documento.
-
-* Puntaje igual a 75:
-  indica que se detectaron más elementos que requieren atención.
-
-*Nota: NO representa gravedad médica, diagnóstico, riesgo de muerte ni probabilidad de enfermedad.*
-
-Es exclusivamente un indicador utilizado por el flujo de trabajo, para decidir qué nivel de revisión requiere el documento.
----
-
----
-### 16. Clasificación Final:
-Con el puntaje obtenido y los umbrales configurados, LangGraph determina una clasificación final;
-Por ejemplo:
-
-* Normal.
-* Revisión.
-* Revisión Prioritaria.
-* Alerta
-
-Esto permite que el sistema organice automáticamente los documentos.
----
-
----
-### 17. Organización Automatica del JSON:
-Una vez terminada la evaluación, MediFlow genera el JSON clínico final;
-Dependiendo del resultado, el archivo se guarda automáticamente en una estructura como:
-
-* Datos_Clinicos/Normal/Receta_Medica/documento.json
-o
-* Datos_Clinicos/Alertas/Alerta/Receta_Medica/documento.json
-
-De esta forma, la ubicación del archivo refleja tanto:
-
-* La clasificación obtenida.
-* El tipo de documento.
----
-
----
-### 18. Resumen Final para el Usuario:
-
-Después de guardar el JSON, MediFlow muestra un resumen del procesamiento;
-El usuario puede conocer:
-
-* Categoría del documento
-* Clasificación final
-* Puntaje de incoherencia
-* Nivel de coherencia
-* Reglas utilizadas
-* Información de riesgo detectada
-* Datos faltantes
-* Datos ambiguos
-* Motivos de la clasificación
-* Ruta donde se guardó el JSON
-
-También se muestran todos los niveles de evaluación configurados;
-Esto permite que el usuario pueda entender por qué el sistema clasificó el documento de determinada manera, 
-en lugar de recibir únicamente un resultado.
----
-
----
-### 19. Decisión del Usuario sobre el JSON clínico final generado:
-
-Una vez terminado el procesamiento, el usuario puede decidir qué hacer con el JSON generado;
-MediFlow ofrece tres opciones:
-
-1. Mantener el JSON en la ubicación indicada
-2. Guardar el JSON en otra ubicación
-3. Eliminar el JSON generado
-
-Opción 1: Mantener
-El JSON permanece dentro de la estructura creada automáticamente por MediFlow.
-
-Opción 2: Guardar en otra ubicación
-El usuario puede introducir otra ruta;
-MediFlow puede crear la carpeta de destino si es necesario y mover el JSON hacia esa ubicación.
-
-Opción 3: Eliminar
-El usuario puede eliminar el JSON final si considera que no desea conservarlo.
-El archivo original permanece conservado en:
-
-*Almacen_Local/Archivos_Originales/*
-
-Por lo tanto, eliminar el JSON generado no elimina el documento original utilizado para el procesamiento.
----
-
----
-### 20. Envio de Correo (Alertas):
-
-MediFlow tiene la capacidad de mandar un correo a la(s) persona(s) encargada(s),
-en caso que el sistema detecte que el archivo subido requiere revisión humanada.
-Manda un mensaje que contiene los siguientes puntos:
-
-* Nombre del Paciente.
-* Nombre del Médico.
-* Tipo de documento.
-* Clasificación del documento.
-* Motivos por los cuales requiere revisión por una persona encargada del área.
-* Muestra la ruta donde se guardo el documento generado.
-
-De esta forma alerta al personal responsable que hay inconsistencias en el archivo, 
-marcando puntos estrategicos para llevar a cabo su revisión.
----
-
-----
-### 21. Tecnologias Usadas:
-
-El prototipo utiliza principalmente las siguientes herramientas:
-
-* Python: Se utiliza como lenguaje principal para controlar todo el flujo de procesamiento.
-
-* Gemini: Se utiliza para el análisis multimodal del documento y la extracción de información clínica estructurada.
-
-* LangGraph: Se utiliza para organizar el flujo de evaluación y clasificación mediante diferentes etapas o nodos.
-
-* JSON: Se utiliza como formato estructurado para almacenar los datos clínicos obtenidos.
-
-* python-dotenv: Permite cargar de manera segura variables de configuración desde el archivo: .env;
-Por ejemplo, la clave utilizada para acceder a Gemini.
-
-También se utlizan:
-Para Sistema de archivos de Python;
-
-las Bibliotecas como:
-* os
-* shutil
-* pathlib
-* datetime
-* json
-
-Que Permiten administrar:
-
-1. Archivos.
-2. Carpetas.
-3. Rutas.
-4. Fechas.
-5. Copias.
-6. JSON.
----
