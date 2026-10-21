@@ -26,6 +26,10 @@ chroma_db/
 # Ignorar archivos 
 casos/referencia/generar_dataset.py
 
+
+# Clave de Google Cloud para desarrollo local
+gcp-dev-key.json
+
 # ignorar almcen local
 #Almacen_Local/
 
