@@ -104,24 +104,48 @@ Ruta_Configuracion_Correos = (
 #Cambio Nuevo:
 #Funcion para cargar los correos configurados.
 
+
+#Cambio Nuevo:
+#Funcion para cargar los correos configurados.
+
 def cargar_correos_streamlit():
 
     if Ruta_Configuracion_Correos.exists():
 
         try:
 
-            with open(Ruta_Configuracion_Correos,"r",encoding="utf-8") as archivo:
+            with open(
+                Ruta_Configuracion_Correos,
+                "r",
+                encoding="utf-8"
+            ) as archivo:
 
-                correos = json.load(archivo)
+                configuracion = json.load(archivo)
 
-                if isinstance(correos,list):
+                #CAMBIO NUEVO:
+                #Aceptamos el formato compartido con el backend.
+                if isinstance(configuracion, dict):
 
-                    return correos
+                    correos = configuracion.get(
+                        "correos_destino",
+                        []
+                    )
 
-        except Exception:
+                    if isinstance(correos, list):
+                        return correos
 
-            pass
+                #Compatibilidad con archivos anteriores
+                #que guardaban directamente una lista.
+                elif isinstance(configuracion, list):
 
+                    return configuracion
+
+        except Exception as error:
+
+            print(
+                "\nError al cargar los correos en Streamlit:"
+            )
+            print(error)
 
     return [
         correo.strip()
@@ -138,6 +162,12 @@ def cargar_correos_streamlit():
 
 def guardar_correos_streamlit(correos):
 
+    #CAMBIO NUEVO:
+    #Usamos la misma estructura JSON que correo.py.
+    configuracion = {
+        "correos_destino": correos
+    }
+
     with open(
         Ruta_Configuracion_Correos,
         "w",
@@ -145,11 +175,12 @@ def guardar_correos_streamlit(correos):
     ) as archivo:
 
         json.dump(
-            correos,
+            configuracion,
             archivo,
             ensure_ascii=False,
             indent=4
         )
+
         
 
 #CAMBIO NUEVO:

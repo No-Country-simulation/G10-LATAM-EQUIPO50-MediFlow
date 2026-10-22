@@ -42,7 +42,8 @@ if variables_faltantes:
 cliente_gemini = genai.Client(
     vertexai=True,
     project=GCP_PROJECT_ID,
-    location="us-central1"
+    location="global"
+    #location="us-central1"
 )
 #Si todo esta bien:
 print("Cliente de Gemini Vertex AI creado con éxito")
