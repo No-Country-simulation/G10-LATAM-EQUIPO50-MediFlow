@@ -8,6 +8,8 @@ import os
 #Permite copiar el archivo original.
 import shutil
 
+import streamlit as st  # Aseguramos el import para el favicon
+
 # Permite obtener fecha y hora para generar
 from datetime import datetime
 

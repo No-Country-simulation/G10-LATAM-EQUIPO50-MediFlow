@@ -6,37 +6,18 @@ from librerias import *
 #Configuracion compartida:
 from configuracion import *
 
-#CAMBIO: Importamos time para poder esperar 
+#CAMBIO: Importamos time para poder esperar
 #entre cada intento de comunicacion con Gemini:
-import time 
+import time
+
+#Importamos la funcion para obtener el MIME type del archivo:
+from archivos import obtener_mime_type
 
 #CAMBIO: Importamos los errores de Gemini para,
-#poder identificar especificamente el error 503. 
+#poder identificar especificamente el error 503.
 from google.genai import errors
+from google.genai import types
 
-
-
-def subir_archivo_a_gemini(ruta_archivo):
-    """
-    Envia el archivo a Gemini.
-    IMPORTANTE:
-    Aqui NO estamos analizando todavia el documento
-    Después utilizaremos el archivo subido
-    para realizar el analisis
-    """
-
-    #Testeando:
-    print("\nSubiendo Archivo a Gemini")
-    print(f"\nArchivo:\n{ruta_archivo}")
-
-    # Subimos el Archivo
-    archivo_gemini = cliente_gemini.files.upload(file = ruta_archivo)
-    print("\nArchivo subido correctamente!!!")
-
-    #Mostramos la informacion proporcionada por Gemini:
-    print(f"\nNombre asignado por Gemini:" f"\n{archivo_gemini.name}")
-
-    return archivo_gemini
 
 def crear_prompt_prueba(tipo_archivo,nombre_archivo):
     """
@@ -306,9 +287,8 @@ Devuelve ÚNICAMENTE JSON válido.
 
 NO utilices Markdown.
 
-NO escribas:
+NO escribas bloques Markdown como ```json.
 
-```json
 NO agregues explicaciones antes o después
 del JSON.
 
@@ -410,7 +390,7 @@ La estructura debe ser EXACTAMENTE:
             "datos_ambiguos": [],
             "datos_faltantes": []
         }},
-    
+
         "clasificacion_documento": {{
             "categoria": "Otro"
         }}
@@ -479,7 +459,6 @@ def validar_json_clinico(texto_respuesta,nombre_archivo):
 
         print("\nRespuesta recibida de Gemini: ")
         print(texto_respuesta)
-
         raise ValueError("\nGemini no devolvió JSON válido.\n" f"Error: {error}")
 
     #Comprobando que el JSON sea un objeto.
@@ -524,8 +503,22 @@ def procesar_con_gemini(ruta_archivo,tipo_archivo,nombre_archivo):
     """
     #Realiza el análisis completo con Gemini.
 
-    #Paso1 Subir archivo:
-    archivo_gemini = subir_archivo_a_gemini(ruta_archivo)
+    # leemos los bytes del archivo local de forma directa.
+    try:
+        with open(ruta_archivo, "rb") as archivo_local:
+            contenido_bytes = archivo_local.read()
+        # Mapeamos extensiones comunes para indicarle el Mime Type correcto a Vertex AI
+        #Obtenemos el MIME type configurado para el archivo:
+        tipo_mime = obtener_mime_type(ruta_archivo)
+
+        # Empaquetamos en la estructura que Vertex AI requiere
+        archivo_payload = types.Part.from_bytes(
+            data=contenido_bytes,
+            mime_type=tipo_mime
+        )
+    except Exception as e:
+        raise RuntimeError(f"No se pudo cargar el archivo para enviar a Gemini: {e}")
+
 
     #Paso2 Creamos las instrucciones a realiar para analizar el archivo subido:
     prompt = crear_prompt_prueba(tipo_archivo,nombre_archivo)
@@ -534,47 +527,44 @@ def procesar_con_gemini(ruta_archivo,tipo_archivo,nombre_archivo):
     print("\nEspere El Agente Inteligente MediFlow con Gemini integrado: ")
     print("Por el Equipo50_LATAM_G10, esta analizando el archivo subido\n")
 
-    #Paso3 Enviamos el prompt + archivo subido a Gemini
-    #CAMBIO: Creamos el numero maximo de intentos que realizara MediFlow
-    #si Gemini presenta un error temporal 503:
-    maximo_intentos = 3 
-    
-    #CAMBIO: Creamos una variable para controlar el numero de intento actual:
-    intento = 1 
-    
-    #CAMBIO: Repetimos la solicitud mientras no superemos el numero maximo de intentos: 
+    # Paso 3: Enviamos el prompt + archivo convertido en bytes a Gemini
+    maximo_intentos = 3
+
+
+    intento = 1
+
     while intento <= maximo_intentos:
         try:
-            #CAMBIO: Mostramos al usuario el intento 
-            #que MediFlow esta realizando:
+
             print(f"Intento {intento} de {maximo_intentos} con Gemini...")
 
-            respuesta = cliente_gemini.models.generate_content(model = MODELO_GEMINI,contents = [prompt,archivo_gemini])
+            # 🚨 CAMBIO PARA VERTEX AI: Pasamos 'archivo_payload' (bytes) en vez de 'archivo_gemini'
+            respuesta = cliente_gemini.models.generate_content(
+                model=MODELO_GEMINI,
+                contents=[prompt, archivo_payload]
+            )
 
-            #CAMBIO: Si Gemini responde correctamente, 
-            #salimos del ciclo de intentos. 
+            # Si Gemini responde correctamente, salimos del ciclo de intentos.
             break
-        #CAMBIO: Capturamos especificamente los errores del servidor de Gemini: 
-        except errors.ServerError as error: 
-            #CAMBIO: Comprobamos si el error corresponde al codigo 503 de servicio no disponible: 
-            if error.code == 503: 
-                #CAMBIO: Si todavia tenemos intentos disponibles, 
-                #esperamos antes de volver a realizar la solicitud:
-                if intento < maximo_intentos: 
-                    #CAMBIO: La espera aumenta dependiendo del numero de intento: 
+
+        except errors.ServerError as error:
+            # Comprobamos si el error corresponde al código 503
+
+            if error.code == 503:
+
+                if intento < maximo_intentos:
+
                     tiempo_espera = 2 ** intento
-                    print( f"\nGemini no esta disponible temporalmente." f"\nError 503." f"\nEsperando {tiempo_espera} segundos antes" f" del siguiente intento...\n" )
+                    print(f"\nGemini no está disponible temporalmente.\nError 503.\nEsperando {tiempo_espera} segundos antes del siguiente intento...\n")
                     time.sleep(tiempo_espera)
-                    #CAMBIO: Aumentamos el numero de intento: 
+
                     intento += 1
-                #CAMBIO: Si ya se utilizaron todos los intentos, 
-                #mostramos el error original: 
+
                 else:
-                    print( "\nGemini no estuvo disponible despues de " f"{maximo_intentos} intentos." )
+                    print(f"\nGemini no estuvo disponible después de {maximo_intentos} intentos.")
                     raise error
-            #CAMBIO: Si Gemini devuelve otro error de servidor diferente a 503, 
-            #no realizamos nuevos intentos: 
-            else: raise error
+            else:
+                raise error
 
     #Paso 4 Obtenemos el texto de respuesta que genero Gemini:
     texto_respuesta = respuesta.text

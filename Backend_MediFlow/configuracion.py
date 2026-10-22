@@ -5,20 +5,9 @@
 #del archivo librerias.py
 from librerias import *
 
-#Obtencion de API_KEY Gemini:
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-
-#Comprobamos que si esta cargada la API_KEY:
-if not GEMINI_API_KEY:
-
-    raise ValueError(
-        "\nNo se encontró GEMINI_API_KEY.\n\n"
-        "Crea un archivo .env en la carpeta del proyecto "
-        "con:\n\n"
-        "GEMINI_API_KEY = TU_API_KEY"
-    )
-
-print("\nAPI KEY encontrada!!")
+#Variables importantes de configuracion de MediFlow:
+GCP_PROJECT_ID = os.getenv("GCP_PROJECT_ID")
+MODELO_GEMINI = os.getenv("MODELO_GEMINI", "gemini-2.5-flash") # Valor por defecto seguro
 
 #Parte Nueva: Configuracion del Correo
 #Obtencion de las Credenciales del correo:
@@ -26,19 +15,37 @@ EMAIL_USUARIO = os.getenv("EMAIL_USUARIO")
 EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
 EMAIL_DESTINO = os.getenv("EMAIL_DESTINO")
 
+# 2. SISTEMA DE VALIDACIÓN PROFESIONAL
+# Centralizamos la comprobación para evitar alertas genéricas o caídas inesperadas.
+variables_criticas = {
+    "GCP_PROJECT_ID": GCP_PROJECT_ID,
+    "EMAIL_USUARIO": EMAIL_USUARIO,
+    "EMAIL_PASSWORD": EMAIL_PASSWORD,
+    "EMAIL_DESTINO": EMAIL_DESTINO
+}
+
+variables_faltantes = [nombre for nombre, valor in variables_criticas.items() if not valor]
+
+if variables_faltantes:
+    mensaje_error = (
+        f"\n[🚨 CONFIGURATION ERROR] Faltan las siguientes variables de entorno: {', '.join(variables_faltantes)}\n"
+        f"👉 Si estás en LOCAL: Asegúrate de definirlas en tu archivo '.env'.\n"
+        f"👉 Si estás en CLOUD RUN: Asegúrate de inyectarlas usando la bandera '--set-env-vars' en el despliegue.\n"
+    )
+    # En lugar de romper el backend con un ValueError agresivo, lanzamos un aviso claro
+    print(mensaje_error)
+
 #Creando Cliente de Gemini
 #Creamos el cliente utilizando nuestra API KEY
 #Este objeto será el encargado de comunicarse
 #con los servicios de Gemini
-cliente_gemini = genai.Client(api_key = GEMINI_API_KEY)
-
+cliente_gemini = genai.Client(
+    vertexai=True,
+    project=GCP_PROJECT_ID,
+    location="us-central1"
+)
 #Si todo esta bien:
-print("Cliente de Gemini creado")
-
-#Modelo de IA que usaremos
-#Mantenemos el modelo en una variable independiente
-#para poder cambiarlo facilmente
-MODELO_GEMINI = os.getenv("MODELO_GEMINI")
+print("Cliente de Gemini Vertex AI creado con éxito")
 
 #Configuracion De Carpetas:
 #Obtenemos la ubicación del archivo Python que estamos ejecutando.
@@ -73,7 +80,6 @@ Carpeta_Configuracion_Reglas = os.path.join(Carpeta_Almacen,"configuracion_regla
 Extensiones_Imagen = {
     ".jpg",
     ".jpeg",
-    ".png",
     ".png",
     ".bmp",
     ".tiff",

@@ -34,8 +34,12 @@ services:
     # - Configuraciones
     # - Archivos generados
     # aunque el contenedor sea reconstruido.
+
     volumes:
       - ./Almacen_Local:/app/Almacen_Local
+      # Monta la clave de la máquina real dentro del contenedor
+      - ./gcp-dev-key.json:/app/gcp-dev-key.json:ro
+
 
 
     #Reinicio automatico

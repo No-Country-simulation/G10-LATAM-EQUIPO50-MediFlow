@@ -3,6 +3,7 @@
 #Permite crear la interfaz grafica de Streamlit.
 import streamlit as st
 
+
 #Permite trabajar con archivos y rutas.
 import os
 
@@ -21,12 +22,23 @@ import json
 # Permite cargar las variables del archivo .env
 from dotenv import load_dotenv
 
+
 # Permita calcular el tiempo de procesamiento de MediFlow.
 # Punto 6. Flujo
 import time
 
 #Permite calcular la hora limite de atencion de cada documento.
 from datetime import datetime, timedelta
+
+
+#Configuracion principal de MediFlow:
+#Configuramos el titulo de la aplicacion.
+st.set_page_config(
+   page_title="MediFlow",
+  page_icon="🏥",
+ layout="wide"
+)
+
 
 # Carga las variables del archivo .env
 load_dotenv()
@@ -178,14 +190,6 @@ def texto_tiempo_objetivo(clasificacion):
 
     return f"Atencion objetivo: {duracion} (antes de las {hora_limite:%H:%M del %d/%m})"
 
-
-#Configuracion principal de MediFlow:
-#Configuramos el titulo de la aplicacion.
-st.set_page_config(
-   page_title="MediFlow",
-  page_icon="🏥",
- layout="wide"
-)
 
 #Titulo principal de MediFlow.
 #CAMBIO NUEVO: Utilizamos un encabezado personalizado para

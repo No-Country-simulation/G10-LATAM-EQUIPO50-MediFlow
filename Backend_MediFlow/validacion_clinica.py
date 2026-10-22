@@ -27,7 +27,7 @@ import unicodedata
 from pathlib import Path
 
 RAIZ = Path(__file__).resolve().parent
-CATALOGOS = RAIZ / "casos" / "referencia" / "catalogos"
+CATALOGOS = RAIZ.parent / "casos" / "referencia" / "catalogos"
 
 # PESOS DE CADA CONFLICTO (configurables, igual que las reglas existentes)
 PESOS_DEFECTO = {

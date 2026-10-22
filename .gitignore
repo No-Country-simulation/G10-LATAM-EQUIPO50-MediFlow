@@ -26,9 +26,15 @@ chroma_db/
 # Ignorar archivos 
 casos/referencia/generar_dataset.py
 
+
+# Clave de Google Cloud para desarrollo local
+gcp-dev-key.json
+
 # ignorar almcen local
 #Almacen_Local/
 
 #ignorar evaluacion y evaluacion resultados
 evaluacion.py
 evaluacion_resultados/
+# Archivos locales de trabajo y datos clinicos de MediFlow
+/Almacen_Local/
