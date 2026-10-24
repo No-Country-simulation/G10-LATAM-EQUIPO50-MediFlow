@@ -611,12 +611,29 @@ with pestana_procesamiento:
                         clasificacion_final,
                         categoria
                     )
-                    sincronizar_json_final(ruta_json, clasificacion_final)
+                    sincronizar_json_final(ruta_json, clasificacion_final, categoria)
+
+
+                    #Determinar el nombre del bucket usando la misma lógica de negocio
+                    if clasificacion_final == "urgente":
+                        bucket_utilizado = "mediflow-urgencias"
+                    elif clasificacion_final in {"ambiguo", "datos_faltantes", "alerta", "revision_prioritaria", "revision"}:
+                            bucket_utilizado = "mediflow-revision-humana"
+                    elif clasificacion_final == "normal":
+                        if categoria == "Receta Médica":
+                             bucket_utilizado = "mediflow-farmacia"
+                        elif categoria == "Orden de Solicitud de Procedimiento":
+                            bucket_utilizado = "mediflow-auditoria-autorizaciones"
+                        else:
+                            bucket_utilizado = "mediflow-historia-clinica"
+                    else:      
+                        bucket_utilizado = "mediflow-revision-humana"
+
                     etapas.append({
-                        "etapa": "Guardado y sincronizacion",
-                        "detalle": "JSON final almacenado",
-                        "duracion_s": round(time.perf_counter() - inicio_etapa, 2)
-                    })
+                                "etapa": "Guardado y sincronizacion",
+                                "detalle": f"JSON final almacenado en {bucket_utilizado} y sincronizado con la nube",
+                                "duracion_s": round(time.perf_counter() - inicio_etapa, 2)
+                                })
 
 
                     #CAMBIO NUEVO:

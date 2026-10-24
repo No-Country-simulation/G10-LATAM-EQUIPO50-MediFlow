@@ -90,8 +90,11 @@ La cuenta propietaria del proyecto recibió además, de forma explícita, `roles
 | `EMAIL_PASSWORD` | Contraseña de aplicación de esa cuenta de Gmail | Secret Manager: `mediflow-email-password` |
 | `EMAIL_DESTINO` | Destinatario(s) de las alertas, separados por comas | Secret Manager: `mediflow-destinatary-email` |
 | `GCS_BUCKET_RECIBIDOS` | Nombre del bucket de documentos recibidos | Variable de entorno |
-| `GCS_BUCKET_PROCESADOS` | Nombre del bucket de documentos procesados | Variable de entorno |
-| `GCS_BUCKET_AUDITORIA` | Nombre del bucket de auditoría humana | Variable de entorno |
+| `GCS_BUCKET_HISTORIA_CLINICA` | Nombre del bucket de documentos de archivo | Variable de entorno |
+| `GCS_BUCKET_URGENCIAS` | Nombre del bucket de documentos de urgencias | Variable de entorno |
+| `GCS_BUCKET_FARMACIA` | Nombre del bucket de documentos de farmacia | Variable de entorno |
+| `GCS_BUCKET_AUDITORIA_AUTORIZACIONES` | Nombre del bucket de documentos de autorizaciones | Variable de entorno |
+| `GCS_BUCKET_REVISION_HUMANA` | Nombre del bucket de auditoría humana | Variable de entorno |
 
 `GEMINI_API_KEY` **ya no se usa**: Gemini se autentica con la identidad de Google Cloud. Si existe un secreto con esa clave de una versión anterior de la guía (`mediflow-gemini-key`), no es necesario.
 
@@ -153,7 +156,8 @@ gcloud services enable run.googleapis.com artifactregistry.googleapis.com \
 ### 2. Crear los buckets
 
 ```bash
-for BUCKET in mediflow-recibidos mediflow-procesados mediflow-auditoria-humana; do
+for BUCKET in mediflow-recibidos mediflow-historia-clinica mediflow-revision-humana \
+              mediflow-urgencias mediflow-farmacia mediflow-auditoria-autorizaciones; do
   gcloud storage buckets create gs://${BUCKET} \
     --location=${REGION} \
     --uniform-bucket-level-access \
@@ -175,7 +179,8 @@ gcloud projects add-iam-policy-binding ${PROYECTO} \
   --role="roles/aiplatform.user"
 
 # Cloud Storage: solo sobre los tres buckets
-for BUCKET in mediflow-recibidos mediflow-procesados mediflow-auditoria-humana; do
+for BUCKET in mediflow-recibidos mediflow-historia-clinica mediflow-revision-humana \
+              mediflow-urgencias mediflow-farmacia mediflow-auditoria-autorizaciones; do
   gcloud storage buckets add-iam-policy-binding gs://${BUCKET} \
     --member="serviceAccount:${SA}" \
     --role="roles/storage.objectAdmin"
@@ -349,7 +354,7 @@ OCI Compute (instancia Ampere A1) se evaluó como plataforma de despliegue y se 
 Docker es opcional. Sin él, la aplicación se ejecuta dentro del ambiente de conda:
 
 ```bash
-streamlit run Frontend/app_streamlit_backend_directo.py
+streamlit run Frontend/app_streamlit_backend.py
 ```
 
 Con Docker:

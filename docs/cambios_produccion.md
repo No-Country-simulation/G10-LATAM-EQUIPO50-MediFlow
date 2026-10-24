@@ -21,7 +21,7 @@ El cambio de fondo es que el backend deja de autenticarse ante Gemini con una AP
 | `Backend_MediFlow/configuracion.py` | Cliente de Gemini sobre Vertex AI; nueva variable `GCP_PROJECT_ID`; validación centralizada de variables de entorno; `MODELO_GEMINI` con valor por defecto; `st.set_page_config` con ícono emoji |
 | `Backend_MediFlow/gemini.py` | El archivo se envía como bytes dentro de la solicitud, sin subirlo antes a la Files API; reintentos ante error 503 sin cambios de lógica |
 | `Backend_MediFlow/librerias.py` | Se importa `streamlit as st` (lo usa `configuracion.py`) |
-| `Frontend/app_streamlit_backend_directo.py` | `st.set_page_config` se mueve al inicio del archivo, antes de cualquier otra instrucción de Streamlit |
+| `Frontend/app_streamlit_backend.py` | `st.set_page_config` se mueve al inicio del archivo, antes de cualquier otra instrucción de Streamlit |
 | `Frontend_Respaldo/app_streamlit.py` | `st.set_page_config` comentado (versión anterior, sin uso activo) |
 | `.env.example` | Archivo nuevo en esta rama con las variables de entorno del proyecto |
 

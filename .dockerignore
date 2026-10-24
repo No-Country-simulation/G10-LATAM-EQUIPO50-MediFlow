@@ -10,6 +10,10 @@
 #utilizando env_file.
 .env
 
+#Clave de la cuenta de servicio para desarrollo local:
+#se monta como volumen en docker-compose.yml, nunca se copia a la imagen.
+gcp-dev-key.json
+
 #Python
 __pycache__/
 *.py[cod]

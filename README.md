@@ -31,7 +31,7 @@ El objetivo del proyecto es diseñar, construir e implementar un agente de intel
 | Lenguaje / orquestación | Python + LangGraph (grafo de 7 nodos) |
 | Extracción / clasificación | Gemini en Vertex AI (multimodal — lee PDF, imagen y JSON directamente), autenticado con las credenciales de Google Cloud, sin API key |
 | Validación clínica | Capa determinística con catálogos de referencia (CIE-10, medicamentos, valores críticos) |
-| Interfaz | Streamlit (`Frontend/app_streamlit_backend_directo.py`) |
+| Interfaz | Streamlit (`Frontend/app_streamlit_backend.py`) |
 | Despliegue | Google Cloud Run (contenedor Docker). OCI Compute se descartó por falta de capacidad |
 | Almacenamiento | Google Cloud Storage — buckets `recibidos` / `procesados` / `auditoria-humana` (implementado). OCI Object Storage, Always Free (en implementación) |
 | Notificaciones | Correo electrónico (SMTP/Gmail) para casos que requieren revisión, con cuentas dedicadas al proyecto; las credenciales viven en Secret Manager |
@@ -119,7 +119,7 @@ gcloud auth application-default login
 cp .env.example .env
 
 # 6. Ejecutar la aplicación
-python -m streamlit run Frontend/app_streamlit_backend_directo.py
+python -m streamlit run Frontend/app_streamlit_backend.py
 ```
 
 El nombre `mediflow_env` puede reemplazarse por el que se prefiera.
@@ -156,7 +156,7 @@ El mensaje lo emite el Python administrado por el sistema (en macOS, el instalad
 
    ```bash
    "$CONDA_PREFIX/bin/python" -m pip install -r requirements.txt
-   "$CONDA_PREFIX/bin/python" -m streamlit run Frontend/app_streamlit_backend_directo.py
+   "$CONDA_PREFIX/bin/python" -m streamlit run Frontend/app_streamlit_backend.py
    ```
 
 4. No utilizar `--break-system-packages`: modifica el Python del sistema y no es necesario si se trabaja dentro de un ambiente que tenga su propio Python.
@@ -405,7 +405,7 @@ G10-LATAM-EQUIPO50-MediFlow/
 │   ├── resultados.py
 │   └── correo.py
 ├── Frontend/
-│   └── app_streamlit_backend_directo.py
+│   └── app_streamlit_backend.py
 ├── Frontend_Respaldo/             # versión anterior (FastAPI + Streamlit), sin uso activo
 ├── cloud/
 │   ├── gcloud_storage.py
