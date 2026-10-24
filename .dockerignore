@@ -13,6 +13,7 @@
 #Clave de la cuenta de servicio para desarrollo local:
 #se monta como volumen en docker-compose.yml, nunca se copia a la imagen.
 gcp-dev-key.json
+oci_api_key.pem
 
 #Python
 __pycache__/

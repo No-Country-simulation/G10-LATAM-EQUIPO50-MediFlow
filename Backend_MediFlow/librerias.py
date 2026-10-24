@@ -30,6 +30,7 @@ from google import genai
 #No olvidar
 from dotenv import load_dotenv
 load_dotenv()
+import logging
 
 #Parte Nueva: Envio de alertas por correo
 #Librerias incluidas en Python para crear y enviar correos

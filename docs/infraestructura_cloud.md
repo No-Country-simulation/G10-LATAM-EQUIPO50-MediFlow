@@ -178,7 +178,7 @@ gcloud projects add-iam-policy-binding ${PROYECTO} \
   --member="serviceAccount:${SA}" \
   --role="roles/aiplatform.user"
 
-# Cloud Storage: solo sobre los tres buckets
+# Cloud Storage: solo sobre los buckets
 for BUCKET in mediflow-recibidos mediflow-historia-clinica mediflow-revision-humana \
               mediflow-urgencias mediflow-farmacia mediflow-auditoria-autorizaciones; do
   gcloud storage buckets add-iam-policy-binding gs://${BUCKET} \
@@ -244,6 +244,17 @@ for SECRETO in mediflow-email-password mediflow-origin-email mediflow-destinatar
 done
 ```
 
+Permisos Criptográficos para Alertas de Correo (URLs Firmadas)
+Para que el backend de MediFlow pueda generar enlaces de descarga segura válidos por 2 horas sin exponer públicamente los buckets, la Cuenta de Servicio (SA) requiere el rol de creación de tokens sobre sí misma.
+```bash
+# Asignar rol de Creador de Tokens de Cuenta de Servicio a la SA de MediFlow
+gcloud iam service-accounts add-iam-policy-binding \
+    $SA \
+    --member="serviceAccount:$SA" \
+    --role="roles/iam.serviceAccountTokenCreator" \
+    --project="$PROYECTO"
+```
+
 Para varios destinatarios, `<CORREO_DESTINO>` se escribe separado por comas.
 
 ### 7. Construir la imagen
@@ -270,7 +281,6 @@ gcloud run deploy mediflow-service \
 
 - `--port 8501` es necesario porque el `Dockerfile` ejecuta Streamlit en ese puerto (Cloud Run asume 8080 por defecto).
 - `--allow-unauthenticated` publica la aplicación para la demostración: cualquiera con la URL puede usarla, y cada documento procesado consume cuota y costo de Vertex AI. En ese modo debe procesar únicamente documentos sintéticos.
-- No se fija `--memory`: se usa el valor por defecto de Cloud Run. Si aparecen reinicios por falta de memoria en los logs, se puede agregar `--memory 1Gi`.
 
 ### 9. Verificar
 
@@ -348,6 +358,116 @@ Puntos por decidir antes de implementarlo:
 | Datos clínicos | Mismas reglas que en Google Cloud: solo documentos sintéticos mientras la aplicación sea pública |
 
 OCI Compute (instancia Ampere A1) se evaluó como plataforma de despliegue y se descartó por falta de capacidad disponible; el despliegue se movió a Cloud Run.
+
+## Almacenamiento en OCI (Always Free) — realizado
+
+### 0. Preparar la terminal
+
+Solo si se trabaja desde una máquina local (macOS con Homebrew); en Cloud Shell no hace falta:
+
+```bash
+brew install oci-cli
+
+# Crear la carpeta .oci si no existe y asegurar permisos
+mkdir -p ~/.oci && chmod 700 ~/.oci
+
+# Generar la llave privada (Este es el archivo que va en la variable)
+openssl genrsa -out ~/.oci/oci_api_key.pem 2048
+chmod 600 ~/.oci/oci_api_key.pem
+
+# Generar la llave pública y privada (Necesarias para el siguiente paso)
+openssl rsa -pubout -in ~/.oci/oci_api_key.pem -out ~/.oci/oci_api_key_public.pem
+```
+
+Definir las variables que usan los pasos siguientes (reemplazar los valores entre `< >`) y seleccionar el compartimento:
+
+```bash
+# --- Variables de Oracle Cloud Infrastructure (OCI) ---
+export OCI_COMPARTMENT_ID="<OCID_DEL_COMPARTMENT_DEL_PROYECTO>"
+export OCI_NAMESPACE="<OBJECT_STORAGE_NAMESPACE_DE_TU_CUENTA>"
+export OCI_REGION_PROP="sa-bogota-1" # Región de OCI Always Free
+
+# Credenciales de API del usuario OCI para Secret Manager
+export OCI_TENANCY_OCID="<OCID_DE_TU_TENANCY>"
+export OCI_USER_OCID="<OCID_DE_TU_USUARIO_OCI>"
+export OCI_FINGERPRINT="<FINGERPRINT_DE_LA_LLAVE_API>" # Se obtiene subiendo la clave pública en User Setting -> Tokens and keys -> API Keys
+export RUTA_LLAVE_PEM="<RUTA_A_TU_ARCHIVO_LLAVE_PRIVADA_OCI.pem>"
+
+# Escribir el archivo de configuración directamente usando tus variables
+cat <<EOF > ~/.oci/config
+[DEFAULT]
+user=${OCI_USER_OCID}
+fingerprint=${OCI_FINGERPRINT}
+key_file=${RUTA_LLAVE_PEM}
+tenancy=${OCI_TENANCY_OCID}
+region=${OCI_REGION_PROP}
+EOF
+# Aplicar los permisos de seguridad obligatorios de Oracle
+chmod 600 ~/.oci/config
+```
+
+Definir las variables que usan los pasos siguientes (reemplazar los valores entre `< >`) y seleccionar el proyecto:
+
+### 1. Crear los buckets en OCI Object Storage
+
+```bash
+for BUCKET in mediflow-recibidos mediflow-historia-clinica mediflow-revision-humana \
+              mediflow-urgencias mediflow-farmacia mediflow-auditoria-autorizaciones; do
+  oci os bucket create \
+    --name ${BUCKET} \
+    --compartment-id ${OCI_COMPARTMENT_ID} \
+    --region ${OCI_REGION_PROP}
+done
+```
+
+### 2. Guardar los secretos y dar acceso 
+
+```bash
+printf '%s' "${OCI_TENANCY_OCID}" | gcloud secrets create oci-tenancy-ocid --data-file=-
+printf '%s' "${OCI_USER_OCID}"    | gcloud secrets create oci-user-ocid --data-file=-
+printf '%s' "${OCI_FINGERPRINT}"  | gcloud secrets create oci-fingerprint --data-file=-
+printf '%s' "${OCI_NAMESPACE}"    | gcloud secrets create oci-namespace --data-file=-
+
+
+# Cargar el archivo de la llave privada PEM multilínea de OCI de forma segura
+gcloud secrets create oci-private-key-content --data-file="${RUTA_LLAVE_PEM}"
+
+# Otorgar permisos de lectura (Accessor) a mediflow-backend sobre los nuevos secretos de OCI
+for SECRETO in oci-tenancy-ocid oci-user-ocid oci-fingerprint oci-namespace oci-private-key-content; do
+  gcloud secrets add-iam-policy-binding "${SECRETO}" \
+    --member="serviceAccount:${SA}" \
+    --role="roles/secretmanager.secretAccessor"
+done
+```
+### 3. Despliegue definitivo en Cloud Run
+
+```bash
+gcloud run deploy mediflow-service \
+  --image ${REGION}-docker.pkg.dev/${PROYECTO}/mediflow-repo/mediflow-app:latest \
+  --region ${REGION} \
+  --allow-unauthenticated \
+  --port 8501 \
+  --service-account ${SA} \
+  --memory 1Gi \
+  --set-env-vars GCP_PROJECT_ID=${PROYECTO},\
+MODELO_GEMINI=${MODELO},\
+OCI_REGION=${OCI_REGION_PROP},\
+GCS_BUCKET_RECIBIDOS=mediflow-recibidos,\
+GCS_BUCKET_HISTORIA_CLINICA=mediflow-historia-clinica,\
+GCS_BUCKET_REVISION_HUMANA=mediflow-revision-humana,\
+GCS_BUCKET_URGENCIAS=mediflow-urgencias,\
+GCS_BUCKET_FARMACIA=mediflow-farmacia,\
+GCS_BUCKET_AUDITORIA_AUTORIZACIONES=mediflow-auditoria-autorizaciones \
+  --set-secrets EMAIL_USUARIO=mediflow-origin-email:latest,\
+EMAIL_PASSWORD=mediflow-email-password:latest,\
+EMAIL_DESTINO=mediflow-destinatary-email:latest,\
+OCI_TENANCY_OCID=oci-tenancy-ocid:latest,\
+OCI_USER_OCID=oci-user-ocid:latest,\
+OCI_FINGERPRINT=oci-fingerprint:latest,\
+OCI_NAMESPACE=oci-namespace:latest,\
+OCI_PRIVATE_KEY_CONTENT=oci-private-key-content:latest
+```
+
 
 ## Desarrollo local
 

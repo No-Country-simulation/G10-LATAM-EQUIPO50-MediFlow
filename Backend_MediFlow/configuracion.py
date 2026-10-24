@@ -15,13 +15,28 @@ EMAIL_USUARIO = os.getenv("EMAIL_USUARIO")
 EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
 EMAIL_DESTINO = os.getenv("EMAIL_DESTINO")
 
+#Configuración de Oracle Cloud Infrastructure (OCI) ---
+OCI_NAMESPACE = os.getenv("OCI_NAMESPACE")
+OCI_REGION = os.getenv("OCI_REGION", "us-ashburn-1")
+OCI_TENANCY_OCID = os.getenv("OCI_TENANCY_OCID")
+OCI_USER_OCID = os.getenv("OCI_USER_OCID")
+OCI_FINGERPRINT = os.getenv("OCI_FINGERPRINT")
+
+# OCI puede venir como archivo físico (Docker local) o texto crudo (Cloud Run)
+OCI_PRIVATE_KEY_FILE = os.getenv("OCI_PRIVATE_KEY_FILE")
+OCI_PRIVATE_KEY_CONTENT = os.getenv("OCI_PRIVATE_KEY_CONTENT")
+
 # 2. SISTEMA DE VALIDACIÓN PROFESIONAL
 # Centralizamos la comprobación para evitar alertas genéricas o caídas inesperadas.
 variables_criticas = {
     "GCP_PROJECT_ID": GCP_PROJECT_ID,
     "EMAIL_USUARIO": EMAIL_USUARIO,
     "EMAIL_PASSWORD": EMAIL_PASSWORD,
-    "EMAIL_DESTINO": EMAIL_DESTINO
+    "EMAIL_DESTINO": EMAIL_DESTINO,
+    "OCI_NAMESPACE": OCI_NAMESPACE,
+    "OCI_TENANCY_OCID": OCI_TENANCY_OCID,
+    "OCI_USER_OCID": OCI_USER_OCID,
+    "OCI_FINGERPRINT": OCI_FINGERPRINT
 }
 
 variables_faltantes = [nombre for nombre, valor in variables_criticas.items() if not valor]
@@ -35,6 +50,10 @@ if variables_faltantes:
     # En lugar de romper el backend con un ValueError agresivo, lanzamos un aviso claro
     print(mensaje_error)
     
+# Validación específica para la llave privada de OCI (requiere al menos una de las dos modalidades)
+if not OCI_PRIVATE_KEY_FILE and not OCI_PRIVATE_KEY_CONTENT:
+    print("\n[🚨 OCI KEY ERROR] No se detectó ninguna llave privada de OCI (ni OCI_PRIVATE_KEY_FILE ni OCI_PRIVATE_KEY_CONTENT).\n")
+
 #Creando Cliente de Gemini
 #Creamos el cliente utilizando nuestra API KEY
 #Este objeto será el encargado de comunicarse

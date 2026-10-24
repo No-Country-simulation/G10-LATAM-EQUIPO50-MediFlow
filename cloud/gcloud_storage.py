@@ -39,6 +39,9 @@ def _get_client():
         _client = storage.Client()
     return _client
 
+def obtener_cliente_gcs():
+    """Expone de forma pública el cliente storage.Client autenticado."""
+    return _get_client()
 
 def subir_objeto(bucket_name: str, nombre_objeto: str, contenido: bytes) -> None:
     """Sube (o sobrescribe) un objeto en el bucket indicado."""

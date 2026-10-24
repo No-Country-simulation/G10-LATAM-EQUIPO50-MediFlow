@@ -30,8 +30,11 @@ casos/referencia/generar_dataset.py
 # Clave de Google Cloud para desarrollo local
 gcp-dev-key.json
 
+# Clave privada de OCI para desarrollo local
+oci_api_key.pem
+
 # ignorar almcen local
-#Almacen_Local/
+Almacen_Local/
 
 #ignorar evaluacion y evaluacion resultados
 evaluacion.py

@@ -39,6 +39,8 @@ services:
       - ./Almacen_Local:/app/Almacen_Local
       # Monta la clave de la máquina real dentro del contenedor
       - ./gcp-dev-key.json:/app/gcp-dev-key.json
+      # Monta la clave privada de OCI de la máquina real dentro del contenedor (Solo Lectura)
+      - ./oci_api_key.pem:/app/oci_api_key.pem:ro
 
 
 
