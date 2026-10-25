@@ -14,6 +14,7 @@ from cloud.gcloud_storage import (
     BUCKET_AUDITORIA_AUTORIZACIONES as GCS_AUDITORIA_AUTORIZACIONES,
     guardar_recibido as gcs_guardar_recibido,
     subir_objeto as gcs_subir_objeto,
+    generar_url_firmada as gcs_generar_url_firmada,
 )
 
 # Importaciones de OCI Object Storage
@@ -25,6 +26,7 @@ from cloud.oci_storage import (
     BUCKET_FARMACIA as OCI_FARMACIA,
     BUCKET_AUDITORIA_AUTORIZACIONES as OCI_AUDITORIA_AUTORIZACIONES,
     subir_objeto_oci,
+    generar_url_par as oci_generar_url_par,
 )
 
 logger = logging.getLogger(__name__)
@@ -108,94 +110,76 @@ def sincronizar_json_final(ruta_json: str, clasificacion: str, categoria: str = 
     except Exception as error:
         logger.warning(f"Fallo de sincronización en OCI para '{nombre_objeto}': {error}")
 
-    # 4. Lógica de alertas para casos que requieren revisión o son urgentes
-    if clasificacion != "normal" and (exito_gcs or exito_oci):
+    # 4. Alerta por correo para casos que requieren revisión humana o son urgentes.
+    #    No depende de que las subidas hayan salido bien: si una nube falla, el correo
+    #    igual se envía y el enlace de esa nube aparece como "No disponible".
+    if clasificacion != "normal":
         import json
-        from datetime import datetime, timedelta, timezone
 
-        # Valores por defecto por si el JSON no tiene las llaves exactas
-        datos_paciente_nombre = "No especificado"
-        datos_medico_nombre = "No especificado"
-        motivos_lista = ["Revisión requerida por flujo analítico"]
+        horas_vigencia = int(os.getenv("HORAS_VIGENCIA_ENLACES", "2"))
+
+        # Valores por defecto por si el JSON no trae las llaves esperadas
+        nombre_paciente = "No especificado"
+        nombre_medico = "No especificado"
+        motivos = []
 
         try:
-            payload_clinico = json.loads(contenido.decode("utf-8"))
-            paciente_info = payload_clinico.get("paciente", {})
-            datos_paciente_nombre = paciente_info.get("nombre", paciente_info.get("nombre_completo", "No especificado"))
+            payload = json.loads(contenido.decode("utf-8"))
 
-            medico_info = payload_clinico.get("medico", {})
-            datos_medico_nombre = medico_info.get("nombre", medico_info.get("nombre_completo", "No especificado"))
+            paciente = payload.get("paciente") or {}
+            medico = payload.get("medico") or {}
+            nombre_paciente = paciente.get("nombre_completo") or paciente.get("nombre") or nombre_paciente
+            nombre_medico = medico.get("nombre_completo") or medico.get("nombre") or nombre_medico
 
-            alertas = payload_clinico.get("motivos", payload_clinico.get("alertas", []))
-            if alertas:
-                motivos_lista = alertas if isinstance(alertas, list) else [str(alertas)]
+            # Los motivos reales viven en validacion_coherencia y clasificacion_riesgo
+            motivos_coherencia = (payload.get("validacion_coherencia") or {}).get("motivos") or []
+            if isinstance(motivos_coherencia, str):
+                motivos_coherencia = [motivos_coherencia]
+            motivos.extend(str(m) for m in motivos_coherencia)
+
+            riesgo = payload.get("clasificacion_riesgo") or {}
+            if riesgo.get("motivo_urgencia"):
+                motivos.append(f"Urgencia: {riesgo['motivo_urgencia']}")
+            if riesgo.get("datos_faltantes"):
+                motivos.append("Datos faltantes: " + ", ".join(str(d) for d in riesgo["datos_faltantes"]))
+            if riesgo.get("datos_ambiguos"):
+                motivos.append("Datos ambiguos: " + ", ".join(str(d) for d in riesgo["datos_ambiguos"]))
         except Exception as err_json:
             logger.warning(f"No se pudo extraer la metadata del JSON para el correo: {err_json}")
 
-        # --- GENERACIÓN DE ENLACES TEMPORALES AUTENTICADOS (FIRMADOS) ---
-        url_gcs_final = "No disponible (Fallo en GCS)"
-        url_oci_final = "No disponible (Fallo en OCI)"
+        if not motivos:
+            motivos = ["Revisión requerida por flujo analítico"]
 
-        # A. Firmar URL de Google Cloud Storage usando tu wrapper nativo
+        # --- Enlaces temporales: los buckets son privados, solo se comparten URLs firmadas ---
+        url_gcs_final = None
+        url_oci_final = None
+
         if exito_gcs:
             try:
-                from cloud.gcloud_storage import obtener_cliente_gcs
-                cliente_gcs = obtener_cliente_gcs()
-                
-                bucket_gcs_obj = cliente_gcs.bucket(gcs_destino)
-                blob_obj = bucket_gcs_obj.blob(nombre_objeto)
-                
-                # Genera la URL firmada de descarga directa (Válida por 2 horas)
-                url_gcs_final = blob_obj.generate_signed_url(expiration=timedelta(hours=2))
-            except Exception as e_gcs_sign:
-                logger.warning(f"No se pudo firmar la URL de GCS: {e_gcs_sign}")
+                url_gcs_final = gcs_generar_url_firmada(gcs_destino, nombre_objeto, horas_vigencia)
+            except Exception as error:
+                logger.warning(f"No se pudo firmar la URL de GCS para '{nombre_objeto}': {error}")
 
-        # B. Generar Petición Preautenticada (PAR) en OCI usando tu wrapper nativo
         if exito_oci:
             try:
-                import oci
-                from cloud.oci_storage import obtener_cliente_oci, OCI_NAMESPACE, OCI_REGION
-                cliente_oci = obtener_cliente_oci()
-                
-                detalles_par = oci.object_storage.models.CreatePreauthenticatedRequestDetails(
-                    name=f"AccesoDemo_{nombre_objeto}",
-                    access_type="ObjectRead",
-                    object_name=nombre_objeto,
-                    time_expires=datetime.now(timezone.utc) + timedelta(hours=2)
-                )
-                
-                respuesta_par = cliente_oci.create_preauthenticated_request(
-                    namespace_name=OCI_NAMESPACE,
-                    bucket_name=oci_destino,
-                    create_preauthenticated_request_details=detalles_par
-                )
-                
-                url_oci_final = f"https://objectstorage.{OCI_REGION}.oraclecloud.com{respuesta_par.data.access_uri}"
-            except Exception as e_oci_sign:
-                logger.warning(f"No se pudo generar la URL firmada de OCI: {e_oci_sign}")
+                url_oci_final = oci_generar_url_par(oci_destino, nombre_objeto, horas_vigencia)
+            except Exception as error:
+                logger.warning(f"No se pudo generar el enlace (PAR) de OCI para '{nombre_objeto}': {error}")
 
-        # --- ENVÍO DEL CORREO MEDIANTE SALTO DE CARPETA DINÁMICO ---
+        # --- Envío del correo ---
         try:
-            # Importamos sys de forma diferida para manipular las rutas de búsqueda
-            import sys
-            
-            # Obtenemos la ruta absoluta de la carpeta padre (Backend_Mediflow)
-            ruta_padre = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-            
-            # Si no está registrada en las rutas de búsqueda de Python, la agregamos
-            if ruta_padre not in sys.path:
-                sys.path.insert(0, ruta_padre)
+            try:
+                # Mismo módulo que usa el frontend (evita cargar una segunda copia)
+                from Backend_MediFlow.correo import enviar_alerta_correo
+            except ImportError:
+                from correo import enviar_alerta_correo
 
-            # Ahora Python encontrará 'correo.py' en la raíz sin problemas
-            from correo import enviar_alerta_correo
-
-            # Ejecutamos la función pasando los 8 argumentos requeridos
             enviar_alerta_correo(
-                nombre_paciente=datos_paciente_nombre,
-                nombre_medico=datos_medico_nombre,
+                nombre_paciente=nombre_paciente,
+                nombre_medico=nombre_medico,
                 tipo_documento=categoria,
                 clasificacion_final=clasificacion,
-                motivo=", ".join(motivos_lista),
+                motivo="\n".join(f"- {m}" for m in motivos),
                 ruta_json=ruta_json,
                 bucket_gcs_nombre=gcs_destino,
                 bucket_gcs_url=url_gcs_final,
@@ -203,4 +187,6 @@ def sincronizar_json_final(ruta_json: str, clasificacion: str, categoria: str = 
                 bucket_oci_url=url_oci_final,
             )
         except Exception as error_alerta:
-            logger.error(f"Fallo crítico al llamar al módulo de alertas por correo: {error_alerta}")
+            logger.error(f"Fallo al llamar al módulo de alertas por correo: {error_alerta}")
+
+    return exito_gcs or exito_oci

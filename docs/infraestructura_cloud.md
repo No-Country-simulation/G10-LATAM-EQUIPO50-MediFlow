@@ -117,6 +117,93 @@ Reglas de manejo:
 - Cambiar una cuenta o la contraseña **no requiere cambios de código**: se agrega una versión nueva al secreto y se despliega una revisión nueva (ver [Actualizar un secreto](#actualizar-un-secreto)). Los secretos expuestos como variables de entorno se leen cuando arranca la instancia, por lo que una instancia en ejecución no ve el valor nuevo hasta que se crea una revisión.
 - La lista de destinatarios que se edita desde la interfaz se guarda en `Almacen_Local/configuracion_correos.json`. En Cloud Run ese archivo se pierde cuando la instancia se reinicia; el valor permanente es `EMAIL_DESTINO`.
 
+## Enlaces temporales en las alertas por correo
+
+Cada alerta de revisión humana incluye un enlace de descarga del JSON clínico en cada nube. Los buckets de ambas nubes son **privados**: no se hacen públicos. Los enlaces se generan en el momento de enviar la alerta (`cloud/sincronizar_almacenamiento.py`), son de **solo lectura**, apuntan a **un único objeto** y **vencen**.
+
+| Nube | Mecanismo | Función | Acceso que concede |
+|------|-----------|---------|--------------------|
+| Google Cloud Storage | URL firmada V4 (`GET`) | `generar_url_firmada()` en `cloud/gcloud_storage.py` | Descargar ese objeto |
+| OCI Object Storage | Pre-Authenticated Request (PAR) tipo `ObjectRead` sobre un objeto | `generar_url_par()` en `cloud/oci_storage.py` | Descargar ese objeto |
+
+La vigencia se controla con la variable `HORAS_VIGENCIA_ENLACES` (opcional; por defecto 2 horas). Si un enlace no se puede generar, el correo se envía igual y ese enlace aparece como "No disponible"; el motivo queda en el log (`No se pudo firmar la URL de GCS...` o `No se pudo generar el enlace (PAR) de OCI...`).
+
+### Seguridad de los enlaces
+
+- **Quien tenga el enlace puede descargar ese objeto** hasta que venza, sin iniciar sesión. Los enlaces viajan por correo: quien acceda a esa bandeja, o a un reenvío, puede abrirlos mientras estén vigentes.
+- **Alcance mínimo.** Cada enlace da lectura de un solo objeto; no permite listar el bucket, subir, sobrescribir ni borrar.
+- **Los buckets siguen cerrados.** En GCS se crean con `--uniform-bucket-level-access --public-access-prevention`; en OCI con `--public-access-type NoPublicAccess`. No hace falta hacer públicos los buckets para que los enlaces funcionen.
+- **Vigencia.** Corta por diseño (2 h). En GCS, la firma V4 admite como máximo 7 días; en OCI la expiración es obligatoria y no tiene tope. Se recomienda no pasar de 24 h.
+- **Revocación.** En OCI se revoca un enlace eliminando su PAR. En GCS una URL firmada no se puede revocar de forma individual: deja de funcionar al vencer, al borrar el objeto o al quitarle a la cuenta firmante el permiso de lectura.
+- **Limpieza.** Los PAR de OCI vencidos siguen listados en el bucket hasta que se eliminan (consola de OCI o `oci os preauth-request`).
+- **Datos reales.** Mientras la aplicación esté publicada con `--allow-unauthenticated`, solo deben procesarse documentos sintéticos. Con datos reales habría que revisar además el cuerpo del correo, que incluye el nombre del paciente y del médico.
+
+### Permisos necesarios
+
+**Google Cloud**
+
+| Identidad | Recurso | Permiso / rol | Para qué |
+|-----------|---------|---------------|----------|
+| Cuenta de servicio de ejecución (`mediflow-backend`) | Los 6 buckets | `roles/storage.objectAdmin` | Subir los JSON y leerlos. El enlace firmado hereda los permisos de la cuenta que firma (necesita `storage.objects.get`) |
+| `mediflow-backend` | La propia cuenta de servicio | `roles/iam.serviceAccountTokenCreator` (`iam.serviceAccounts.signBlob`) | **Solo Cloud Run.** Cloud Run no tiene llave privada, así que la firma se hace por IAM |
+| Proyecto | — | API `iamcredentials.googleapis.com` habilitada | **Solo Cloud Run.** Es la API de IAM que realiza la firma |
+
+- **Desarrollo local (Docker):** `GOOGLE_APPLICATION_CREDENTIALS` debe apuntar a la llave JSON de una **cuenta de servicio**; con ella la firma se calcula localmente. Las credenciales personales (`gcloud auth application-default login`) no pueden firmar URLs.
+- **Cloud Run:** el código intenta firmar con llave y, si las credenciales solo traen un token (caso de Cloud Run), firma por IAM.
+- El rol `serviceAccountTokenCreator` se otorga **sobre la propia cuenta de servicio**, no a nivel de proyecto.
+
+**OCI**
+
+| Identidad | Permiso | Para qué |
+|-----------|---------|----------|
+| Usuario de la API key de OCI | `PAR_MANAGE` sobre los buckets, más lectura de objetos | Crear los PAR |
+
+Política sencilla que lo cubre (es amplia; se puede acotar):
+
+```
+Allow group <GRUPO_DEL_USUARIO_API> to manage object-family in compartment <NOMBRE_DEL_COMPARTMENT>
+```
+
+La llave privada del usuario de la API se entrega al servicio como archivo (Docker local) o desde Secret Manager (Cloud Run); nunca se versiona.
+
+### Comandos
+
+```bash
+export PROYECTO="one-g10-mediflow-equipo50"
+export SA_RUN="mediflow-backend@${PROYECTO}.iam.gserviceaccount.com"
+export BUCKETS="mediflow-recibidos mediflow-historia-clinica mediflow-revision-humana mediflow-urgencias mediflow-farmacia mediflow-auditoria-autorizaciones"
+
+# Lectura y escritura sobre los 6 buckets
+for B in $BUCKETS; do
+  gcloud storage buckets add-iam-policy-binding gs://$B \
+    --member="serviceAccount:${SA_RUN}" --role="roles/storage.objectAdmin"
+done
+
+# Solo Cloud Run: firmar por IAM
+gcloud services enable iamcredentials.googleapis.com --project=${PROYECTO}
+gcloud iam service-accounts add-iam-policy-binding ${SA_RUN} \
+  --member="serviceAccount:${SA_RUN}" --role="roles/iam.serviceAccountTokenCreator"
+
+# Verificar que el rol quedó asignado
+gcloud iam service-accounts get-iam-policy ${SA_RUN} \
+  --flatten="bindings[].members" \
+  --filter="bindings.role:roles/iam.serviceAccountTokenCreator" \
+  --format="table(bindings.members)"
+```
+
+Después de cambiar permisos en Cloud Run no hace falta reconstruir la imagen; sí se necesita una revisión nueva si cambia el código (pasos 7 y 8 de la guía de despliegue).
+
+### Solución de problemas de los enlaces
+
+| Síntoma en el log o en el correo | Causa probable |
+|----------------------------------|----------------|
+| `you need a private key to sign credentials ... compute_engine ...` | Versión del código sin firma por IAM: actualizar `cloud/gcloud_storage.py` y desplegar una revisión nueva |
+| Error 403 con `iam.serviceAccounts.signBlob` | Falta `roles/iam.serviceAccountTokenCreator` de `mediflow-backend` sobre sí misma |
+| Error indicando que la API de IAM Service Account Credentials no está habilitada | Habilitar `iamcredentials.googleapis.com` |
+| El enlace de GCS abre con "acceso denegado" o error de firma | La cuenta firmante no tiene lectura en ese bucket, o el enlace ya venció |
+| `NotAuthorizedOrNotFound` al crear el PAR de OCI | Falta la política, o el nombre del bucket o del compartment no coincide (OCI usa el mismo error para ambos casos) |
+| El correo muestra "No disponible" en un enlace | No se pudo generar ese enlace; revisar el log de esa nube |
+
 ## Guía de despliegue
 
 Los comandos pueden ejecutarse desde **Cloud Shell** (consola de Google Cloud → ícono de terminal), que trae `gcloud` instalado y autenticado; en ese caso hay que clonar primero el repositorio allí y cambiar a la rama `production` (`git clone <url-del-repo>` y `git checkout production`). La imagen se construye en Cloud Build (paso 7), por lo que no se requiere Docker local.

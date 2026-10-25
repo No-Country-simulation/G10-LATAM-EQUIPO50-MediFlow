@@ -157,6 +157,9 @@ from cloud.oci_storage import OCI_NAMESPACE, OCI_REGION
 
 logger = logging.getLogger(__name__)
 
+# Vigencia de los enlaces temporales (debe coincidir con la que usa el puente de nube)
+HORAS_VIGENCIA_ENLACES = int(os.getenv("HORAS_VIGENCIA_ENLACES", "2"))
+
 def validar_configuracion_correo():
     """
     Verifica que las variables necesarias
@@ -215,9 +218,11 @@ def enviar_alerta_correo(
             bucket_gcs_nombre = "mediflow-historia-clinica"
             bucket_oci_nombre = "mediflow-historia-clinica"
 
-    # 4. Asegurar las URLs de descarga pública directa
-    url_gcs = bucket_gcs_url if bucket_gcs_url else f"https://googleapis.com{bucket_gcs_nombre}/{nombre_archivo_json}"
-    url_oci = bucket_oci_url if bucket_oci_url else f"https://objectstorage.{OCI_REGION}://{OCI_NAMESPACE}/b/{bucket_oci_nombre}/o/{nombre_archivo_json}"
+    # 4. Enlaces temporales de descarga. Los buckets son privados: un enlace directo
+    #    sin firma daria "Acceso denegado", asi que si no hay enlace firmado se avisa.
+    sin_enlace = "No disponible (no se pudo generar el enlace temporal; revisar los logs)"
+    url_gcs = bucket_gcs_url or sin_enlace
+    url_oci = bucket_oci_url or sin_enlace
 
     # 5. Construir el contenedor del mensaje
     mensaje = EmailMessage()
@@ -259,6 +264,7 @@ Bucket Asignado: {bucket_oci_nombre}
 Enlace de Acceso Directo:
 {url_oci}
 ====================================================================
+Los enlaces son temporales y vencen en {HORAS_VIGENCIA_ENLACES} hora(s).
 
 Ruta Local de Respaldo:
 {ruta_json}
@@ -273,7 +279,7 @@ por el sistema Inteligente de MediFlow.
     # 6. Conexión y envío SMTP
     try:
         print("\nConectando con el servidor de correo, espere...")
-        with smtplib.SMTP_SSL("://gmail.com", 465) as servidor:
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as servidor:
             servidor.login(EMAIL_USUARIO, EMAIL_PASSWORD)
             servidor.send_message(mensaje)
 

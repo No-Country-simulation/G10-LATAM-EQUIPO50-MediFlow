@@ -784,21 +784,7 @@ with pestana_procesamiento:
                             correos_alerta
                         )
 
-
-                        #Enviamos la alerta utilizando
-                        #la funcion existente de correo.py.
-
-                        enviar_alerta_correo(
-                            nombre_paciente,
-                            nombre_medico,
-                            tipo_documento,
-                            clasificacion_final,
-                            motivo_correo,
-                            ruta_json
-                        )
-
-                        correo_enviado = True
-
+                    correo_enviado = True
 
                     #CAMBIO NUEVO:
                     #Paso 17:

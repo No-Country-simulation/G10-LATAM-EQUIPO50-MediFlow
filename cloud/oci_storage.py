@@ -5,6 +5,9 @@ Funciona de forma transparente tanto en Docker Local como en Google Cloud Run.
 
 import os
 import logging
+import uuid
+from datetime import datetime, timedelta, timezone
+
 import oci
 
 # Importamos las variables centralizadas de tu módulo de configuración
@@ -67,3 +70,25 @@ def subir_objeto_oci(bucket_name: str, nombre_objeto: str, contenido: bytes) -> 
     except Exception as e:
         logger.error(f"Error crítico en put_object de OCI sobre el bucket {bucket_name}: {e}")
         raise e
+
+
+def generar_url_par(bucket_name: str, nombre_objeto: str, horas: int = 2) -> str:
+    """Devuelve una URL temporal (Pre-Authenticated Request, solo lectura) para un objeto
+    de un bucket PRIVADO de OCI.
+
+    El usuario de la API necesita PAR_MANAGE sobre el bucket y permiso de lectura de objetos
+    (por ejemplo: "Allow group <grupo> to manage object-family in compartment <compartimento>").
+    """
+    client = _get_client()
+    detalles = oci.object_storage.models.CreatePreauthenticatedRequestDetails(
+        name=f"alerta-{uuid.uuid4().hex[:12]}",
+        access_type="ObjectRead",
+        object_name=nombre_objeto,
+        time_expires=datetime.now(timezone.utc) + timedelta(hours=horas),
+    )
+    respuesta = client.create_preauthenticated_request(
+        namespace_name=OCI_NAMESPACE,
+        bucket_name=bucket_name,
+        create_preauthenticated_request_details=detalles,
+    )
+    return f"https://objectstorage.{OCI_REGION}.oraclecloud.com{respuesta.data.access_uri}"
