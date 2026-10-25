@@ -3,6 +3,7 @@ Archivos_que_no_deben_subirse
 
 # Ignorar las credenciales api_keys:
 .env
+.env.pruebas
 
 # Byte-compiled / optimized files
 __pycache__/
@@ -37,5 +38,6 @@ oci_api_key.pem
 Almacen_Local/
 
 #ignorar evaluacion y evaluacion resultados
-evaluacion.py
+# evaluacion.py
 evaluacion_resultados/
+cache_15/
