@@ -17,7 +17,6 @@ casos/
 └── referencia/
     ├── ground_truth.jsonl     respuesta correcta de cada documento
     ├── manifest.csv           el mismo resumen en tabla (abrir en Excel)
-    ├── generar_dataset.py     script que generó los documentos
     └── catalogos/
         ├── cie10_subconjunto.json      21 códigos CIE-10 con descripción
         ├── medicamentos.json           20 fármacos con dosis máxima diaria
@@ -92,15 +91,11 @@ Una línea JSON por documento. Campos principales:
 | `conflictos_esperados` | Inconsistencias que la validación debe detectar |
 | `ruta_esperada` | urgencias, revision_humana, farmacia, auditoria_autorizaciones, historia_clinica_electronica |
 
-Las fechas y la vigencia de recetas se evalúan contra `fecha_referencia`,
-definida en `catalogos/reglas_y_parametros.json`.
 
 ---
 
 ## Cómo ejecutar la evaluación
 
-Desde la **raíz del repositorio**, con el entorno activo y `GEMINI_API_KEY`
-en el `.env`:
 
 ```bash
 python evaluacion.py                 # los 100 documentos
@@ -164,6 +159,49 @@ Los pesos se ajustan en `PESOS_DEFECTO` y los valores críticos en
 `catalogos/reglas_y_parametros.json`, sin tocar el resto del código.
 
 ---
+
+---
+
+## Resultados medidos
+
+Con fecha de referencia fija, para que el resultado no dependa del día en que
+se ejecute (hay casos que dependen de la fecha, como el documento con fecha de
+emisión futura):
+
+```bash
+python Backend_MediFlow/validacion_clinica.py --hoy 2026-10-05
+```
+
+| Enrutamiento correcto | 15 casos (dev) | 31 casos (dev + test) |
+|---|---|---|
+| Sin validación clínica | 12/15 (80 %) | 22/31 (71 %) |
+| Con validación clínica | 13/15 (87 %) | 23/31 (74 %) |
+
+Casos adversariales verificados:
+
+| Caso | Conflicto detectado | Peso | Ruta sin validar | Ruta validada |
+|---|---|---|---|---|
+| DOC-005 | `fecha_emision_futura` | 40 | auditoria_autorizaciones | revision_humana |
+| DOC-015 | `cie10_no_corresponde_diagnostico` | 35 | revision_humana | revision_humana |
+
+En DOC-015 el código `N20.0` ("Cálculo del riñón") no corresponde al
+diagnóstico impreso ("Otras gonartrosis primarias").
+
+Corrida de punta a punta con `evaluacion.py --split test --limite 15`:
+
+| Métrica | Resultado |
+|---|---|
+| Categoría | 100 % (14/14), igual en PDF nativo, escaneado, foto y JSON |
+| Paciente (nombre y documento), médico | 100 % |
+| Medicamentos | 100 % (7/7) |
+| Recall de urgencias | 1/1 |
+| Matrícula, CIE-10 | 85.7 % |
+| Enrutamiento | 78.6 % (11/14) |
+| Carga de revisión humana | 2 de 14, los 2 esperados |
+
+El enrutamiento de la corrida de punta a punta es más bajo porque la caché
+contiene respuestas de dos versiones del prompt de extracción. Se recalculará
+con la caché regenerada por completo.
 
 ## Regenerar o ampliar el dataset
 

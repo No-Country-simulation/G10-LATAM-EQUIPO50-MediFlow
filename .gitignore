@@ -3,6 +3,7 @@ Archivos_que_no_deben_subirse
 
 # Ignorar las credenciales api_keys:
 .env
+.env.pruebas
 
 # Byte-compiled / optimized files
 __pycache__/
@@ -33,11 +34,11 @@ gcp-dev-key.json
 # Clave privada de OCI para desarrollo local
 oci_api_key.pem
 
-# ignorar almcen local
+# Archivos locales de trabajo y datos clinicos de MediFlow
 Almacen_Local/
 
-#ignorar evaluacion y evaluacion resultados
-evaluacion.py
+# Resultados generados por la evaluacion
 evaluacion_resultados/
-# Archivos locales de trabajo y datos clinicos de MediFlow
-/Almacen_Local/
+
+# Cache local
+cache_15/

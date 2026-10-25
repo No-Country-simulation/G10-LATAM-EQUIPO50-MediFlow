@@ -1079,15 +1079,19 @@ with pestana_procesamiento:
                     with columnas[posicion]:
 
                         st.markdown(
-f'<div style="background:white;border-left:6px solid {color};'
-f'border-radius:10px;padding:14px;margin-bottom:10px;'
-f'box-shadow:0 1px 4px rgba(0,0,0,0.08);">'
-f'<div style="font-size:26px;">{icono}</div>'
-f'<div style="color:#0B4F6C;font-weight:700;font-size:14px;margin-top:4px;">'
-f'{numero}. {nombre_etapa}</div>'
-f'<div style="color:#000;font-size:12px;margin:6px 0;min-height:32px;">{resumen}</div>'
-f'<div style="color:{color};font-weight:700;font-size:16px;">{etapa["duracion_s"]} s</div>'
-f'</div>',
+                             f'<div style="background:white;border-left:8px solid {color};'
+                            f'border-radius:12px;padding:18px 16px;margin-bottom:12px;'
+                            f'min-height:215px;box-sizing:border-box;overflow-wrap:anywhere;'
+                            f'box-shadow:0 1px 4px rgba(0,0,0,0.08);">'
+                            f'<div style="font-size:clamp(28px,2.4vw,40px);line-height:1;">{icono}</div>'
+                            f'<div style="color:#0B4F6C;font-weight:700;'
+                            f'font-size:clamp(16px,1.3vw,22px);line-height:1.25;margin-top:8px;">'
+                            f'{numero}. {nombre_etapa}</div>'
+                            f'<div style="color:#000;font-size:clamp(14px,1.05vw,18px);'
+                            f'line-height:1.35;margin:10px 0;min-height:72px;">{resumen}</div>'
+                            f'<div style="color:{color};font-weight:700;'
+                            f'font-size:clamp(20px,1.7vw,28px);">{etapa["duracion_s"]} s</div>'
+                            f'</div>',
                             unsafe_allow_html=True
                         )
 
@@ -1101,24 +1105,23 @@ f'</div>',
             else:
                 color_destino = VERDE
                 texto_destino = "✅ PROCESAMIENTO AUTOMATICO"
-
             st.markdown(
-                    f'<div style="background:{color_destino};border-radius:12px;padding:18px;'
-                    f'text-align:center;margin-top:6px;">'
-                    f'<div style="color:white;font-weight:700;font-size:20px;">{texto_destino}</div>'
-                    f'<div style="color:white;font-size:14px;margin-top:6px;">{categoria_documental}</div>'
-                    f'<div style="color:white;font-size:13px;margin-top:4px;">'
-                    f'Clasificacion final: {clasificacion_final} &nbsp;|&nbsp; '
-                    f'Procesado en {trazabilidad.get("tiempo_total_s", 0)} s</div>'
-                    f'<div style="color:white;font-weight:700;font-size:15px;margin-top:10px;'
-                    f'border-top:1px solid rgba(255,255,255,0.4);padding-top:10px;">'
-                    f'⏱️ {texto_tiempo_objetivo(clasificacion_final)}</div>'
-                    f'</div>',
+                f'<div style="background:{color_destino};border-radius:14px;padding:24px 20px;'
+                f'text-align:center;margin-top:8px;">'
+                f'<div style="color:white;font-weight:700;'
+                f'font-size:clamp(24px,2.1vw,34px);line-height:1.2;">{texto_destino}</div>'
+                f'<div style="color:white;font-size:clamp(16px,1.3vw,22px);margin-top:8px;">'
+                f'{categoria_documental}</div>'
+                f'<div style="color:white;font-size:clamp(15px,1.15vw,19px);margin-top:6px;">'
+                f'Clasificacion final: {clasificacion_final} &nbsp;|&nbsp; '
+                f'Procesado en {trazabilidad.get("tiempo_total_s", 0)} s</div>'
+                f'<div style="color:white;font-weight:700;'
+                f'font-size:clamp(17px,1.4vw,24px);margin-top:14px;'
+                f'border-top:1px solid rgba(255,255,255,0.4);padding-top:12px;">'
+                f'⏱️ {texto_tiempo_objetivo(clasificacion_final)}</div>'
+                f'</div>',
                 unsafe_allow_html=True
             )
-
-
-
             #Detalle completo de cada etapa, desplegable bajo las tarjetas.
             st.write("")
             st.caption("Detalle de cada etapa")
