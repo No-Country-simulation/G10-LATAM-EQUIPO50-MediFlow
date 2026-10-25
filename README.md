@@ -37,6 +37,31 @@ El objetivo del proyecto es diseñar, construir e implementar un agente de intel
 | Notificaciones | Correo electrónico (SMTP/Gmail) para casos que requieren revisión, con cuentas dedicadas al proyecto; las credenciales viven en Secret Manager |
 | Gestión de tareas | Trello |
 
+## Escenarios de prueba y trazabilidad
+
+Cada documento procesado deja registro de las etapas recorridas, su duracion
+y el destino final. A continuacion los tres escenarios del reto, medidos de
+punta a punta contra el ground truth del banco de casos.
+
+### Rutina — DOC-001
+Sin conflictos clinicos, nivel de coherencia normal, sigue a la cola automatica.
+
+![Recorrido del documento DOC-001](docs/capturas/recorrido-doc-001.png)
+
+### Urgencia — DOC-002
+La validacion clinica detecta un conflicto (40 puntos, revision prioritaria),
+pero la clasificacion final es urgente. En el nodo de decision de ruta la
+urgencia tiene prioridad 1, asi que el destino es la cola de urgencias medicas.
+
+![Recorrido del documento DOC-002](docs/capturas/recorrido-doc-002.png)
+
+### Ambigüedad — DOC-003
+Dos conflictos: diagnostico de apendicitis aguda con acetaminofen para la casa,
+y un documento con doble proposito (receta y orden de examenes). Destino:
+revision humana, con atencion objetivo de 1 hora.
+
+![Recorrido del documento DOC-003](docs/capturas/recorrido-doc-003.png)
+
 ## Equipo
 
 | Integrante | Rol |
@@ -44,7 +69,7 @@ El objetivo del proyecto es diseñar, construir e implementar un agente de intel
 | José Moya | Backend, arquitectura y orquestación |
 | Anahí Ramírez | LLM & ML, grafo de decisión, puntaje de confianza y orquestación |
 | Andrés Mustafá | Cloud e infraestructura; contrato de datos, tablero de Trello y documentación/arquitectura |
-| Juan Pablo Palacio | Ingesta de documentos, casos de prueba |
+| Juan Pablo Palacio | Ingesta de documentos, casos de prueba | pruebas y validación del flujo.
 | Jonatan Cuero | Interfaz |
 
 ## Documentación
@@ -56,7 +81,7 @@ El objetivo del proyecto es diseñar, construir e implementar un agente de intel
 | [`docs/infraestructura_cloud.md`](docs/infraestructura_cloud.md) | Arquitectura de despliegue, identidad y permisos, correos de las alertas, guía de despliegue, OCI (planificado) y desarrollo local |
 | [`docs/cambios_produccion.md`](docs/cambios_produccion.md) | Cambios de la rama `production` respecto de `main`, necesarios para el despliegue en Cloud Run |
 | [`Backend_MediFlow/README_Backend.md`](Backend_MediFlow/README_Backend.md) | Documentación técnica del backend |
-
+- [Escenarios de prueba y trazabilidad](#escenarios-de-prueba-y-trazabilidad)
 ## Ramas
 
 | Rama | Uso |
