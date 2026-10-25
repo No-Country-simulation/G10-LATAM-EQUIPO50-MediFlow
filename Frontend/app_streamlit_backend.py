@@ -106,21 +106,7 @@ Ruta_Configuracion_Correos = (
 
 def cargar_correos_streamlit():
 
-    if Ruta_Configuracion_Correos.exists():
-
-        try:
-
-            with open(Ruta_Configuracion_Correos,"r",encoding="utf-8") as archivo:
-
-                correos = json.load(archivo)
-
-                if isinstance(correos,list):
-
-                    return correos
-
-        except Exception:
-
-            pass
+    return cargar_correos_destino()
 
 
     return [
@@ -137,18 +123,13 @@ def cargar_correos_streamlit():
 #Funcion para guardar los correos configurados.
 
 def guardar_correos_streamlit(correos):
-
-    with open(
-        Ruta_Configuracion_Correos,
-        "w",
-        encoding="utf-8"
-    ) as archivo:
-
-        json.dump(
-            correos,
-            archivo,
-            ensure_ascii=False,
-            indent=4
+ 
+    if not guardar_correos_destino(correos):
+ 
+        st.warning(
+            "No se pudo guardar la lista en Cloud Storage. "
+            "Quedo solo en el disco local, que en Cloud Run "
+            "se pierde cuando la aplicacion se reinicia."
         )
         
 

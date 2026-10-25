@@ -11,91 +11,210 @@ from configuracion import *
 #que recibiran las alertas de MediFlow.
 Carpeta_Configuracion_Correos = os.path.join(Carpeta_Almacen,"configuracion_correos.json")
 
-def cargar_correos_destino():
+#Respaldo PERSISTENTE de la lista de destinatarios en Cloud Storage.
+#En Cloud Run el disco local es efimero: se borra cuando la instancia se reinicia,
+#asi que la lista se guarda tambien en un objeto del bucket. Cloud Storage es la
+#fuente de verdad; el archivo local es una copia y el ultimo recurso si la nube falla.
+#El permiso necesario ya existe: la cuenta de servicio es objectAdmin de los buckets.
+BUCKET_CONFIGURACION_CORREOS = os.getenv(
+    "GCS_BUCKET_CONFIGURACION",
+    os.getenv("GCS_BUCKET_RECIBIDOS","mediflow-recibidos")
+)
+OBJETO_CONFIGURACION_CORREOS = os.getenv(
+    "GCS_OBJETO_CORREOS",
+    "_configuracion/correos_destino.json"
+)
+
+def _normalizar_correos(datos):
     """
-    Carga los correos que recibiran las alertas
-    desde el archivo configuracion_correos.json.
+    Acepta una lista de correos, un diccionario {"correos_destino": [...]}
+    o un texto separado por comas, y devuelve una lista limpia y sin repetidos.
+    Devuelve None si el contenido no es valido.
 
-    Si el archivo no existe, utiliza el correo que
-    actualmente se encuentra configurado en EMAIL_DESTINO
-    dentro del archivo .env.
+    Asi el frontend (que antes guardaba una lista) y correo.py
+    (que guardaba un diccionario) leen el mismo archivo sin pisarse.
+    """
+    if isinstance(datos,dict):
+        datos = datos.get("correos_destino",[])
 
-    De esta manera mantenemos compatibilidad con la
-    configuracion anterior de MediFlow.
+    if isinstance(datos,str):
+        datos = datos.split(",")
+
+    if not isinstance(datos,list):
+        return None
+
+    correos = []
+
+    for correo in datos:
+        correo = str(correo).strip()
+
+        if correo and correo not in correos:
+            correos.append(correo)
+
+    return correos
+
+
+def _leer_correos_local():
+    """Lee la copia local. Devuelve la lista, o None si no existe o esta danada."""
+
+    if not os.path.exists(Carpeta_Configuracion_Correos):
+        return None
+
+    try:
+        with open(Carpeta_Configuracion_Correos,"r",encoding="utf-8") as archivo:
+            return _normalizar_correos(json.load(archivo))
+
+    except Exception as error:
+        print("\nError al cargar la configuracion de correos:")
+        print(error)
+        return None
+
+
+def _escribir_correos_local(correos):
+    """Guarda la copia local. Devuelve True si pudo."""
+
+    try:
+        os.makedirs(Carpeta_Almacen,exist_ok=True)
+
+        with open(Carpeta_Configuracion_Correos,"w",encoding="utf-8") as archivo:
+            json.dump({"correos_destino": correos},archivo,ensure_ascii=False,indent=4)
+
+        return True
+
+    except Exception as error:
+        print("\nNo se pudo guardar la copia local de los correos:")
+        print(error)
+        return False
+
+
+def _leer_correos_gcs():
+    """
+    Lee la lista desde Cloud Storage.
+    Devuelve ("ok", lista), ("no_existe", None) o ("error", None).
     """
 
-    #Verificamos si ya existe el archivo de configuracion
-    if os.path.exists(Carpeta_Configuracion_Correos):
+    try:
+        from cloud.gcloud_storage import obtener_cliente_gcs
+        from google.api_core.exceptions import NotFound
+
+        blob = (
+            obtener_cliente_gcs()
+            .bucket(BUCKET_CONFIGURACION_CORREOS)
+            .blob(OBJETO_CONFIGURACION_CORREOS)
+        )
 
         try:
+            texto = blob.download_as_text(encoding="utf-8")
+        except NotFound:
+            return "no_existe", None
 
-            #Abrimos el archivo de configuracion
-            with open(
-                Carpeta_Configuracion_Correos,
-                "r",
-                encoding="utf-8"
-            ) as archivo:
+        correos = _normalizar_correos(json.loads(texto))
 
-                configuracion = json.load(archivo)
+        if correos is None:
+            logging.getLogger(__name__).warning(
+                "La lista de correos en Cloud Storage tiene un formato no valido."
+            )
+            return "error", None
 
-            #Obtenemos la lista de correos
-            correos = configuracion.get("correos_destino", [])
+        return "ok", correos
 
-            #Verificamos que sea una lista
-            if isinstance(correos, list):
-
-                return correos
-
-        except Exception as error:
-
-            print("\nError al cargar la configuracion de correos:")
-            print(error)
+    except Exception as error:
+        logging.getLogger(__name__).warning(
+            f"No se pudo leer la lista de correos desde Cloud Storage: {error}"
+        )
+        return "error", None
 
 
-    #CAMBIO NUEVO:
-    #Si el archivo todavia no existe,
-    #utilizamos EMAIL_DESTINO del archivo .env
-    #para crear la configuracion inicial.
+def _escribir_correos_gcs(correos):
+    """Guarda la lista en Cloud Storage. Devuelve True si pudo."""
 
+    try:
+        from cloud.gcloud_storage import obtener_cliente_gcs
+
+        blob = (
+            obtener_cliente_gcs()
+            .bucket(BUCKET_CONFIGURACION_CORREOS)
+            .blob(OBJETO_CONFIGURACION_CORREOS)
+        )
+
+        blob.upload_from_string(
+            json.dumps({"correos_destino": correos},ensure_ascii=False,indent=4),
+            content_type="application/json"
+        )
+
+        return True
+
+    except Exception as error:
+        logging.getLogger(__name__).warning(
+            f"No se pudo guardar la lista de correos en Cloud Storage: {error}"
+        )
+        return False
+
+
+def cargar_correos_destino():
+    """
+    Devuelve la lista de correos que reciben las alertas.
+
+    Orden de busqueda:
+      1. Cloud Storage (fuente de verdad, sobrevive a los reinicios de Cloud Run).
+      2. Copia local en Almacen_Local/configuracion_correos.json.
+      3. EMAIL_DESTINO (secreto o .env). Solo sirve como valor inicial:
+         una vez que existe la lista guardada, esta manda.
+    """
+
+    estado, correos = _leer_correos_gcs()
+
+    if estado == "ok":
+        #Dejamos la copia local al dia (si falla la nube, queda como respaldo)
+        _escribir_correos_local(correos)
+        return correos
+
+    #La nube no tiene lista (primera vez) o no se pudo leer:
+    #probamos con la copia local
+    correos_local = _leer_correos_local()
+
+    if correos_local is not None:
+
+        #Solo sembramos la nube si de verdad no existe;
+        #si fue un error pasajero NO se sobrescribe lo que haya guardado alli.
+        if estado == "no_existe":
+            _escribir_correos_gcs(correos_local)
+
+        return correos_local
+
+    #Primera vez: tomamos EMAIL_DESTINO como lista inicial
     correos_iniciales = []
 
     if EMAIL_DESTINO:
-
-        #Permitimos colocar varios correos separados por coma
-        correos_iniciales = [
-            correo.strip()
-            for correo in EMAIL_DESTINO.split(",")
-            if correo.strip()
-        ]
-
-
-    #CAMBIO NUEVO:
-    #Guardamos automaticamente la configuracion inicial
-    #en el nuevo archivo JSON.
+        correos_iniciales = _normalizar_correos(EMAIL_DESTINO) or []
 
     if correos_iniciales:
+        _escribir_correos_local(correos_iniciales)
 
-        guardar_correos_destino(correos_iniciales)
-
+        if estado == "no_existe":
+            _escribir_correos_gcs(correos_iniciales)
 
     return correos_iniciales
 
+
 def guardar_correos_destino(correos):
     """
-    Guarda la lista de correos que recibiran
-    las alertas de MediFlow.
+    Guarda la lista de correos que recibiran las alertas de MediFlow
+    en Cloud Storage y en la copia local.
+
+    Devuelve True si quedo guardada en Cloud Storage (persistente).
+    Devuelve False si solo quedo en el disco local: en Cloud Run
+    ese cambio se perderia al reiniciarse la instancia.
     """
 
-    #Nos aseguramos de que exista la carpeta Almacen_Local
-    os.makedirs(Carpeta_Almacen,exist_ok=True)
+    correos_limpios = _normalizar_correos(correos)
 
-    #Creamos la estructura que tendra el archivo JSON
-    configuracion = {"correos_destino": correos}
+    if correos_limpios is None:
+        raise ValueError("La lista de correos no es valida.")
 
-    #Guardamos la configuracion
-    with open(Carpeta_Configuracion_Correos,"w",encoding="utf-8") as archivo:
+    _escribir_correos_local(correos_limpios)
 
-        json.dump(configuracion,archivo,ensure_ascii=False,indent=4)
+    return _escribir_correos_gcs(correos_limpios)
 
 
 def agregar_correo_destino(correo):

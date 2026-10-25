@@ -115,7 +115,7 @@ Reglas de manejo:
 - Los tres valores viven solo en Secret Manager. No se escriben en el repositorio, en la documentación ni en mensajes de chat; en el repositorio solo existe `.env.example`, sin valores.
 - Para crear los secretos se usa `read -rs` (paso 6 de la guía), de modo que la contraseña no queda en el historial de la terminal.
 - Cambiar una cuenta o la contraseña **no requiere cambios de código**: se agrega una versión nueva al secreto y se despliega una revisión nueva (ver [Actualizar un secreto](#actualizar-un-secreto)). Los secretos expuestos como variables de entorno se leen cuando arranca la instancia, por lo que una instancia en ejecución no ve el valor nuevo hasta que se crea una revisión.
-- La lista de destinatarios que se edita desde la interfaz se guarda en `Almacen_Local/configuracion_correos.json`. En Cloud Run ese archivo se pierde cuando la instancia se reinicia; el valor permanente es `EMAIL_DESTINO`.
+- La lista de destinatarios se guarda en Cloud Storage (_configuracion/correos_destino.json) y persiste a los reinicios. EMAIL_DESTINO solo se usa como valor inicial la primera vez.
 
 ## Enlaces temporales en las alertas por correo
 
