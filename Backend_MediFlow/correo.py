@@ -150,19 +150,27 @@ def eliminar_correo_destino(correo):
 
 
     return correos
+# Traemos las variables globales necesarias del módulo configuracion
+from configuracion import EMAIL_USUARIO, EMAIL_PASSWORD, EMAIL_DESTINO, GCP_PROJECT_ID
+# Traemos las constantes de OCI creadas en el paso anterior
+from cloud.oci_storage import OCI_NAMESPACE, OCI_REGION
 
+logger = logging.getLogger(__name__)
+
+# Vigencia de los enlaces temporales (debe coincidir con la que usa el puente de nube)
+HORAS_VIGENCIA_ENLACES = int(os.getenv("HORAS_VIGENCIA_ENLACES", "2"))
 
 def validar_configuracion_correo():
     """
     Verifica que las variables necesarias
-    estén definidas en el archivo .env.
+    estén definidas.
     """
 
     if not EMAIL_USUARIO:
-        raise ValueError("No se encontro EMAIL_USUARIO en el archivo .env")
+        raise ValueError("No se encontro EMAIL_USUARIO.")
 
     if not EMAIL_PASSWORD:
-        raise ValueError("No se encontro EMAIL_PASSWORD en el archivo .env")
+        raise ValueError("No se encontro EMAIL_PASSWORD.")
 
     #Los destinatarios ahora se obtienen desde
     #configuracion_correos.json.
@@ -174,59 +182,54 @@ def validar_configuracion_correo():
 
         raise ValueError("No se encontraron correos destinatarios configurados.")
 
-    
 
-def enviar_alerta_correo(nombre_paciente,nombre_medico,tipo_documento,clasificacion_final,motivo,ruta_json):
+def enviar_alerta_correo(
+    nombre_paciente,
+    nombre_medico,
+    tipo_documento,
+    clasificacion_final,
+    motivo,
+    ruta_json,
+    bucket_gcs_nombre=None,
+    bucket_gcs_url=None,
+    bucket_oci_nombre=None,
+    bucket_oci_url=None
+):
     """
-    Envía un correo de alerta cuando MediFlow determina
-    que el documento requiere revision humana.
-
-    Parametros:
-        nombre_paciente:
-            Nombre del paciente obtenido por Gemini.
-
-        nombre_medico:
-            Nombre del medico obtenido por Gemini.
-
-        tipo_documento:
-            Tipo de documento analizado.
-
-        clasificacion_final:
-            Clasificacion final determinada por LangGraph.
-
-        motivo:
-            Motivos por los cuales el documento requiere
-            revision humana.
+    Envía un correo de alerta incorporando nombres de buckets y enlaces directos públicos.
     """
-
-    #Primero verificamos que exista la configuracion para enviar el correo
     validar_configuracion_correo()
-
-    #Obtenemos todos los correos configurados
-    #para recibir las alertas.
     destinatarios = cargar_correos_destino()
+    destinatarios_string = ", ".join(destinatarios)
 
-    #Creamos el mensaje a enviar por correo
+    # 2. Extraer el nombre del objeto
+    nombre_archivo_json = os.path.basename(ruta_json)
+
+    # 3. LÓGICA DE RESPALDO (Fallback): Si Docker importó la función sin los nuevos datos,
+    # resolvemos los buckets de forma idéntica a como lo hace el puente clínico
+    if not bucket_gcs_nombre:
+        if clasificacion_final == "urgente":
+            bucket_gcs_nombre = "mediflow-urgencias"
+            bucket_oci_nombre = "mediflow-urgencias"
+        elif clasificacion_final in {"ambiguo", "datos_faltantes", "alerta", "revision_prioritaria", "revision"}:
+            bucket_gcs_nombre = "mediflow-revision-humana"
+            bucket_oci_nombre = "mediflow-revision-humana"
+        else:
+            bucket_gcs_nombre = "mediflow-historia-clinica"
+            bucket_oci_nombre = "mediflow-historia-clinica"
+
+    # 4. Enlaces temporales de descarga. Los buckets son privados: un enlace directo
+    #    sin firma daria "Acceso denegado", asi que si no hay enlace firmado se avisa.
+    sin_enlace = "No disponible (no se pudo generar el enlace temporal; revisar los logs)"
+    url_gcs = bucket_gcs_url or sin_enlace
+    url_oci = bucket_oci_url or sin_enlace
+
+    # 5. Construir el contenedor del mensaje
     mensaje = EmailMessage()
-
-    #Ponemos Asunto al correo:
-    mensaje["Subject"] = ("ALERTA MEDIFLOW - Requiere Revision Humana")
-
-    #Cuenta de correo desde la cual se enviara:
+    mensaje["Subject"] = f"⚠️ ALERTA MEDIFLOW - Requiere Revision Humana [{clasificacion_final.upper()}]"
     mensaje["From"] = EMAIL_USUARIO
+    mensaje["To"] = destinatarios_string
 
-    #Los destinatarios ahora se obtienen
-    #desde configuracion_correos.json.
-    mensaje["To"] = destinatarios
-
-    #Medico o responsable del area que recibira la alerta por correo
-    #Convertir la cadena en una lista de correos
-    #destinatarios = [correo.strip() for correo in EMAIL_DESTINO.split(",")]
-
-    #Agregar destinatarios
-    #mensaje["To"] = destinatarios
-
-    #Agregamos el mensaje del correo
     cuerpo = f"""ALERTA MEDIFLOW
 
 Se ha detectado un documento clinico que requiere
@@ -249,66 +252,43 @@ Clasificacion Final:
 Motivos de Revision:
 {motivo}
 
-Ruta donde se guardo el JSON Final:
+Acceso Directo a los Repositorios Cloud:
+====================================================================
+[Google Cloud Storage]
+Bucket Asignado: {bucket_gcs_nombre}
+Enlace de Acceso Directo:
+{url_gcs}
+
+[Oracle Cloud Infrastructure]
+Bucket Asignado: {bucket_oci_nombre}
+Enlace de Acceso Directo:
+{url_oci}
+====================================================================
+Los enlaces son temporales y vencen en {HORAS_VIGENCIA_ENLACES} hora(s).
+
+Ruta Local de Respaldo:
 {ruta_json}
 
-Por favor, revise el documento en el sistema MediFlow.
+Por favor, revise el documento pulsando los enlaces de acceso inmediato o en el sistema MediFlow.
 
 Este mensaje fue generado automaticamente
 por el sistema Inteligente de MediFlow.
 """
-
     mensaje.set_content(cuerpo)
 
-    #Hacemos la conexion a los servidores del correo:
+    # 6. Conexión y envío SMTP
     try:
-
-        #Testeando:
-        print("\nConectando con el servidor de correo, espere")
-
-        #Para usar Gmail se utiliza:
-        #SMTP:
-        #smtp.gmail.com
-        #Puerto SSL:
-        #465
-        #SMTP_SSL crea una conexión cifrada.
-
-        with smtplib.SMTP_SSL("smtp.gmail.com",465) as servidor:
-
-            #Iniciamos Sesion
-            servidor.login(EMAIL_USUARIO,EMAIL_PASSWORD)
-
-            #Enviamos el mensaje creado
+        print("\nConectando con el servidor de correo, espere...")
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as servidor:
+            servidor.login(EMAIL_USUARIO, EMAIL_PASSWORD)
             servidor.send_message(mensaje)
 
-        #Verificamos que se haya enviado el correo:
         print("\nAlerta por correo enviada Exitosamente!!!")
-
-        #Mostramos todos los destinatarios utilizados
-        #para enviar la alerta.
-        print(f"Destinatarios: {', '.join(destinatarios)}")
-
-        #Vemos a quien le mandamos el correo:
-        #print(f"Destinatario: {EMAIL_DESTINO}")
-
+        print(f"Destinatarios: {destinatarios_string}")
         return True
-
-    #Si no se pudo enviar manda alerta:
     except smtplib.SMTPAuthenticationError:
-
-        print("\nError de autenticacion no se pudo enviar el correo")
-        print("\nPosibles motivos")
-        print("\nVerifica:")
-        print("El correo de Gmail este bien configurado")
-        print("La contraseña del correo que hara el envio")
-        print("La verificación en dos pasos este configurada")
-        print("Y que se este utilizando una contraseña de aplicacion")
-
+        print("\nError de autenticacion: No se pudo enviar el correo.")
         return False
-
-    except Exception as error:
-
-        print("\nError al enviar el correo:")
-        print(error)
-
+    except Exception as e:
+        logger.error(f"Error inesperado al enviar correo: {e}")
         return False

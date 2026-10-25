@@ -38,8 +38,12 @@ services:
     volumes:
       - ./Almacen_Local:/app/Almacen_Local
       # Monta la clave de la máquina real dentro del contenedor
+
+      # Monta la clave de Google Cloud en modo de solo lectura
       - ./gcp-dev-key.json:/app/gcp-dev-key.json:ro
 
+      # Monta la clave privada de OCI en modo de solo lectura
+      - ./oci_api_key.pem:/app/oci_api_key.pem:ro
 
 
     #Reinicio automatico

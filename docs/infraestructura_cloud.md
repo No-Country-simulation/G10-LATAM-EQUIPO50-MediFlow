@@ -90,8 +90,11 @@ La cuenta propietaria del proyecto recibió además, de forma explícita, `roles
 | `EMAIL_PASSWORD` | Contraseña de aplicación de esa cuenta de Gmail | Secret Manager: `mediflow-email-password` |
 | `EMAIL_DESTINO` | Destinatario(s) de las alertas, separados por comas | Secret Manager: `mediflow-destinatary-email` |
 | `GCS_BUCKET_RECIBIDOS` | Nombre del bucket de documentos recibidos | Variable de entorno |
-| `GCS_BUCKET_PROCESADOS` | Nombre del bucket de documentos procesados | Variable de entorno |
-| `GCS_BUCKET_AUDITORIA` | Nombre del bucket de auditoría humana | Variable de entorno |
+| `GCS_BUCKET_HISTORIA_CLINICA` | Nombre del bucket de documentos de archivo | Variable de entorno |
+| `GCS_BUCKET_URGENCIAS` | Nombre del bucket de documentos de urgencias | Variable de entorno |
+| `GCS_BUCKET_FARMACIA` | Nombre del bucket de documentos de farmacia | Variable de entorno |
+| `GCS_BUCKET_AUDITORIA_AUTORIZACIONES` | Nombre del bucket de documentos de autorizaciones | Variable de entorno |
+| `GCS_BUCKET_REVISION_HUMANA` | Nombre del bucket de auditoría humana | Variable de entorno |
 
 `GEMINI_API_KEY` **ya no se usa**: Gemini se autentica con la identidad de Google Cloud. Si existe un secreto con esa clave de una versión anterior de la guía (`mediflow-gemini-key`), no es necesario.
 
@@ -113,6 +116,93 @@ Reglas de manejo:
 - Para crear los secretos se usa `read -rs` (paso 6 de la guía), de modo que la contraseña no queda en el historial de la terminal.
 - Cambiar una cuenta o la contraseña **no requiere cambios de código**: se agrega una versión nueva al secreto y se despliega una revisión nueva (ver [Actualizar un secreto](#actualizar-un-secreto)). Los secretos expuestos como variables de entorno se leen cuando arranca la instancia, por lo que una instancia en ejecución no ve el valor nuevo hasta que se crea una revisión.
 - La lista de destinatarios que se edita desde la interfaz se guarda en `Almacen_Local/configuracion_correos.json`. En Cloud Run ese archivo se pierde cuando la instancia se reinicia; el valor permanente es `EMAIL_DESTINO`.
+
+## Enlaces temporales en las alertas por correo
+
+Cada alerta de revisión humana incluye un enlace de descarga del JSON clínico en cada nube. Los buckets de ambas nubes son **privados**: no se hacen públicos. Los enlaces se generan en el momento de enviar la alerta (`cloud/sincronizar_almacenamiento.py`), son de **solo lectura**, apuntan a **un único objeto** y **vencen**.
+
+| Nube | Mecanismo | Función | Acceso que concede |
+|------|-----------|---------|--------------------|
+| Google Cloud Storage | URL firmada V4 (`GET`) | `generar_url_firmada()` en `cloud/gcloud_storage.py` | Descargar ese objeto |
+| OCI Object Storage | Pre-Authenticated Request (PAR) tipo `ObjectRead` sobre un objeto | `generar_url_par()` en `cloud/oci_storage.py` | Descargar ese objeto |
+
+La vigencia se controla con la variable `HORAS_VIGENCIA_ENLACES` (opcional; por defecto 2 horas). Si un enlace no se puede generar, el correo se envía igual y ese enlace aparece como "No disponible"; el motivo queda en el log (`No se pudo firmar la URL de GCS...` o `No se pudo generar el enlace (PAR) de OCI...`).
+
+### Seguridad de los enlaces
+
+- **Quien tenga el enlace puede descargar ese objeto** hasta que venza, sin iniciar sesión. Los enlaces viajan por correo: quien acceda a esa bandeja, o a un reenvío, puede abrirlos mientras estén vigentes.
+- **Alcance mínimo.** Cada enlace da lectura de un solo objeto; no permite listar el bucket, subir, sobrescribir ni borrar.
+- **Los buckets siguen cerrados.** En GCS se crean con `--uniform-bucket-level-access --public-access-prevention`; en OCI con `--public-access-type NoPublicAccess`. No hace falta hacer públicos los buckets para que los enlaces funcionen.
+- **Vigencia.** Corta por diseño (2 h). En GCS, la firma V4 admite como máximo 7 días; en OCI la expiración es obligatoria y no tiene tope. Se recomienda no pasar de 24 h.
+- **Revocación.** En OCI se revoca un enlace eliminando su PAR. En GCS una URL firmada no se puede revocar de forma individual: deja de funcionar al vencer, al borrar el objeto o al quitarle a la cuenta firmante el permiso de lectura.
+- **Limpieza.** Los PAR de OCI vencidos siguen listados en el bucket hasta que se eliminan (consola de OCI o `oci os preauth-request`).
+- **Datos reales.** Mientras la aplicación esté publicada con `--allow-unauthenticated`, solo deben procesarse documentos sintéticos. Con datos reales habría que revisar además el cuerpo del correo, que incluye el nombre del paciente y del médico.
+
+### Permisos necesarios
+
+**Google Cloud**
+
+| Identidad | Recurso | Permiso / rol | Para qué |
+|-----------|---------|---------------|----------|
+| Cuenta de servicio de ejecución (`mediflow-backend`) | Los 6 buckets | `roles/storage.objectAdmin` | Subir los JSON y leerlos. El enlace firmado hereda los permisos de la cuenta que firma (necesita `storage.objects.get`) |
+| `mediflow-backend` | La propia cuenta de servicio | `roles/iam.serviceAccountTokenCreator` (`iam.serviceAccounts.signBlob`) | **Solo Cloud Run.** Cloud Run no tiene llave privada, así que la firma se hace por IAM |
+| Proyecto | — | API `iamcredentials.googleapis.com` habilitada | **Solo Cloud Run.** Es la API de IAM que realiza la firma |
+
+- **Desarrollo local (Docker):** `GOOGLE_APPLICATION_CREDENTIALS` debe apuntar a la llave JSON de una **cuenta de servicio**; con ella la firma se calcula localmente. Las credenciales personales (`gcloud auth application-default login`) no pueden firmar URLs.
+- **Cloud Run:** el código intenta firmar con llave y, si las credenciales solo traen un token (caso de Cloud Run), firma por IAM.
+- El rol `serviceAccountTokenCreator` se otorga **sobre la propia cuenta de servicio**, no a nivel de proyecto.
+
+**OCI**
+
+| Identidad | Permiso | Para qué |
+|-----------|---------|----------|
+| Usuario de la API key de OCI | `PAR_MANAGE` sobre los buckets, más lectura de objetos | Crear los PAR |
+
+Política sencilla que lo cubre (es amplia; se puede acotar):
+
+```
+Allow group <GRUPO_DEL_USUARIO_API> to manage object-family in compartment <NOMBRE_DEL_COMPARTMENT>
+```
+
+La llave privada del usuario de la API se entrega al servicio como archivo (Docker local) o desde Secret Manager (Cloud Run); nunca se versiona.
+
+### Comandos
+
+```bash
+export PROYECTO="one-g10-mediflow-equipo50"
+export SA_RUN="mediflow-backend@${PROYECTO}.iam.gserviceaccount.com"
+export BUCKETS="mediflow-recibidos mediflow-historia-clinica mediflow-revision-humana mediflow-urgencias mediflow-farmacia mediflow-auditoria-autorizaciones"
+
+# Lectura y escritura sobre los 6 buckets
+for B in $BUCKETS; do
+  gcloud storage buckets add-iam-policy-binding gs://$B \
+    --member="serviceAccount:${SA_RUN}" --role="roles/storage.objectAdmin"
+done
+
+# Solo Cloud Run: firmar por IAM
+gcloud services enable iamcredentials.googleapis.com --project=${PROYECTO}
+gcloud iam service-accounts add-iam-policy-binding ${SA_RUN} \
+  --member="serviceAccount:${SA_RUN}" --role="roles/iam.serviceAccountTokenCreator"
+
+# Verificar que el rol quedó asignado
+gcloud iam service-accounts get-iam-policy ${SA_RUN} \
+  --flatten="bindings[].members" \
+  --filter="bindings.role:roles/iam.serviceAccountTokenCreator" \
+  --format="table(bindings.members)"
+```
+
+Después de cambiar permisos en Cloud Run no hace falta reconstruir la imagen; sí se necesita una revisión nueva si cambia el código (pasos 7 y 8 de la guía de despliegue).
+
+### Solución de problemas de los enlaces
+
+| Síntoma en el log o en el correo | Causa probable |
+|----------------------------------|----------------|
+| `you need a private key to sign credentials ... compute_engine ...` | Versión del código sin firma por IAM: actualizar `cloud/gcloud_storage.py` y desplegar una revisión nueva |
+| Error 403 con `iam.serviceAccounts.signBlob` | Falta `roles/iam.serviceAccountTokenCreator` de `mediflow-backend` sobre sí misma |
+| Error indicando que la API de IAM Service Account Credentials no está habilitada | Habilitar `iamcredentials.googleapis.com` |
+| El enlace de GCS abre con "acceso denegado" o error de firma | La cuenta firmante no tiene lectura en ese bucket, o el enlace ya venció |
+| `NotAuthorizedOrNotFound` al crear el PAR de OCI | Falta la política, o el nombre del bucket o del compartment no coincide (OCI usa el mismo error para ambos casos) |
+| El correo muestra "No disponible" en un enlace | No se pudo generar ese enlace; revisar el log de esa nube |
 
 ## Guía de despliegue
 
@@ -153,7 +243,8 @@ gcloud services enable run.googleapis.com artifactregistry.googleapis.com \
 ### 2. Crear los buckets
 
 ```bash
-for BUCKET in mediflow-recibidos mediflow-procesados mediflow-auditoria-humana; do
+for BUCKET in mediflow-recibidos mediflow-historia-clinica mediflow-revision-humana \
+              mediflow-urgencias mediflow-farmacia mediflow-auditoria-autorizaciones; do
   gcloud storage buckets create gs://${BUCKET} \
     --location=${REGION} \
     --uniform-bucket-level-access \
@@ -174,8 +265,9 @@ gcloud projects add-iam-policy-binding ${PROYECTO} \
   --member="serviceAccount:${SA}" \
   --role="roles/aiplatform.user"
 
-# Cloud Storage: solo sobre los tres buckets
-for BUCKET in mediflow-recibidos mediflow-procesados mediflow-auditoria-humana; do
+# Cloud Storage: solo sobre los buckets
+for BUCKET in mediflow-recibidos mediflow-historia-clinica mediflow-revision-humana \
+              mediflow-urgencias mediflow-farmacia mediflow-auditoria-autorizaciones; do
   gcloud storage buckets add-iam-policy-binding gs://${BUCKET} \
     --member="serviceAccount:${SA}" \
     --role="roles/storage.objectAdmin"
@@ -239,6 +331,17 @@ for SECRETO in mediflow-email-password mediflow-origin-email mediflow-destinatar
 done
 ```
 
+Permisos Criptográficos para Alertas de Correo (URLs Firmadas)
+Para que el backend de MediFlow pueda generar enlaces de descarga segura válidos por 2 horas sin exponer públicamente los buckets, la Cuenta de Servicio (SA) requiere el rol de creación de tokens sobre sí misma.
+```bash
+# Asignar rol de Creador de Tokens de Cuenta de Servicio a la SA de MediFlow
+gcloud iam service-accounts add-iam-policy-binding \
+    $SA \
+    --member="serviceAccount:$SA" \
+    --role="roles/iam.serviceAccountTokenCreator" \
+    --project="$PROYECTO"
+```
+
 Para varios destinatarios, `<CORREO_DESTINO>` se escribe separado por comas.
 
 ### 7. Construir la imagen
@@ -265,7 +368,6 @@ gcloud run deploy mediflow-service \
 
 - `--port 8501` es necesario porque el `Dockerfile` ejecuta Streamlit en ese puerto (Cloud Run asume 8080 por defecto).
 - `--allow-unauthenticated` publica la aplicación para la demostración: cualquiera con la URL puede usarla, y cada documento procesado consume cuota y costo de Vertex AI. En ese modo debe procesar únicamente documentos sintéticos.
-- No se fija `--memory`: se usa el valor por defecto de Cloud Run. Si aparecen reinicios por falta de memoria en los logs, se puede agregar `--memory 1Gi`.
 
 ### 9. Verificar
 
@@ -344,12 +446,122 @@ Puntos por decidir antes de implementarlo:
 
 OCI Compute (instancia Ampere A1) se evaluó como plataforma de despliegue y se descartó por falta de capacidad disponible; el despliegue se movió a Cloud Run.
 
+## Almacenamiento en OCI (Always Free) — realizado
+
+### 0. Preparar la terminal
+
+Solo si se trabaja desde una máquina local (macOS con Homebrew); en Cloud Shell no hace falta:
+
+```bash
+brew install oci-cli
+
+# Crear la carpeta .oci si no existe y asegurar permisos
+mkdir -p ~/.oci && chmod 700 ~/.oci
+
+# Generar la llave privada (Este es el archivo que va en la variable)
+openssl genrsa -out ~/.oci/oci_api_key.pem 2048
+chmod 600 ~/.oci/oci_api_key.pem
+
+# Generar la llave pública y privada (Necesarias para el siguiente paso)
+openssl rsa -pubout -in ~/.oci/oci_api_key.pem -out ~/.oci/oci_api_key_public.pem
+```
+
+Definir las variables que usan los pasos siguientes (reemplazar los valores entre `< >`) y seleccionar el compartimento:
+
+```bash
+# --- Variables de Oracle Cloud Infrastructure (OCI) ---
+export OCI_COMPARTMENT_ID="<OCID_DEL_COMPARTMENT_DEL_PROYECTO>"
+export OCI_NAMESPACE="<OBJECT_STORAGE_NAMESPACE_DE_TU_CUENTA>"
+export OCI_REGION_PROP="sa-bogota-1" # Región de OCI Always Free
+
+# Credenciales de API del usuario OCI para Secret Manager
+export OCI_TENANCY_OCID="<OCID_DE_TU_TENANCY>"
+export OCI_USER_OCID="<OCID_DE_TU_USUARIO_OCI>"
+export OCI_FINGERPRINT="<FINGERPRINT_DE_LA_LLAVE_API>" # Se obtiene subiendo la clave pública en User Setting -> Tokens and keys -> API Keys
+export RUTA_LLAVE_PEM="<RUTA_A_TU_ARCHIVO_LLAVE_PRIVADA_OCI.pem>"
+
+# Escribir el archivo de configuración directamente usando tus variables
+cat <<EOF > ~/.oci/config
+[DEFAULT]
+user=${OCI_USER_OCID}
+fingerprint=${OCI_FINGERPRINT}
+key_file=${RUTA_LLAVE_PEM}
+tenancy=${OCI_TENANCY_OCID}
+region=${OCI_REGION_PROP}
+EOF
+# Aplicar los permisos de seguridad obligatorios de Oracle
+chmod 600 ~/.oci/config
+```
+
+Definir las variables que usan los pasos siguientes (reemplazar los valores entre `< >`) y seleccionar el proyecto:
+
+### 1. Crear los buckets en OCI Object Storage
+
+```bash
+for BUCKET in mediflow-recibidos mediflow-historia-clinica mediflow-revision-humana \
+              mediflow-urgencias mediflow-farmacia mediflow-auditoria-autorizaciones; do
+  oci os bucket create \
+    --name ${BUCKET} \
+    --compartment-id ${OCI_COMPARTMENT_ID} \
+    --region ${OCI_REGION_PROP}
+done
+```
+
+### 2. Guardar los secretos y dar acceso
+
+```bash
+printf '%s' "${OCI_TENANCY_OCID}" | gcloud secrets create oci-tenancy-ocid --data-file=-
+printf '%s' "${OCI_USER_OCID}"    | gcloud secrets create oci-user-ocid --data-file=-
+printf '%s' "${OCI_FINGERPRINT}"  | gcloud secrets create oci-fingerprint --data-file=-
+printf '%s' "${OCI_NAMESPACE}"    | gcloud secrets create oci-namespace --data-file=-
+
+
+# Cargar el archivo de la llave privada PEM multilínea de OCI de forma segura
+gcloud secrets create oci-private-key-content --data-file="${RUTA_LLAVE_PEM}"
+
+# Otorgar permisos de lectura (Accessor) a mediflow-backend sobre los nuevos secretos de OCI
+for SECRETO in oci-tenancy-ocid oci-user-ocid oci-fingerprint oci-namespace oci-private-key-content; do
+  gcloud secrets add-iam-policy-binding "${SECRETO}" \
+    --member="serviceAccount:${SA}" \
+    --role="roles/secretmanager.secretAccessor"
+done
+```
+### 3. Despliegue definitivo en Cloud Run
+
+```bash
+gcloud run deploy mediflow-service \
+  --image ${REGION}-docker.pkg.dev/${PROYECTO}/mediflow-repo/mediflow-app:latest \
+  --region ${REGION} \
+  --allow-unauthenticated \
+  --port 8501 \
+  --service-account ${SA} \
+  --memory 1Gi \
+  --set-env-vars GCP_PROJECT_ID=${PROYECTO},\
+MODELO_GEMINI=${MODELO},\
+OCI_REGION=${OCI_REGION_PROP},\
+GCS_BUCKET_RECIBIDOS=mediflow-recibidos,\
+GCS_BUCKET_HISTORIA_CLINICA=mediflow-historia-clinica,\
+GCS_BUCKET_REVISION_HUMANA=mediflow-revision-humana,\
+GCS_BUCKET_URGENCIAS=mediflow-urgencias,\
+GCS_BUCKET_FARMACIA=mediflow-farmacia,\
+GCS_BUCKET_AUDITORIA_AUTORIZACIONES=mediflow-auditoria-autorizaciones \
+  --set-secrets EMAIL_USUARIO=mediflow-origin-email:latest,\
+EMAIL_PASSWORD=mediflow-email-password:latest,\
+EMAIL_DESTINO=mediflow-destinatary-email:latest,\
+OCI_TENANCY_OCID=oci-tenancy-ocid:latest,\
+OCI_USER_OCID=oci-user-ocid:latest,\
+OCI_FINGERPRINT=oci-fingerprint:latest,\
+OCI_NAMESPACE=oci-namespace:latest,\
+OCI_PRIVATE_KEY_CONTENT=oci-private-key-content:latest
+```
+
+
 ## Desarrollo local
 
 Docker es opcional. Sin él, la aplicación se ejecuta dentro del ambiente de conda:
 
 ```bash
-streamlit run Frontend/app_streamlit_backend_directo.py
+streamlit run Frontend/app_streamlit_backend.py
 ```
 
 Con Docker:

@@ -60,7 +60,7 @@ Una urgencia siempre tiene prioridad sobre el resto de las condiciones. Toda cla
 | Sincronización con la nube | Sube el archivo original y el JSON final a Cloud Storage | `cloud/sincronizar_almacenamiento.py`, `cloud/gcloud_storage.py` |
 | Almacenamiento en OCI | Planificado: sincronización con OCI Object Storage (Always Free) | Por definir en `cloud/` |
 | Notificaciones | Alerta por correo electrónico (SMTP de Gmail, cuentas dedicadas al proyecto) | `Backend_MediFlow/correo.py` |
-| Interfaz | Aplicación web; importa el backend directamente | `Frontend/app_streamlit_backend_directo.py` |
+| Interfaz | Aplicación web; importa el backend directamente | `Frontend/app_streamlit_backend.py` |
 
 ## Despliegue
 

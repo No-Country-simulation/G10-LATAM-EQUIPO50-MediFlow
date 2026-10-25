@@ -181,7 +181,7 @@ def guardar_correos_streamlit(correos):
             indent=4
         )
 
-        
+
 
 #CAMBIO NUEVO:
 #Tiempo objetivo de atencion para cada nivel de clasificacion.
@@ -476,8 +476,8 @@ with pestana_procesamiento:
             #MediFlow procesa el documento.
             with st.spinner("MediFlow esta procesando el documento..."):
                 try:
-                    
-                    
+
+
                     # Punto 6. Flujo
                     #Lista donde se registra la duracion de cada etapa
                     #del recorrido del documento (trazabilidad del triaje).
@@ -517,7 +517,7 @@ with pestana_procesamiento:
 
                     ruta_guardada,nombre_generado = (guardar_archivo_original(ruta_archivo))
 
-                    from cloud.sincronizar_almacenamiento import sincronizar_archivo_original, sincronizar_json_final   
+                    from cloud.sincronizar_almacenamiento import sincronizar_archivo_original, sincronizar_json_final
                     sincronizar_archivo_original(ruta_guardada, nombre_generado)
 
 
@@ -527,7 +527,7 @@ with pestana_procesamiento:
                     #la funcion existente del Backend.
 
                     mime_type = obtener_mime_type(ruta_archivo)
-                    
+
                     # Punto 6. Flujo
                     etapas.append({
                         "etapa": "Ingesta y validacion",
@@ -546,7 +546,7 @@ with pestana_procesamiento:
                         tipo_archivo,
                         nombre_generado
                     )
-                    
+
                     # Punto 6. Flujo
                     etapas.append({
                         "etapa": "Extraccion con Gemini",
@@ -642,12 +642,29 @@ with pestana_procesamiento:
                         clasificacion_final,
                         categoria
                     )
-                    sincronizar_json_final(ruta_json, clasificacion_final)
+                    sincronizar_json_final(ruta_json, clasificacion_final, categoria)
+
+
+                    #Determinar el nombre del bucket usando la misma lógica de negocio
+                    if clasificacion_final == "urgente":
+                        bucket_utilizado = "mediflow-urgencias"
+                    elif clasificacion_final in {"ambiguo", "datos_faltantes", "alerta", "revision_prioritaria", "revision"}:
+                            bucket_utilizado = "mediflow-revision-humana"
+                    elif clasificacion_final == "normal":
+                        if categoria == "Receta Médica":
+                             bucket_utilizado = "mediflow-farmacia"
+                        elif categoria == "Orden de Solicitud de Procedimiento":
+                            bucket_utilizado = "mediflow-auditoria-autorizaciones"
+                        else:
+                            bucket_utilizado = "mediflow-historia-clinica"
+                    else:
+                        bucket_utilizado = "mediflow-revision-humana"
+
                     etapas.append({
-                        "etapa": "Guardado y sincronizacion",
-                        "detalle": "JSON final almacenado",
-                        "duracion_s": round(time.perf_counter() - inicio_etapa, 2)
-                    })
+                                "etapa": "Guardado y sincronizacion",
+                                "detalle": f"JSON final almacenado en {bucket_utilizado} y sincronizado con la nube",
+                                "duracion_s": round(time.perf_counter() - inicio_etapa, 2)
+                                })
 
 
                     #CAMBIO NUEVO:
@@ -798,21 +815,7 @@ with pestana_procesamiento:
                             correos_alerta
                         )
 
-
-                        #Enviamos la alerta utilizando
-                        #la funcion existente de correo.py.
-
-                        enviar_alerta_correo(
-                            nombre_paciente,
-                            nombre_medico,
-                            tipo_documento,
-                            clasificacion_final,
-                            motivo_correo,
-                            ruta_json
-                        )
-
-                        correo_enviado = True
-
+                    correo_enviado = True
 
                     #CAMBIO NUEVO:
                     #Paso 17:
@@ -892,7 +895,7 @@ with pestana_procesamiento:
 
                         "datos_clinicos":
                             datos_clinicos_finales,
-                            
+
                          "trazabilidad": {
                             "tiempo_total_s": round(time.perf_counter() - inicio_total, 2),
                             "etapas": etapas
@@ -981,8 +984,8 @@ with pestana_procesamiento:
             st.write("**Nivel de coherencia:**")
 
             st.info(nivel_coherencia)
-            
-        
+
+
         # Punto 6. flujo - cambio final para mostrar la trazabilidad del documento
         #CAMBIO NUEVO:
         #Recorrido del documento (trazabilidad del triaje).
@@ -1098,7 +1101,7 @@ f'</div>',
             else:
                 color_destino = VERDE
                 texto_destino = "✅ PROCESAMIENTO AUTOMATICO"
-                
+
             st.markdown(
                     f'<div style="background:{color_destino};border-radius:12px;padding:18px;'
                     f'text-align:center;margin-top:6px;">'
@@ -1185,7 +1188,7 @@ f'</div>',
                     elif nombre_etapa == "Guardado y sincronizacion":
                         st.write("**JSON final:**")
                         st.code(resultado.get("ruta_json_final", "No disponible"))
-                        
+
         #Ruta del JSON Final:
         st.subheader("JSON Final")
 
