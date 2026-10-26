@@ -67,9 +67,9 @@ revision humana, con atencion objetivo de 1 hora.
 | Integrante | Rol |
 |---|---|
 | José Moya | Backend, arquitectura y orquestación |
-| Anahí Ramírez | LLM & ML, grafo de decisión, puntaje de confianza y orquestación |
+| José Moya y Juan Palacio | LLM & ML, grafo de decisión, puntaje de confianza y orquestación |
 | Andrés Mustafá | Cloud e infraestructura; contrato de datos, tablero de Trello y documentación/arquitectura |
-| Juan Pablo Palacio | Ingesta de documentos, casos de prueba | pruebas y validación del flujo.
+| Juan Palacio | Ingesta de documentos, casos de prueba | pruebas y validación del flujo.
 | Jonatan Cuero | Interfaz |
 
 ## Documentación
