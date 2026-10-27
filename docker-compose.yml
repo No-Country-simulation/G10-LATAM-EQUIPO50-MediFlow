@@ -26,6 +26,8 @@ services:
     ports:
       - "8501:8501"
 
+    environment:
+      RUTA_MAC_USUARIO: ${HOME:?Debes tener definida la variable HOME}
     #Almacenamiento persistente:
     #Almacen_Local permanece fuera del contenedor,    #
     #Esto permite conservar:
@@ -38,6 +40,10 @@ services:
     volumes:
       - ./Almacen_Local:/app/Almacen_Local
       # Monta la clave de la máquina real dentro del contenedor
+
+      #Permite exportar JSON a distintas carpetas del usuario Mac.
+      #- "${HOME}/Desktop/MediFlow_JSON:/app/Exportaciones_JSON"
+      - "${HOME}:/host_home"
 
       # Monta la clave de Google Cloud en modo de solo lectura
       - ./gcp-dev-key.json:/app/gcp-dev-key.json:ro

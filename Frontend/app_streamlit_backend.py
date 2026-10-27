@@ -30,6 +30,13 @@ import time
 #Permite calcular la hora limite de atencion de cada documento.
 from datetime import datetime, timedelta
 
+#CAMBIO NUEVO:
+#Obtenemos la ruta principal del usuario del Mac.
+RUTA_MAC_USUARIO = os.getenv("RUTA_MAC_USUARIO", "")
+
+#CAMBIO NUEVO:
+#Ruta del usuario del Mac disponible dentro de Docker.
+Carpeta_Usuario_Mac = Path("/host_home")
 
 #Configuracion principal de MediFlow:
 #Configuramos el titulo de la aplicacion.
@@ -89,7 +96,64 @@ from Backend_MediFlow.reglas import (
 Carpeta_Almacen = Carpeta_Proyecto_Streamlit / "Almacen_Local"
 Carpeta_Temporal = Carpeta_Almacen / "Archivos_Temporales"
 
+#CAMBIO NUEVO:
+#Carpeta interna de Docker conectada con el Escritorio del Mac.
+Carpeta_Exportaciones_JSON = Path("/app/Exportaciones_JSON")
+
 Carpeta_Temporal.mkdir(parents=True,exist_ok=True)
+
+
+#CAMBIO NUEVO:
+#Evita mostrar rutas internas de Docker en la interfaz.
+
+#CAMBIO NUEVO:
+#Muestra la ubicacion del JSON Final dentro de Almacen_Local.
+
+
+#CAMBIO NUEVO:
+#Muestra las rutas del JSON Final de forma comprensible
+#para el usuario, utilizando la ruta del Escritorio del Mac.
+
+
+#CAMBIO NUEVO:
+#Muestra la ubicacion del JSON Final segun su carpeta real.
+
+#CAMBIO NUEVO:
+#Muestra la ubicacion del JSON Final
+#sin mostrar las rutas internas de Docker.
+
+def mostrar_ruta_json(ruta):
+
+    if not ruta:
+        return "Ubicacion no disponible."
+
+    ruta_texto = str(ruta)
+    ruta_archivo = Path(ruta_texto)
+
+    #Si el archivo se encuentra en Almacen_Local,
+    #mostramos su ubicacion dentro del proyecto.
+    if "/app/Almacen_Local/" in ruta_texto:
+
+        ruta_relativa = ruta_texto.split("/app/Almacen_Local/", 1)[1]
+
+        return str(Carpeta_Almacen / ruta_relativa)
+
+    #Si el archivo se encuentra en una carpeta
+    #del usuario del Mac, mostramos su ruta original.
+    if ruta_texto.startswith("/host_home/"):
+
+        ruta_relativa = ruta_texto.split("/host_home/", 1)[1]
+
+        return str(Path(RUTA_MAC_USUARIO) / ruta_relativa)
+
+    #Si el archivo se encuentra en Exportaciones_JSON,
+    #mostramos su ubicacion en el Escritorio.
+    if ruta_texto.startswith("/app/Exportaciones_JSON/"):
+
+        return str(Path("/Users/josemoya/Desktop/MediFlow_JSON")/ ruta_archivo.name)
+
+    return ruta_texto
+
 
 
 #Cambio Nuevo:
@@ -1190,16 +1254,20 @@ with pestana_procesamiento:
 
                     elif nombre_etapa == "Guardado y sincronizacion":
                         st.write("**JSON final:**")
-                        st.code(resultado.get("ruta_json_final", "No disponible"))
+                        st.write(
+                            mostrar_ruta_json(
+                                resultado.get("ruta_json_final")
+                            )
+                        )
 
         #Ruta del JSON Final:
         st.subheader("JSON Final")
 
         if ruta_json_final:
 
-            st.write("MediFlow guardo el JSON Final en: ")
+            st.write("MediFlow guardo el JSON Final en:")
 
-            st.code(ruta_json_final)
+            st.code(mostrar_ruta_json(ruta_json_final))
 
 
         #Datos Clinicos:
@@ -1220,92 +1288,209 @@ with pestana_procesamiento:
 
             st.header("Administrar JSON Final")
 
-            st.write("Selecciona que deseas hacer con el JSON Final generado por MediFlow.")
+            st.write(
+                "Selecciona que deseas hacer con el JSON Final generado por MediFlow."
+            )
+
+            #Mostramos la ubicacion sin revelar rutas internas de Docker.
+            st.write("**Ubicacion actual del JSON Final:**")
+            st.code(mostrar_ruta_json(ruta_json_final))
 
             #Creamos las opciones disponibles.
-            accion_json = st.radio("Accion para el JSON Final:",["Conservar","Mover","Eliminar"],horizontal=True)
+            accion_json = st.radio(
+                "Accion para el JSON Final:",
+                ["Conservar", "Mover", "Eliminar"],
+                horizontal=True,
+                key="accion_administrar_json"
+            )
 
             #Si el usuario decide Conservarlo:
             if accion_json == "Conservar":
 
                 st.write("El JSON Final permanecera en su ubicacion actual.")
 
-                if st.button("Conservar JSON Final"):
+                if st.button("Conservar JSON Final", key="boton_conservar_json"):
 
                     st.success(
                         "El JSON Final permanece en su ubicacion actual."
                     )
 
-
+            #Si el usuario desea Mover el archivo JSON de lugar:
+            
             #Si el usuario desea Mover el archivo JSON de lugar:
             elif accion_json == "Mover":
 
-                st.write("Indica la carpeta donde deseas guardar el JSON Final.")
-
-                #Permitimos introducir
-                #la nueva ruta.
-                nueva_carpeta = st.text_input(
-                    "Ruta de la nueva carpeta:"
+                st.write(
+                    "Indica la carpeta del Mac donde deseas "
+                    "guardar el JSON Final."
                 )
 
-                if st.button("Mover JSON Final"):
+                #CAMBIO NUEVO:
+                #Permitimos escribir una ruta del Mac.
+                nueva_carpeta = st.text_input(
+                    "Ruta de la nueva carpeta:",
+                    placeholder="~/Documents/Documentos_Medicos"
+                )
 
-                    if not nueva_carpeta:
+                st.caption(
+                    "Puedes indicar una carpeta existente "
+                    "o escribir una nueva para que MediFlow la cree."
+                )
 
-                        st.warning("Debes indicar una carpeta.")
+                if st.button(
+                    "Mover JSON Final",
+                    key="boton_mover_json"
+                ):
+
+                    if not nueva_carpeta.strip():
+
+                        st.warning(
+                            "Debes indicar la carpeta de destino."
+                        )
+
+                    elif not RUTA_MAC_USUARIO:
+
+                        st.error(
+                            "No se configuro la ruta del usuario del Mac "
+                            "en Docker Compose."
+                        )
 
                     else:
 
                         try:
 
-                            #CAMBIO NUEVO:
-                            #Movemos el JSON directamente
-                            #sin utilizar el endpoint de FastAPI.
-
-                            nueva_carpeta = os.path.abspath(
-                                os.path.expanduser(
-                                    nueva_carpeta
-                                )
-                            )
-
-                            os.makedirs(
-                                nueva_carpeta,
-                                exist_ok=True
-                            )
-
-                            nombre_json = os.path.basename(
+                            #Comprobamos que el JSON original exista.
+                            ruta_origen = Path(
                                 ruta_json_final
-                            )
+                            ).resolve()
 
-                            nueva_ruta_json = os.path.join(
-                                nueva_carpeta,
-                                nombre_json
-                            )
+                            if not ruta_origen.is_file():
 
-                            shutil.move(
-                                ruta_json_final,
-                                nueva_ruta_json
-                            )
+                                st.error(
+                                    "No se encontro el JSON Final "
+                                    "en su ubicacion actual."
+                                )
 
-                            st.success(
-                                "El JSON fue movido correctamente."
-                            )
+                            else:
 
-                            st.code(
-                                nueva_ruta_json
-                            )
+                                #CAMBIO NUEVO:
+                                #Convertimos la ruta escrita por el usuario
+                                #en una ruta accesible desde Docker.
 
-                            #Actualizamos la informacion
-                            #guardada en Streamlit.
+                                ruta_mac = nueva_carpeta.strip()
 
-                            resultado["ruta_json_final"] = (
-                                nueva_ruta_json
-                            )
+                                if ruta_mac == "~":
+                                    ruta_mac = RUTA_MAC_USUARIO
 
-                            st.session_state[
-                                "resultado_mediflow"
-                            ] = resultado
+                                elif ruta_mac.startswith("~/"):
+                                    ruta_mac = os.path.join(
+                                        RUTA_MAC_USUARIO,
+                                        ruta_mac[2:]
+                                    )
 
+                                #Normalizamos la ruta de destino.
+                                ruta_mac = os.path.normpath(ruta_mac)
+
+                                #Comprobamos que el destino se encuentre
+                                #dentro de la carpeta del usuario del Mac.
+                                ruta_mac_normalizada = os.path.normpath(
+                                    RUTA_MAC_USUARIO
+                                )
+
+                                if os.path.commonpath(
+                                    [
+                                        ruta_mac_normalizada,
+                                        ruta_mac
+                                    ]
+                                ) != ruta_mac_normalizada:
+
+                                    st.error(
+                                        "Por seguridad, el destino debe "
+                                        "estar dentro de tu carpeta de "
+                                        "usuario del Mac."
+                                    )
+
+                                else:
+
+                                    #Obtenemos la ruta relativa
+                                    #para utilizarla dentro de Docker.
+                                    ruta_relativa = os.path.relpath(
+                                        ruta_mac,
+                                        ruta_mac_normalizada
+                                    )
+
+                                    carpeta_destino = (
+                                        Carpeta_Usuario_Mac
+                                        / ruta_relativa
+                                    ).resolve()
+
+                                    #Comprobamos que el destino
+                                    #permanezca dentro del volumen.
+                                    if not carpeta_destino.is_relative_to(
+                                        Carpeta_Usuario_Mac.resolve()
+                                    ):
+
+                                        st.error(
+                                            "La carpeta de destino "
+                                            "no es valida."
+                                        )
+
+                                    else:
+
+                                        #Creamos la carpeta si no existe.
+                                        carpeta_destino.mkdir(
+                                            parents=True,
+                                            exist_ok=True
+                                        )
+
+                                        #Creamos la nueva ruta del JSON.
+                                        nueva_ruta_json = (
+                                            carpeta_destino
+                                            / ruta_origen.name
+                                        )
+
+                                        #Evitamos sobrescribir otro archivo.
+                                        if nueva_ruta_json.exists():
+
+                                            st.error(
+                                                "Ya existe un archivo con "
+                                                "ese nombre en la carpeta "
+                                                "de destino. No se movio "
+                                                "el JSON."
+                                            )
+
+                                        else:
+
+                                            #Movemos el JSON Final.
+                                            shutil.move(
+                                                str(ruta_origen),
+                                                str(nueva_ruta_json)
+                                            )
+
+                                            #Actualizamos la ruta del JSON.
+                                            resultado[
+                                                "ruta_json_final"
+                                            ] = str(nueva_ruta_json)
+
+                                            st.session_state[
+                                                "resultado_mediflow"
+                                            ] = resultado
+
+                                            st.success(
+                                                "El JSON Final se movio "
+                                                "correctamente."
+                                            )
+
+                                            st.write(
+                                                "**Nueva ubicacion del "
+                                                "JSON Final:**"
+                                            )
+
+                                            st.code(
+                                                mostrar_ruta_json(
+                                                    nueva_ruta_json
+                                                )
+                                            )
 
                         except Exception as error:
 
@@ -1323,36 +1508,31 @@ with pestana_procesamiento:
                     "no sera eliminado."
                 )
 
-                if st.button("Eliminar JSON Final"):
+                if st.button("Eliminar JSON Final", key="boton_eliminar_json"):
 
                     try:
 
-                        #CAMBIO NUEVO:
                         #Eliminamos directamente el JSON Final.
                         #El archivo original permanece guardado.
-
-                        os.remove(
-                            ruta_json_final
-                        )
+                        os.remove(ruta_json_final)
 
                         st.success(
                             "El JSON fue eliminado correctamente."
                         )
 
-                        #Eliminamos la ruta
-                        #de la informacion mostrada.
-
+                        #Eliminamos la ruta de la informacion mostrada.
                         resultado["ruta_json_final"] = None
 
                         st.session_state[
                             "resultado_mediflow"
                         ] = resultado
 
+                    except Exception:
 
-                    except Exception as error:
-
+                        #No mostramos la excepcion porque podria contener
+                        #una ruta interna de Docker.
                         st.error(
-                            f"Error al eliminar el JSON: {error}"
+                            "No fue posible eliminar el JSON Final."
                         )
 
 #Pestaña de configuracion de Umbrales:
