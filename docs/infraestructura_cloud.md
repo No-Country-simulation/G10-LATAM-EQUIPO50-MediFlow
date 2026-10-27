@@ -2,7 +2,7 @@
 
 ## Arquitectura de despliegue
 
-MediFlow se despliega como un único servicio en **Google Cloud Run**, empaquetado con Docker. Gemini se consume a través de **Vertex AI**; el almacenamiento persistente utiliza **Google Cloud Storage**; las credenciales y los correos de las alertas se gestionan con **Secret Manager**; la imagen del contenedor se aloja en **Artifact Registry**. El almacenamiento en **OCI Object Storage (Always Free)** está planificado y aún no está implementado (ver [Almacenamiento en OCI](#almacenamiento-en-oci-always-free--planificado)).
+MediFlow se despliega como un único servicio en **Google Cloud Run**, empaquetado con Docker. Gemini se consume a través de **Vertex AI**; el almacenamiento persistente utiliza **Google Cloud Storage y OCI Object Storage**; las credenciales y los correos de las alertas se gestionan con **Secret Manager**; la imagen del contenedor se aloja en **Artifact Registry**.
 
 ```mermaid
 flowchart LR
