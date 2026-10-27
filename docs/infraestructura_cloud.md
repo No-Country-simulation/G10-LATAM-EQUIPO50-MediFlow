@@ -11,7 +11,7 @@ flowchart LR
     CR --> GCS["Cloud Storage\nrecibidos / procesados /\nauditoria-humana"]
     CR --> SM["Secret Manager\ncorreos + contraseña"]
     CR --> GM["SMTP Gmail\nalertas"]
-    CR -.->|planificado| OCI["OCI Object Storage\nAlways Free"]
+    CR --> OCI["OCI Object Storage\nAlways Free"]
     AR["Artifact Registry\nmediflow-app"] --> CR
     CB["Cloud Build"] --> AR
 ```
