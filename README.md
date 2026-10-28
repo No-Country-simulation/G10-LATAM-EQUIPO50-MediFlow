@@ -1,5 +1,7 @@
 # G10-LATAM-EQUIPO50-MediFlow
 
+Página del Proyecto: https://mediflow-service-179226831969.us-central1.run.app/
+
 Agente Autónomo para Triaje, Extracción y Enrutamiento de Documentos Clínicos
 
 **Sector Empresarial:** HealthTech / Gestión Hospitalaria / Aseguradoras de Salud & Clínicas Médicas
